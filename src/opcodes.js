@@ -76,8 +76,8 @@ const ops6809 = [
 
     {op: 0x30, mnem: 'LEAX', page: 0, mode: modes.indexed, code: 'indx;ea1;zero;idxu;st1 regX'},
     {op: 0x31, mnem: 'LEAY', page: 0, mode: modes.indexed, code: 'indx;ea1;zero;idxu;st1 regY'},
-    {op: 0x32, mnem: 'LEAU', page: 0, mode: modes.indexed, code: 'indx;ea1;idxu;st1 regU'},
-    {op: 0x33, mnem: 'LEAS', page: 0, mode: modes.indexed, code: 'indx;ea1;idxu;st1 regS'},
+    {op: 0x32, mnem: 'LEAS', page: 0, mode: modes.indexed, code: 'indx;ea1;idxu;st1 regS'},
+    {op: 0x33, mnem: 'LEAU', page: 0, mode: modes.indexed, code: 'indx;ea1;idxu;st1 regU'},
     {op: 0x34, mnem: 'PSHS', page: 0, mode: modes.register, code: 'push regS'},
     {op: 0x35, mnem: 'PULS', page: 0, mode: modes.register, code: 'pull regS'},
     {op: 0x36, mnem: 'PSHU', page: 0, mode: modes.register, code: 'push regU'},
@@ -144,7 +144,7 @@ const ops6809 = [
     {op: 0x6B, mnem: 'ERR', page: 0, mode: modes.indexed, code: 'err'},
     {op: 0x6C, mnem: 'INC', page: 0, mode: modes.indexed, code: 'indx;ftch8;inc8;stor8;idxu'},
     {op: 0x6D, mnem: 'TST', page: 0, mode: modes.indexed, code: 'indx;ftch8;tst8;stor8;idxu'},
-    {op: 0x6E, mnem: 'JMP', page: 0, mode: modes.indexed, code: 'indx;ea1;st1 regPC;ntck'},
+    {op: 0x6E, mnem: 'JMP', page: 0, mode: modes.indexed, code: 'indx;ea1;st1 regPC;idxu;ntck'},
     {op: 0x6F, mnem: 'CLR', page: 0, mode: modes.indexed, code: 'indx;ftch8;clr8;stor8;idxu'},
 
     {op: 0x70, mnem: 'NEG', page: 0, mode: modes.extended, code: 'xtnd;ftch8;neg8;stor8'},
