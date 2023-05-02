@@ -4,6 +4,7 @@ module.exports = {
   output: {
     path: resolve(__dirname, 'dist'),
     filename: 'bundle.js',
+    library: 'bundle',
   },
   mode: 'production',
   // mode: 'development',

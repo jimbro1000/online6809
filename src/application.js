@@ -1,28 +1,53 @@
-import {CPU, trc} from "emulator"
+// function speedSlider(cpu, speed) {
+//   let readout;
+//   this.slider = null;
+//   this.slider = document.getElementById('speed');
+//   this.slider.min = 1;
+//   this.slider.max = 10;
+//   speed = Math.max(this.slider.min, Math.trunc(speed));
+//   this.slider.value = Math.min(speed, this.slider.max);
+//   readout = document.getElementById('speedVal');
+//   readout.innerHTML = this.slider.value;
+//   cpu.intervalMils = cpu.speedMils [this.slider.value];
+//   this.slider.oninput = function () {
+//     readout.innerHTML = this.value;
+//     cpu.setSpeed(this.value);
+//   };
+// }
 
-const mc6809 = new CPU();
-mc6809.ready();
-new speedSlider(mc6809, 5);
-document.getElementById('assembly-code').value = document.getElementById('demo-helloworld').value
-machineInterrupt('reset');
-mc6809.refresh(1);
-mc6809.execute();
+class SlideControl {
+  #cpu;
+  #value;
+  #speed;
+  #readout;
+  #slider;
 
-function speedSlider(cpu, speed) {
-  let readout;
-  this.slider = null;
-  this.slider = document.getElementById('speed');
-  this.slider.min = 1;
-  this.slider.max = 10;
-  speed = Math.max(this.slider.min, Math.trunc(speed));
-  this.slider.value = Math.min(speed, this.slider.max);
-  readout = document.getElementById('speedVal');
-  readout.innerHTML = this.slider.value;
-  cpu.intervalMils = cpu.speedMils [this.slider.value];
-  this.slider.oninput = function () {
-    readout.innerHTML = this.value;
-    cpu.setSpeed(this.value);
-  };
+  constructor(cpu, speed) {
+    this.#cpu = cpu;
+    this.#speed = Math.trunc(speed);
+    this.#slider = null;
+    this.#readout = null;
+    this.#value = 0;
+  }
+
+  bindId(slideElement,  textElement) {
+    this.#readout = document.getElementById(textElement);
+    this.#slider = document.getElementById(slideElement);
+    this.#slider.addEventListener('click', this.update.bind(this), false);
+    this.#slider.min = 1;
+    this.#slider.max = 10;
+    this.#speed = Math.max(this.#slider.min, this.#speed);
+    this.#slider.value = Math.min(this.#speed, this.#slider.max);
+    this.#cpu.intervalMils = this.#cpu.speedMils[this.#slider.value];
+    this.#value = parseInt(this.#slider.value);
+    this.#readout.innerHTML = this.#value;
+  }
+
+  update(event) {
+    this.#value = parseInt(event.srcElement.value);
+    this.#readout.innerHTML = this.#value;
+    this.#cpu.setSpeed(this.#value);
+  }
 }
 
 function codeDump(id) {
@@ -76,7 +101,7 @@ function machineReset() {
 }
 
 function machineInterrupt(irqName) {
-  trc('machineInterrupt', irqName);
+  bundle.trc('machineInterrupt', irqName);
   mc6809.alu.interrupt(irqName);
   mc6809.alu.checkInterrupts();
   mc6809.refresh(1);
@@ -124,3 +149,12 @@ function machineOrg(PC, force) {
   mc6809.registers['regPC'].change(PC, 0);
   mc6809.dsmTable.lineOn(mc6809.registers['regPC'].regValue, force);
 }
+
+const mc6809 = new bundle.CPU();
+mc6809.ready();
+const speed = new SlideControl(mc6809, 5);
+speed.bindId('speed', 'speedVal');
+document.getElementById('assembly-code').value = document.getElementById('demo-helloworld').value
+machineInterrupt('reset');
+mc6809.refresh(1);
+mc6809.execute();

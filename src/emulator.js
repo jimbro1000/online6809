@@ -3156,3 +3156,8 @@ function CPU() {
     this.watchList.addWatch(0xff80);
     this.addEvents();
 }
+
+export {
+    CPU,
+    trc
+}
