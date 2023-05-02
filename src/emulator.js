@@ -2154,27 +2154,27 @@ function CPU() {
                 trc('increment', increment, 0);
                 postByte = indexmode | increment;
                 if (increment) {
-                    if ((hasValue) && (value != 0)) {
+                    if ((hasValue) && (value !== 0)) {
                         this.error('Indexing error: can\'t have offset with auto inc/decrement', value);
                     }
                 } else {
                     trc('non-autoinc mode postByte', inHex(postByte, 2));
-                    if ((indexmode < 0x80) && (value == 0)) {
+                    if ((indexmode < 0x80) && (value === 0)) {
                         postByte = postByte | 0x84;
                     } else if (hasValue) {
                         trc('Indexed constant offset', value);
-                        if (indexmode == '0x8D') {
+                        if (indexmode === '0x8D') {
                             // force 16 bit offset for PCR references unless 8 bit specified
-                            if (forceBits == 0) {
+                            if (forceBits === 0) {
                                 forceBits = 16;
                             }
-                            if (value == null) {
+                            if (value === null) {
                                 value = 0;
                             }
                             values = this.pcr(value, forceBits, pcrVal);
                             signedValue = values[0];
                             value = values[1];
-                            if (values.length == 3) {
+                            if (values.length === 3) {
                                 value = (value << 8) | values[2];
                             }
                             indexmode = '0x8C';
@@ -2214,7 +2214,7 @@ function CPU() {
                 trc('Extended or indirect mode', value);
                 bits = this.opSize(value);
                 ;
-                if ((forceBits == 8) && (indirect == 0)) {
+                if ((forceBits === 8) && (indirect === 0)) {
                     mode = modes.direct;
                     trc('Direct mode bit size', bits);
 //          value=(value-(this.dpVal<<8))&0xffff;
@@ -3239,8 +3239,9 @@ function machineRefresh() {
 }
 
 function compileRun(id) {
-    var asmLines, element;
-    if (element = document.getElementById(id)) {
+    let asmLines, element;
+    element = document.getElementById(id);
+    if (element) {
 //    trc ("Assembling program",'');
         mc6809.assemble(element.value.split('\n'));
         mc6809.refresh(1);

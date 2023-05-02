@@ -1807,8 +1807,8 @@ vrestart: fdb hookrestart
 
             <br style='clear:both'/>
             <div style='text-align:center'>
-                <button onclick="compileRun ('assembly-code');" class='buttonRun'>Assemble source code</button>
-                <button onclick="codeDump ('assembly-code');"
+                <button id="compileRun" onclick="compileRun('assembly-code');" class='buttonRun'>Assemble source code</button>
+                <button onclick="codeDump('assembly-code');"
                         style='display:none; background-color: green; padding: 0.5em; border: 2px solid black; font-size: 1em; font-weight:bold'>
                     Dump object code
                 </button>
