@@ -1,0 +1,5504 @@
+<!DOCTYPE html>
+<html lang='en'>
+<head>
+  <meta charset="utf-8">
+  <meta name="description"
+        content="An online assembler,disassembler and emulator for the Motorola 6809 CPU. Test snippets of machine code and see the results on simulated text and graphic displays.">
+  <title>Online Motorola 6809 Emulator</title>
+
+  <style>
+      body {
+          font-family: Arial, Helvetica, sans-serif;
+      }
+
+      table {
+          border-spacing: 2px;
+      }
+
+      h1 {
+          color: #808080;
+          margin-top: 0;
+          margin-bottom: 0.25em;
+          font-style: italic;
+      }
+
+      h3 {
+          margin-top: 0;
+          margin-bottom: 0.25em;
+      }
+
+      .controlCaption {
+          color: #ff0000;
+          font-weight: bold;
+      }
+
+      .anydig {
+          font-family: monospace, Arial, sans-serif;
+          text-align: center;
+          margin: 0;
+          padding: 2px;
+          background-color: #f8f8f8;
+          border: 1px solid #C0C0C0;
+      }
+
+      .anydig.hex {
+          font-size: 1.5em;
+      }
+
+      .anydig.hex.big {
+          font-size: 2.5em;
+      }
+
+      .anydig.bin {
+          font-size: 0.66em;
+      }
+
+      .anydig.flag {
+          font-size: 0.8em;
+      }
+
+      .anydig.label {
+          font-size: 0.8em;
+      }
+
+      .reglabel {
+          text-align: center;
+          font-size: 1.25em;
+          font-weight: bold;
+          color: #4040F0;
+      }
+
+      .regitem {
+          margin: 0 auto;
+      }
+
+      .txtScreen {
+          font-family: monospace, Arial, sans-serif;
+          font-size: 0.75em;
+          border-spacing: 0;
+      }
+
+      .txtFG {
+          color: #000000;
+          background-color: #20c020;
+          padding: 0;
+          margin: 0;
+      }
+
+      .txtBG {
+          color: #20c020;
+          background-color: #000000;
+          padding: 0;
+          margin: 0;
+      }
+
+      .txtGGreen {
+          color: #20c020;
+          background-color: #000000;
+          padding: 0;
+          margin: 0;
+      }
+
+      .txtGYellow {
+          color: #c0c020;
+          background-color: #000000;
+          padding: 0;
+          margin: 0;
+      }
+
+      .txtGBlue {
+          color: #2020C0;
+          background-color: #000000;
+          padding: 0;
+          margin: 0;
+      }
+
+      .txtGRed {
+          color: #c02020;
+          background-color: #000000;
+          padding: 0;
+          margin: 0;
+      }
+
+      .txtGWhite {
+          color: #c0c0c0;
+          background-color: #000000;
+          padding: 0;
+          margin: 0;
+      }
+
+      .txtGCyan {
+          color: #20c0c0;
+          background-color: #000000;
+          padding: 0;
+          margin: 0;
+      }
+
+      .txtGMagenta {
+          color: #c020c0;
+          background-color: #000000;
+          padding: 0;
+          margin: 0;
+      }
+
+      .txtGOrange {
+          color: #a06020;
+          background-color: #000000;
+          padding: 0;
+          margin: 0;
+      }
+
+      .watchWindow {
+          color: #c0c0c0;
+          background-color: #e0e0e0;
+          font-family: "Courier New", Courier, monospace;
+          font-size: 1.25em;
+          vertical-align: baseline;
+          border-style: solid;
+          border-color: #c0c0c0;
+          border-width: 1px;
+          border-collapse: collapse;
+          border-spacing: 0px;
+          padding-left: 0.25em;
+          padding-right: 0.25em;
+          border-collapse: separate;
+          border-spacing: 0 0.25em;
+      }
+
+      .watchControl {
+          color: red;
+          background-color: orange;
+          font-weight: bold;
+          padding-left: 0.25em;
+          padding-right: 0.25em;
+          cursor: pointer;
+      }
+
+      .watchControl:hover {
+          background-color: magenta;
+      }
+
+      .watchAddr {
+          color: #e0a020;
+          background-color: black;
+          font-weight: bold;
+          padding-left: 1em;
+          padding-right: 1em;
+      }
+
+      .watchHex {
+          background-color: black;
+          color: #e0a020;
+          padding-left: 0.5em;
+          padding-right: 0.5em;
+      }
+
+      .DSM {
+          color: #808080;
+          font-family: "Courier New", Courier, monospace;
+          font-size: 1em;
+          vertical-align: baseline;
+          border-style: solid;
+          border-color: #404040;
+          border-width: 1px;
+          border-collapse: collapse;
+          border-spacing: 0px;
+          padding: 0;
+      }
+
+      .DSMhi {
+          background-color: #107010;
+      }
+
+      .DSMlo {
+          background-color: #000000;
+      }
+
+      .DSM.ADDR {
+          color: #e0a020;
+          font-size: 0.9em;
+          font-weight: bold;
+          padding-left: 0.5em;
+          padding-right: 0.5em;
+          width: 3em;
+      }
+
+      .DSM.BYTES {
+          color: #e0a020;
+          font-size: 0.8em;
+          padding-left: 0.5em;
+          padding-right: 0.5em;
+          width: 9em;
+
+      }
+
+      .DSM.MNEM {
+          color: #c0c0c0;
+          font-weight: bold;
+          padding-left: 0.5em;
+          padding-right: 0.5em;
+          width: 12em
+      }
+
+      .DSM.Edit {
+          color: #f02020;
+          background-color: #d0d0f0;
+          padding-left: 0.5em;
+          padding-right: 0.5em;
+          font-weight: bold;
+          font-size: 0.9em;
+      }
+
+      .cellEdit {
+          color: #2020F0;
+          background-color: #d0d0f0;
+          margin: 0;
+          padding: 0;
+          font-weight: bold;
+          font-size: 0.8em;
+          width: 100%;
+      }
+
+      .usageNote {
+          font-size: 0.9em;
+          font-style: italic;
+          margin-top: 0.25em;
+          margin-bottom: 0.25em;
+      }
+
+      .statusText {
+          color: #606060;
+          background-color: #f0f0f0;
+          border: 1px solid #404040;
+          font-size: 1em;
+          font-weight: bold;
+          padding-top: 0.25em;
+          padding-bottom: 0.25em;
+          padding-left: 1em;
+          padding-right: 1em;
+
+      }
+
+      .panel {
+          background-color: #f0f0f0;
+          padding: 0.5em;
+      }
+
+      .labelsContainer {
+          display: flex;
+          flex-direction: column;
+          border: 1px solid black;
+          height: 40em;
+          width: 12em;
+      }
+
+      .labelList {
+          flex-grow: 1;
+      }
+
+      .interrupts {
+          text-align: center;
+      }
+
+      .buttonRun {
+          background-color: #30d050;
+          border-radius: 16px;
+          border: 3px solid #18ab29;
+          display: inline-block;
+          cursor: pointer;
+          color: #ffffff;
+          font-family: Arial;
+          font-size: 20px;
+          font-weight: bold;
+          padding: 4px 32px;
+          text-decoration: none;
+      }
+
+      .buttonRun:hover {
+          background-color: #5cbf2a;
+      }
+
+      .buttonRun:active {
+          position: relative;
+          top: 1px;
+      }
+
+      .buttonStep {
+          background-color: #c0c040;
+          border-radius: 8px;
+          border: 1px solid #808080;
+          display: inline-block;
+          cursor: pointer;
+          color: #ffffff;
+          font-family: Arial;
+          font-size: 14px;
+          font-weight: bold;
+          padding: 2px 16px;
+          text-decoration: none;
+      }
+
+      .buttonStep:hover {
+          background-color: #e09030;
+      }
+
+      .buttonStep:active {
+          position: relative;
+          top: 1px;
+      }
+
+      .buttonHalt {
+          background-color: #e04040;
+      }
+
+      .buttonHalt:hover {
+          background-color: #e09030;
+      }
+
+      .buttonIRQ {
+          border-radius: 4px;
+          padding: 2px 8px;
+          font-size: 12px;
+          background-color: #6060c0;
+      }
+
+      .buttonIRQ:hover {
+          background-color: #4040e0;
+      }
+
+      .buttonReset {
+          font-size: 16px;
+          background-color: #a060c0;
+      }
+
+      .buttonReset:hover {
+          background-color: #6040e0;
+      }
+
+      .machinePanel {
+          vertical-align: top;
+          padding: 0.5em;
+          background-color: #f4f4f4;
+      }
+
+      .screenPanel {
+          vertical-align: top;
+          padding: 0.5em;
+          background-color: #e8e8e8;
+      }
+
+      .examplesList {
+          display: none;
+          position: absolute;
+          background-color: #d0d0e0;
+          color: #202020;
+          min-width: 8em;
+          box-shadow: 0px 8px 16px 0px rgba(0, 0, 0, 0.2);
+          text-shadow: none;
+          border: 1px solid black;
+          z-index: 1;
+          -webkit-border-radius: 4px;
+          -moz-border-radius: 4px;
+          border-radius: 4px;
+
+      }
+
+      .dropDown {
+          position: relative;
+      }
+
+      .buttonExamples {
+          position: relative;
+          background-color: #c0c040;
+          border-radius: 4px;
+          border: 1px solid #808080;
+          display: inline-block;
+          cursor: pointer;
+          color: #ffffff;
+          font-family: Arial;
+          font-size: 14px;
+          font-weight: bold;
+          padding: 2px 16px;
+          text-decoration: none;
+      }
+
+      .menuItem {
+          color: #4040c0;
+          margin: 0.25em;
+          padding: 0.25em;
+          font-size: 0.9em;
+          font-weight: bold;
+      }
+
+      .menuItem:hover {
+          background-color: #f8f8f8;
+      }
+
+      .dropDown:hover .examplesList {
+          display: block
+      }
+
+      .dropDown:hover .buttonExamples {
+          background-color: #e09030;
+      }
+
+
+  </style>
+
+</head>
+
+<body style='margin:1em'>
+
+<script>
+
+  tracing = 1;
+
+  function trc(caption, data, force) {
+    if ((tracing != 0) || (force)) {
+      console.log(caption + ': \'' + data + '\'');
+    }
+  }
+
+  const SIbaseAddress = 0xff80, SIrefreshOff = 0, SIrefreshOn = 1, SIgraphicsMode = 2, SIkeyInterface = 3;
+  /* System Interface
+   SIrefreshOff             Write <any> to force OFF register refresh and display animation
+   SIrefreshOn              Write <any> to re-enable register refresh and display animation
+   SIgraphicsMode           Write <number of colours> to select graphics mode (2, 4, 16 allowed values)
+   SIkeyInterface           Write 0 then read an ASCII code (if<128), write 255 to clear the keyboard buffer
+*/
+  //const GD_LineBytes=0x20;
+
+  //const keyCodesList={48:0, 49:1, 50:2, 51:3, 52:4, 53:5, 54:7, 55:8, 56:9, 65:10, 66:11, 67:12, 68:13, 69:14, 70:15}
+  const Defaults = {org: 0x4000, lineBytes: 0x20};
+  const keyCodesList = {
+    '0': 0,
+    '1': 1,
+    '2': 2,
+    '3': 3,
+    '4': 4,
+    '5': 5,
+    '6': 6,
+    '7': 7,
+    '8': 8,
+    '9': 9,
+    'A': 10,
+    'B': 11,
+    'C': 12,
+    'D': 13,
+    'E': 14,
+    'F': 15,
+  };
+  const blockChars = [
+    '&nbsp;',
+    '&#x2597;',
+    '&#x2596;',
+    '&#x2584;',
+    '&#x259D;',
+    '&#x2590;',
+    '&#x259E;',
+    '&#x259F;',
+    '&#x2598;',
+    '&#x259A;',
+    '&#x258C;',
+    '&#x2599;',
+    '&#x2580;',
+    '&#x259C;',
+    '&#x259B;',
+    '&#x2588;',
+    '&nbsp;'];
+  const blockClasses = [
+    'txtGGreen',
+    'txtGYellow',
+    'txtGBlue',
+    'txtGRed',
+    'txtGWhite',
+    'txtGCyan',
+    'txtGMagenta',
+    'txtGOrange'];
+  const modes = {
+    simple: 0x01,
+    bits8: 0x00,
+    bits16: 0x02,
+    immediate: 0x04,
+    direct: 0x08,
+    indexed: 0x10,
+    extended: 0x20,
+    pcr: 0x40,
+    register: 0x80,
+    pager: 0x100,
+    pair: 0x02,
+    pseudo: 0x8000,
+  };
+  const modesText = {
+    0x04: 'Immediate',
+    0x08: 'Direct',
+    0x10: 'Indexed',
+    0x20: 'Extended',
+    0x40: 'PCR',
+    0x80: 'Register',
+  };
+  const pairRegsToText = {
+    0: 'regD',
+    1: 'regX',
+    2: 'regY',
+    3: 'regU',
+    4: 'regS',
+    5: 'regPC',
+    6: '',
+    7: '',
+    8: 'regA',
+    9: 'regB',
+    10: 'regCC',
+    11: 'regDP',
+  };
+  const pairRegsToValue = {'D': 0, 'X': 1, 'Y': 2, 'U': 3, 'S': 4, 'PC': 5, 'A': 8, 'B': 9, 'CC': 10, 'DP': 11};
+  const fullRegsToTextS = ['regCC', 'regA', 'regB', 'regDP', 'regX', 'regY', 'regU', 'regPC'];
+  const fullRegsToTextU = ['regCC', 'regA', 'regB', 'regDP', 'regX', 'regY', 'regS', 'regPC'];
+  const fullRegsToValue = {
+    'CC': 0x01,
+    'A': 0x02,
+    'B': 0x04,
+    'D': 0x06,
+    'DP': 0x08,
+    'X': 0x10,
+    'Y': 0x20,
+    'U': 0x40,
+    'S': 0x40,
+    'PC': 0x80,
+  };
+  const ops6809 = [
+    {op: 0x00, mnem: 'NEG', page: 0, mode: modes.direct, code: 'drct;ftch8;neg8;stor8'},
+    {op: 0x01, mnem: 'ERR', page: 0, mode: modes.direct, code: 'err'},
+    {op: 0x02, mnem: 'ERR', page: 0, mode: modes.direct, code: 'err'},
+    {op: 0x03, mnem: 'COM', page: 0, mode: modes.direct, code: 'drct;ftch8;com8;stor8'},
+    {op: 0x04, mnem: 'LSR', page: 0, mode: modes.direct, code: 'drct;ftch8;lsr8;stor8'},
+    {op: 0x05, mnem: 'ERR', page: 0, mode: modes.direct, code: 'err'},
+    {op: 0x06, mnem: 'ROR', page: 0, mode: modes.direct, code: 'drct;ftch8;ror8;stor8'},
+    {op: 0x07, mnem: 'ASR', page: 0, mode: modes.direct, code: 'drct;ftch8;asr8;stor8'},
+    {op: 0x08, mnem: 'LSL', page: 0, mode: modes.direct, code: 'drct;ftch8;lsl8;stor8'},
+    {op: 0x08, mnem: 'ASL', page: 0, mode: modes.direct, code: 'drct;ftch8;lsl8;stor8'},
+    {op: 0x09, mnem: 'ROL', page: 0, mode: modes.direct, code: 'drct;ftch8;rol8;stor8'},
+    {op: 0x0A, mnem: 'DEC', page: 0, mode: modes.direct, code: 'drct;ftch8;dec8;stor8'},
+    {op: 0x0B, mnem: 'ERR', page: 0, mode: modes.direct, code: 'err'},
+    {op: 0x0C, mnem: 'INC', page: 0, mode: modes.direct, code: 'drct;ftch8;inc8;stor8'},
+    {op: 0x0D, mnem: 'TST', page: 0, mode: modes.direct, code: 'drct;ftch8;tst8;stor8'},
+    {op: 0x0E, mnem: 'JMP', page: 0, mode: modes.direct, code: 'drct;ea1;st1 regPC;ntck'},
+    {op: 0x0F, mnem: 'CLR', page: 0, mode: modes.direct, code: 'drct;ftch8;clr8;stor8'},
+
+    {op: 0x10, mnem: '', page: 0, mode: modes.simple | modes.pager, code: 'page 0x10'},
+    {op: 0x11, mnem: '', page: 0, mode: modes.simple | modes.pager, code: 'page 0x11'},
+    {op: 0x12, mnem: 'NOP', page: 0, mode: modes.simple, code: 'nop'},
+    {op: 0x13, mnem: 'SYNC', page: 0, mode: modes.simple, code: 'sync'},
+    {op: 0x14, mnem: 'ERR', page: 0, mode: modes.direct, code: 'err'},
+    {op: 0x15, mnem: 'ERR', page: 0, mode: modes.direct, code: 'err'},
+    {op: 0x16, mnem: 'LBRA', page: 0, mode: modes.pcr | modes.bits16, code: 'rel16;st1 regPC;ntck'},
+    {op: 0x17, mnem: 'LBSR', page: 0, mode: modes.pcr | modes.bits16, code: 'rel16;stck16 regPC;st1 regPC;ntck'},
+    {op: 0x18, mnem: 'ERR', page: 0, mode: modes.direct, code: 'err'},
+    {op: 0x19, mnem: 'DAA', page: 0, mode: modes.simple, code: 'daa'},
+    {op: 0x1A, mnem: 'ORCC', page: 0, mode: modes.immediate, code: 'pcb;ld2 regCC;exx;or8;st1 regCC'},
+    {op: 0x1B, mnem: 'ERR', page: 0, mode: modes.direct, code: 'err'},
+    {op: 0x1C, mnem: 'ANDCC', page: 0, mode: modes.immediate, code: 'pcb;ld2 regCC;exx;and8;st1 regCC'},
+    {op: 0x1D, mnem: 'SEX', page: 0, mode: modes.simple, code: 'ld1 regB;sx;shft;st1 regA'},
+    {op: 0x1E, mnem: 'EXG', page: 0, mode: modes.register | modes.pair, code: 'rgop exg'},
+    {op: 0x1F, mnem: 'TFR', page: 0, mode: modes.register | modes.pair, code: 'rgop tfr'},
+
+    {op: 0x20, mnem: 'BRA', page: 0, mode: modes.pcr | modes.bits8, code: 'rel8;st1 regPC;ntck'},
+    {op: 0x21, mnem: 'BRN', page: 0, mode: modes.pcr | modes.bits8, code: 'rel8'},
+    {op: 0x22, mnem: 'BHI', page: 0, mode: modes.pcr | modes.bits8, code: 'rel8;chk LS;qt;st1 regPC;ntck'},
+    {op: 0x23, mnem: 'BLS', page: 0, mode: modes.pcr | modes.bits8, code: 'rel8;chk LS;qf;st1 regPC;ntck'},
+    {op: 0x24, mnem: 'BCC', page: 0, mode: modes.pcr | modes.bits8, code: 'rel8;chk C;qt;st1 regPC;ntck'},
+    {op: 0x24, mnem: 'BHS', page: 0, mode: modes.pcr | modes.bits8, code: 'rel8;chk C;qt;st1 regPC;ntck'},
+    {op: 0x25, mnem: 'BCS', page: 0, mode: modes.pcr | modes.bits8, code: 'rel8;chk C;qf;st1 regPC;ntck'},
+    {op: 0x25, mnem: 'BLO', page: 0, mode: modes.pcr | modes.bits8, code: 'rel8;chk C;qf;st1 regPC;ntck'},
+    {op: 0x26, mnem: 'BNE', page: 0, mode: modes.pcr | modes.bits8, code: 'rel8;chk Z;qt;st1 regPC;ntck'},
+    {op: 0x27, mnem: 'BEQ', page: 0, mode: modes.pcr | modes.bits8, code: 'rel8;chk Z;qf;st1 regPC;ntck'},
+    {op: 0x28, mnem: 'BVC', page: 0, mode: modes.pcr | modes.bits8, code: 'rel8;chk V;qt;st1 regPC;ntck'},
+    {op: 0x29, mnem: 'BVS', page: 0, mode: modes.pcr | modes.bits8, code: 'rel8;chk V;qf;st1 regPC;ntck'},
+    {op: 0x2A, mnem: 'BMI', page: 0, mode: modes.pcr | modes.bits8, code: 'rel8;chk N;qf;st1 regPC;ntck'},
+    {op: 0x2B, mnem: 'BPL', page: 0, mode: modes.pcr | modes.bits8, code: 'rel8;chk N;qt;st1 regPC;ntck'},
+    {op: 0x2C, mnem: 'BGE', page: 0, mode: modes.pcr | modes.bits8, code: 'rel8;chk LT;qt;st1 regPC;ntck'},
+    {op: 0x2D, mnem: 'BLT', page: 0, mode: modes.pcr | modes.bits8, code: 'rel8;chk LT;qf;st1 regPC;ntck'},
+    {op: 0x2E, mnem: 'BGT', page: 0, mode: modes.pcr | modes.bits8, code: 'rel8;chk LE;qt;st1 regPC;ntck'},
+    {op: 0x2F, mnem: 'BLE', page: 0, mode: modes.pcr | modes.bits8, code: 'rel8;chk LE;qf;st1 regPC;ntck'},
+
+    {op: 0x20, mnem: 'LBRA', page: 0x10, mode: modes.pcr | modes.bits16, code: 'rel16;st1 regPC;ntck'},
+    {op: 0x21, mnem: 'LBRN', page: 0x10, mode: modes.pcr | modes.bits16, code: 'rel16'},
+    {op: 0x22, mnem: 'LBHI', page: 0x10, mode: modes.pcr | modes.bits16, code: 'rel16;chk LS;qt;st1 regPC;ntck'},
+    {op: 0x23, mnem: 'LBLS', page: 0x10, mode: modes.pcr | modes.bits16, code: 'rel16;chk LS;qf;st1 regPC;ntck'},
+    {op: 0x24, mnem: 'LBCC', page: 0x10, mode: modes.pcr | modes.bits16, code: 'rel16;chk C;qt;st1 regPC;ntck'},
+    {op: 0x24, mnem: 'LBHS', page: 0x10, mode: modes.pcr | modes.bits16, code: 'rel16;chk C;qt;st1 regPC;ntck'},
+    {op: 0x25, mnem: 'LBCS', page: 0x10, mode: modes.pcr | modes.bits16, code: 'rel16;chk C;qf;st1 regPC;ntck'},
+    {op: 0x25, mnem: 'LBLO', page: 0x10, mode: modes.pcr | modes.bits16, code: 'rel16;chk C;qf;st1 regPC;ntck'},
+    {op: 0x26, mnem: 'LBNE', page: 0x10, mode: modes.pcr | modes.bits16, code: 'rel16;chk Z;qt;st1 regPC;ntck'},
+    {op: 0x27, mnem: 'LBEQ', page: 0x10, mode: modes.pcr | modes.bits16, code: 'rel16;chk Z;qf;st1 regPC;ntck'},
+    {op: 0x28, mnem: 'LBVC', page: 0x10, mode: modes.pcr | modes.bits16, code: 'rel16;chk V;qt;st1 regPC;ntck'},
+    {op: 0x29, mnem: 'LBVS', page: 0x10, mode: modes.pcr | modes.bits16, code: 'rel16;chk V;qf;st1 regPC;ntck'},
+    {op: 0x2A, mnem: 'LBMI', page: 0x10, mode: modes.pcr | modes.bits16, code: 'rel16;chk N;qf;st1 regPC;ntck'},
+    {op: 0x2B, mnem: 'LBPL', page: 0x10, mode: modes.pcr | modes.bits16, code: 'rel16;chk N;qt;st1 regPC;ntck'},
+    {op: 0x2C, mnem: 'LBGE', page: 0x10, mode: modes.pcr | modes.bits16, code: 'rel16;chk LT;qt;st1 regPC;ntck'},
+    {op: 0x2D, mnem: 'LBLT', page: 0x10, mode: modes.pcr | modes.bits16, code: 'rel16;chk LT;qf;st1 regPC;ntck'},
+    {op: 0x2E, mnem: 'LBGT', page: 0x10, mode: modes.pcr | modes.bits16, code: 'rel16;chk LE;qt;st1 regPC;ntck'},
+    {op: 0x2F, mnem: 'LBLE', page: 0x10, mode: modes.pcr | modes.bits16, code: 'rel16;chk LE;qf;st1 regPC;ntck'},
+
+    {op: 0x30, mnem: 'LEAX', page: 0, mode: modes.indexed, code: 'indx;ea1;zero;st1 regX'},
+    {op: 0x31, mnem: 'LEAY', page: 0, mode: modes.indexed, code: 'indx;ea1;zero;st1 regY'},
+    {op: 0x32, mnem: 'LEAU', page: 0, mode: modes.indexed, code: 'indx;ea1;st1 regU'},
+    {op: 0x33, mnem: 'LEAS', page: 0, mode: modes.indexed, code: 'indx;ea1;st1 regS'},
+    {op: 0x34, mnem: 'PSHS', page: 0, mode: modes.register, code: 'push regS'},
+    {op: 0x35, mnem: 'PULS', page: 0, mode: modes.register, code: 'pull regS'},
+    {op: 0x36, mnem: 'PSHU', page: 0, mode: modes.register, code: 'push regU'},
+    {op: 0x37, mnem: 'PULU', page: 0, mode: modes.register, code: 'pull regU'},
+    {op: 0x38, mnem: 'ERR', page: 0, mode: modes.direct, code: 'err'},
+    {op: 0x39, mnem: 'RTS', page: 0, mode: modes.simple, code: 'pull16 regS;st1 regPC;ntck'},
+    {op: 0x3A, mnem: 'ABX', page: 0, mode: modes.simple, code: 'abx'},
+    {op: 0x3B, mnem: 'RTI', page: 0, mode: modes.simple, code: 'rti;ntck'},
+    {op: 0x3C, mnem: 'CWAI', page: 0, mode: modes.immediate, code: 'pcb;ld2 regCC;exx;and8;wait'},
+    {op: 0x3D, mnem: 'MUL', page: 0, mode: modes.simple, code: 'mul'},
+    {op: 0x3E, mnem: 'ERR', page: 0, mode: modes.simple, code: 'err'},
+    {op: 0x3F, mnem: 'SWI', page: 0, mode: modes.simple, code: 'swi 1'},
+    {op: 0x3F, mnem: 'SWI2', page: 0x10, mode: modes.simple, code: 'swi 2'},
+    {op: 0x3F, mnem: 'SWI3', page: 0x11, mode: modes.simple, code: 'swi 3'},
+
+    {op: 0x40, mnem: 'NEGA', page: 0, mode: modes.simple, code: 'ld1 regA;neg8;st1 regA'},
+    {op: 0x41, mnem: 'ERR', page: 0, mode: modes.simple, code: 'err'},
+    {op: 0x42, mnem: 'ERR', page: 0, mode: modes.simple, code: 'err'},
+    {op: 0x43, mnem: 'COMA', page: 0, mode: modes.simple, code: 'ld1 regA;com8;st1 regA'},
+    {op: 0x44, mnem: 'LSRA', page: 0, mode: modes.simple, code: 'ld1 regA;lsr8;st1 regA'},
+    {op: 0x45, mnem: 'ERRA', page: 0, mode: modes.simple, code: 'err'},
+    {op: 0x46, mnem: 'RORA', page: 0, mode: modes.simple, code: 'ld1 regA;ror8;st1 regA'},
+    {op: 0x47, mnem: 'ASRA', page: 0, mode: modes.simple, code: 'ld1 regA;asr8;st1 regA'},
+    {op: 0x48, mnem: 'LSLA', page: 0, mode: modes.simple, code: 'ld1 regA;lsl8;st1 regA'},
+    {op: 0x48, mnem: 'ASLA', page: 0, mode: modes.simple, code: 'ld1 regA;lsl8;st1 regA'},
+    {op: 0x49, mnem: 'ROLA', page: 0, mode: modes.simple, code: 'ld1 regA;rol8;st1 regA'},
+    {op: 0x4A, mnem: 'DECA', page: 0, mode: modes.simple, code: 'ld1 regA;dec8;st1 regA'},
+    {op: 0x4B, mnem: 'ERR', page: 0, mode: modes.simple, code: 'err'},
+    {op: 0x4C, mnem: 'INCA', page: 0, mode: modes.simple, code: 'ld1 regA;inc8;st1 regA'},
+    {op: 0x4D, mnem: 'TSTA', page: 0, mode: modes.simple, code: 'ld1 regA;tst8;st1 regA'},
+    {op: 0x4E, mnem: 'ERR', page: 0, mode: modes.simple, code: 'err'},
+    {op: 0x4F, mnem: 'CLRA', page: 0, mode: modes.simple, code: 'ld1 regA;clr8;st1 regA'},
+
+    {op: 0x50, mnem: 'NEGB', page: 0, mode: modes.simple, code: 'ld1 regB;neg8;st1 regB'},
+    {op: 0x51, mnem: 'ERR', page: 0, mode: modes.simple, code: 'err'},
+    {op: 0x52, mnem: 'ERR', page: 0, mode: modes.simple, code: 'err'},
+    {op: 0x53, mnem: 'COMB', page: 0, mode: modes.simple, code: 'ld1 regB;com8;st1 regB'},
+    {op: 0x54, mnem: 'LSRB', page: 0, mode: modes.simple, code: 'ld1 regB;lsr8;st1 regB'},
+    {op: 0x55, mnem: 'ERR', page: 0, mode: modes.simple, code: 'err'},
+    {op: 0x56, mnem: 'RORB', page: 0, mode: modes.simple, code: 'ld1 regB;ror8;st1 regB'},
+    {op: 0x57, mnem: 'ASRB', page: 0, mode: modes.simple, code: 'ld1 regB;asr8;st1 regB'},
+    {op: 0x58, mnem: 'LSLB', page: 0, mode: modes.simple, code: 'ld1 regB;lsl8;st1 regB'},
+    {op: 0x58, mnem: 'ASLB', page: 0, mode: modes.simple, code: 'ld1 regB;lsl8;st1 regB'},
+    {op: 0x59, mnem: 'ROLB', page: 0, mode: modes.simple, code: 'ld1 regB;rol8;st1 regB'},
+    {op: 0x5A, mnem: 'DECB', page: 0, mode: modes.simple, code: 'ld1 regB;dec8;st1 regB'},
+    {op: 0x5B, mnem: 'ERR', page: 0, mode: modes.simple, code: 'err'},
+    {op: 0x5C, mnem: 'INCB', page: 0, mode: modes.simple, code: 'ld1 regB;inc8;st1 regB'},
+    {op: 0x5D, mnem: 'TSTB', page: 0, mode: modes.simple, code: 'ld1 regB;tst8;st1 regB'},
+    {op: 0x5E, mnem: 'ERR', page: 0, mode: modes.simple, code: 'err'},
+    {op: 0x5F, mnem: 'CLRB', page: 0, mode: modes.simple, code: 'ld1 regB;clr8;st1 regB'},
+
+    {op: 0x60, mnem: 'NEG', page: 0, mode: modes.indexed, code: 'indx;ftch8;neg8;stor8;idxu'},
+    {op: 0x61, mnem: 'ERR', page: 0, mode: modes.indexed, code: 'err'},
+    {op: 0x62, mnem: 'ERR', page: 0, mode: modes.indexed, code: 'err'},
+    {op: 0x63, mnem: 'COM', page: 0, mode: modes.indexed, code: 'indx;ftch8;com8;stor8;idxu'},
+    {op: 0x64, mnem: 'LSR', page: 0, mode: modes.indexed, code: 'indx;ftch8;lsr8;stor8;idxu'},
+    {op: 0x65, mnem: 'ERR', page: 0, mode: modes.indexed, code: 'err'},
+    {op: 0x66, mnem: 'ROR', page: 0, mode: modes.indexed, code: 'indx;ftch8;ror8;stor8;idxu'},
+    {op: 0x67, mnem: 'ASR', page: 0, mode: modes.indexed, code: 'indx;ftch8;asr8;stor8;idxu'},
+    {op: 0x68, mnem: 'LSL', page: 0, mode: modes.indexed, code: 'indx;ftch8;lsl8;stor8;idxu'},
+    {op: 0x68, mnem: 'ASL', page: 0, mode: modes.indexed, code: 'indx;ftch8;lsl8;stor8;idxu'},
+    {op: 0x69, mnem: 'ROL', page: 0, mode: modes.indexed, code: 'indx;ftch8;rol8;stor8;idxu'},
+    {op: 0x6A, mnem: 'DEC', page: 0, mode: modes.indexed, code: 'indx;ftch8;dec8;stor8;idxu'},
+    {op: 0x6B, mnem: 'ERR', page: 0, mode: modes.indexed, code: 'err'},
+    {op: 0x6C, mnem: 'INC', page: 0, mode: modes.indexed, code: 'indx;ftch8;inc8;stor8;idxu'},
+    {op: 0x6D, mnem: 'TST', page: 0, mode: modes.indexed, code: 'indx;ftch8;tst8;stor8;idxu'},
+    {op: 0x6E, mnem: 'JMP', page: 0, mode: modes.indexed, code: 'indx;ea1;st1 regPC;ntck'},
+    {op: 0x6F, mnem: 'CLR', page: 0, mode: modes.indexed, code: 'indx;ftch8;clr8;stor8;idxu'},
+
+    {op: 0x70, mnem: 'NEG', page: 0, mode: modes.extended, code: 'xtnd;ftch8;neg8;stor8'},
+    {op: 0x71, mnem: 'ERR', page: 0, mode: modes.extended, code: 'err'},
+    {op: 0x72, mnem: 'ERR', page: 0, mode: modes.extended, code: 'err'},
+    {op: 0x73, mnem: 'COM', page: 0, mode: modes.extended, code: 'xtnd;ftch8;com8;stor8'},
+    {op: 0x74, mnem: 'LSR', page: 0, mode: modes.extended, code: 'xtnd;ftch8;lsr8;stor8'},
+    {op: 0x75, mnem: 'ERR', page: 0, mode: modes.extended, code: 'err'},
+    {op: 0x76, mnem: 'ROR', page: 0, mode: modes.extended, code: 'xtnd;ftch8;ror8;stor8'},
+    {op: 0x77, mnem: 'ASR', page: 0, mode: modes.extended, code: 'xtnd;ftch8;asr8;stor8'},
+    {op: 0x78, mnem: 'LSL', page: 0, mode: modes.extended, code: 'xtnd;ftch8;lsl8;stor8'},
+    {op: 0x78, mnem: 'ASL', page: 0, mode: modes.extended, code: 'xtnd;ftch8;lsl8;stor8'},
+    {op: 0x79, mnem: 'ROL', page: 0, mode: modes.extended, code: 'xtnd;ftch8;rol8;stor8'},
+    {op: 0x7A, mnem: 'DEC', page: 0, mode: modes.extended, code: 'xtnd;ftch8;dec8;stor8'},
+    {op: 0x7B, mnem: 'ERR', page: 0, mode: modes.extended, code: 'err'},
+    {op: 0x7C, mnem: 'INC', page: 0, mode: modes.extended, code: 'xtnd;ftch8;inc8;stor8'},
+    {op: 0x7D, mnem: 'TST', page: 0, mode: modes.extended, code: 'xtnd;ftch8;tst8;stor8'},
+    {op: 0x7E, mnem: 'JMP', page: 0, mode: modes.extended, code: 'xtnd;ea1;st1 regPC;ntck'},
+    {op: 0x7F, mnem: 'CLR', page: 0, mode: modes.extended, code: 'xtnd;ftch8;clr8;stor8'},
+
+    {op: 0x80, mnem: 'SUBA', page: 0, mode: modes.immediate, code: 'pcb;ld2 regA;sub8;st1 regA'},
+    {op: 0x81, mnem: 'CMPA', page: 0, mode: modes.immediate, code: 'pcb;ld2 regA;sub8'},
+    {op: 0x82, mnem: 'SBCA', page: 0, mode: modes.immediate, code: 'pcb;ld2 regA;sbc8;st1 regA'},
+    {op: 0x83, mnem: 'SUBD', page: 0, mode: modes.immediate | modes.bits16, code: 'pcw;ld2 regD;sub16;st1 regD'},
+    {op: 0x83, mnem: 'CMPD', page: 0x10, mode: modes.immediate | modes.bits16, code: 'pcw;ld2 regD;sub16'},
+    {op: 0x83, mnem: 'CMPU', page: 0x11, mode: modes.immediate | modes.bits16, code: 'pcw;ld2 regU;sub16'},
+    {op: 0x84, mnem: 'ANDA', page: 0, mode: modes.immediate, code: 'pcb;ld2 regA;and8;st1 regA'},
+    {op: 0x85, mnem: 'BITA', page: 0, mode: modes.immediate, code: 'pcb;ld2 regA;and8'},
+    {op: 0x86, mnem: 'LDA', page: 0, mode: modes.immediate, code: 'pcb;tst8; st1 regA'},
+    {op: 0x87, mnem: 'ERR', page: 0, mode: modes.immediate, code: 'err'},
+    {op: 0x88, mnem: 'EORA', page: 0, mode: modes.immediate, code: 'pcb;ld2 regA;eor8;st1 regA'},
+    {op: 0x89, mnem: 'ADCA', page: 0, mode: modes.immediate, code: 'pcb;ld2 regA;adc8;st1 regA'},
+    {op: 0x8A, mnem: 'ORA', page: 0, mode: modes.immediate, code: 'pcb;ld2 regA;or8;st1 regA'},
+    {op: 0x8B, mnem: 'ADDA', page: 0, mode: modes.immediate, code: 'pcb;ld2 regA;add8;st1 regA'},
+    {op: 0x8C, mnem: 'CMPX', page: 0, mode: modes.immediate | modes.bits16, code: 'pcw;ld2 regX;sub16'},
+    {op: 0x8C, mnem: 'CMPY', page: 0x10, mode: modes.immediate | modes.bits16, code: 'pcw;ld2 regY;sub16'},
+    {op: 0x8C, mnem: 'CMPS', page: 0x11, mode: modes.immediate | modes.bits16, code: 'pcw;ld2 regS;sub16'},
+    {op: 0x8D, mnem: 'BSR', page: 0, mode: modes.pcr | modes.bits8, code: 'rel8;stck16 regPC;st1 regPC;ntck'},
+    {op: 0x8E, mnem: 'LDX', page: 0, mode: modes.immediate | modes.bits16, code: 'pcw;tst16;st1 regX'},
+    {op: 0x8E, mnem: 'LDY', page: 0x10, mode: modes.immediate | modes.bits16, code: 'pcw;tst16;st1 regY'},
+    {op: 0x8F, mnem: 'ERR', page: 0, mode: modes.simple, code: 'err'},
+
+    {op: 0x90, mnem: 'SUBA', page: 0, mode: modes.direct, code: 'drct;ftch8;ld2 regA;sub8;st1 regA'},
+    {op: 0x91, mnem: 'CMPA', page: 0, mode: modes.direct, code: 'drct;ftch8;ld2 regA;sub8'},
+    {op: 0x92, mnem: 'SBCA', page: 0, mode: modes.direct, code: 'drct;ftch8;ld2 regA;sbc8;st1 regA'},
+    {op: 0x93, mnem: 'SUBD', page: 0, mode: modes.direct | modes.bits16, code: 'drct;ftch16;ld2 regD;sub16;st1 regD'},
+    {op: 0x93, mnem: 'CMPD', page: 0x10, mode: modes.direct | modes.bits16, code: 'drct;ftch16;ld2 regD;sub16'},
+    {op: 0x93, mnem: 'CMPU', page: 0x11, mode: modes.direct | modes.bits16, code: 'drct;ftch16;ld2 regU;sub16'},
+    {op: 0x94, mnem: 'ANDA', page: 0, mode: modes.direct, code: 'drct;ftch8;ld2 regA;and8;st1 regA'},
+    {op: 0x95, mnem: 'BITA', page: 0, mode: modes.direct, code: 'drct;ftch8;ld2 regA;and8'},
+    {op: 0x96, mnem: 'LDA', page: 0, mode: modes.direct, code: 'drct;ftch8;tst8; st1 regA'},
+    {op: 0x97, mnem: 'STA', page: 0, mode: modes.direct, code: 'drct;ld1 regA;tst8;stor8'},
+    {op: 0x98, mnem: 'EORA', page: 0, mode: modes.direct, code: 'drct;ftch8;ld2 regA;eor8;st1 regA'},
+    {op: 0x99, mnem: 'ADCA', page: 0, mode: modes.direct, code: 'drct;ftch8;ld2 regA;adc8;st1 regA'},
+    {op: 0x9A, mnem: 'ORA', page: 0, mode: modes.direct, code: 'drct;ftch8;ld2 regA;or8;st1 regA'},
+    {op: 0x9B, mnem: 'ADDA', page: 0, mode: modes.direct, code: 'drct;ftch8;ld2 regA;add8;st1 regA'},
+    {op: 0x9C, mnem: 'CMPX', page: 0, mode: modes.direct | modes.bits16, code: 'drct;ftch16;ld2 regX;sub16'},
+    {op: 0x9C, mnem: 'CMPY', page: 0x10, mode: modes.direct | modes.bits16, code: 'drct;ftch16;ld2 regY;sub16'},
+    {op: 0x9C, mnem: 'CMPS', page: 0x11, mode: modes.direct | modes.bits16, code: 'drct;ftch16;ld2 regS;sub16'},
+    {op: 0x9D, mnem: 'JSR', page: 0, mode: modes.direct | modes.bits16, code: 'drct;stck16 regPC;ea1;st1 regPC;ntck'},
+    {op: 0x9E, mnem: 'LDX', page: 0, mode: modes.direct | modes.bits16, code: 'drct;ftch16;tst16;st1 regX'},
+    {op: 0x9E, mnem: 'LDY', page: 0x10, mode: modes.direct | modes.bits16, code: 'drct;ftch16;tst16;st1 regY'},
+    {op: 0x9F, mnem: 'STX', page: 0, mode: modes.direct | modes.bits16, code: 'drct;ld1 regX;tst16;stor16'},
+    {op: 0x9F, mnem: 'STY', page: 0x10, mode: modes.direct | modes.bits16, code: 'drct;ld1 regY;tst16;stor16'},
+
+    {op: 0xA0, mnem: 'SUBA', page: 0, mode: modes.indexed, code: 'indx;ftch8;ld2 regA;sub8;idxu;st1 regA'},
+    {op: 0xA1, mnem: 'CMPA', page: 0, mode: modes.indexed, code: 'indx;ftch8;ld2 regA;sub8;idxu'},
+    {op: 0xA2, mnem: 'SBCA', page: 0, mode: modes.indexed, code: 'indx;ftch8;ld2 regA;sbc8;idxu;st1 regA'},
+    {
+      op: 0xA3,
+      mnem: 'SUBD',
+      page: 0,
+      mode: modes.indexed | modes.bits16,
+      code: 'indx;ftch16;ld2 regD;sub16;idxu;st1 regD',
+    },
+    {op: 0xA3, mnem: 'CMPD', page: 0x10, mode: modes.indexed | modes.bits16, code: 'indx;ftch16;ld2 regD;sub16;idxu'},
+    {op: 0xA3, mnem: 'CMPU', page: 0x11, mode: modes.indexed | modes.bits16, code: 'indx;ftch16;ld2 regU;sub16;idxu'},
+    {op: 0xA4, mnem: 'ANDA', page: 0, mode: modes.indexed, code: 'indx;ftch8;ld2 regA;and8;idxu;st1 regA'},
+    {op: 0xA5, mnem: 'BITA', page: 0, mode: modes.indexed, code: 'indx;ftch8;ld2 regA;and8;idxu'},
+    {op: 0xA6, mnem: 'LDA', page: 0, mode: modes.indexed, code: 'indx;ftch8;tst8;idxu;st1 regA'},
+    {op: 0xA7, mnem: 'STA', page: 0, mode: modes.indexed, code: 'indx;ld1 regA;tst8;stor8;idxu'},
+    {op: 0xA8, mnem: 'EORA', page: 0, mode: modes.indexed, code: 'indx;ftch8;ld2 regA;eor8;idxu;st1 regA'},
+    {op: 0xA9, mnem: 'ADCA', page: 0, mode: modes.indexed, code: 'indx;ftch8;ld2 regA;adc8;idxu;st1 regA'},
+    {op: 0xAA, mnem: 'ORA', page: 0, mode: modes.indexed, code: 'indx;ftch8;ld2 regA;or8;idxu;st1 regA'},
+    {op: 0xAB, mnem: 'ADDA', page: 0, mode: modes.indexed, code: 'indx;ftch8;ld2 regA;add8;idxu;st1 regA'},
+    {op: 0xAC, mnem: 'CMPX', page: 0, mode: modes.indexed | modes.bits16, code: 'indx;ftch16;ld2 regX;sub16;idxu'},
+    {op: 0xAC, mnem: 'CMPY', page: 0x10, mode: modes.indexed | modes.bits16, code: 'indx;ftch16;ld2 regY;sub16;idxu'},
+    {op: 0xAC, mnem: 'CMPS', page: 0x11, mode: modes.indexed | modes.bits16, code: 'indx;ftch16;ld2 regS;sub16;idxu'},
+    {
+      op: 0xAD,
+      mnem: 'JSR',
+      page: 0,
+      mode: modes.indexed | modes.bits16,
+      code: 'indx;idxu;stck16 regPC;ea1;st1 regPC;ntck',
+    },
+    {op: 0xAE, mnem: 'LDX', page: 0, mode: modes.indexed | modes.bits16, code: 'indx;ftch16;tst16;st1 regX;idxu'},
+    {op: 0xAE, mnem: 'LDY', page: 0x10, mode: modes.indexed | modes.bits16, code: 'indx;ftch16;tst16;st1 regY;idxu'},
+    {op: 0xAF, mnem: 'STX', page: 0, mode: modes.indexed | modes.bits16, code: 'indx;ld1 regX;tst16;stor16;idxu'},
+    {op: 0xAF, mnem: 'STY', page: 0x10, mode: modes.indexed | modes.bits16, code: 'indx;ld1 regY;tst16;stor16;idxu'},
+
+    {op: 0xB0, mnem: 'SUBA', page: 0, mode: modes.extended, code: 'xtnd;ftch8;ld2 regA;sub8;st1 regA'},
+    {op: 0xB1, mnem: 'CMPA', page: 0, mode: modes.extended, code: 'xtnd;ftch8;ld2 regA;sub8'},
+    {op: 0xB2, mnem: 'SBCA', page: 0, mode: modes.extended, code: 'xtnd;ftch8;ld2 regA;sbc8;st1 regA'},
+    {op: 0xB3, mnem: 'SUBD', page: 0, mode: modes.extended | modes.bits16, code: 'xtnd;ftch16;ld2 regD;sub16;st1 regD'},
+    {op: 0xB3, mnem: 'CMPD', page: 0x10, mode: modes.extended | modes.bits16, code: 'xtnd;ftch16;ld2 regD;sub16'},
+    {op: 0xB3, mnem: 'CMPU', page: 0x11, mode: modes.extended | modes.bits16, code: 'xtnd;ftch16;ld2 regU;sub16'},
+    {op: 0xB4, mnem: 'ANDA', page: 0, mode: modes.extended, code: 'xtnd;ftch8;ld2 regA;and8;st1 regA'},
+    {op: 0xB5, mnem: 'BITA', page: 0, mode: modes.extended, code: 'xtnd;ftch8;ld2 regA;and8'},
+    {op: 0xB6, mnem: 'LDA', page: 0, mode: modes.extended, code: 'xtnd;ftch8;tst8; st1 regA'},
+    {op: 0xB7, mnem: 'STA', page: 0, mode: modes.extended, code: 'xtnd;ld1 regA;tst8;stor8'},
+    {op: 0xB8, mnem: 'EORA', page: 0, mode: modes.extended, code: 'xtnd;ftch8;ld2 regA;eor8;st1 regA'},
+    {op: 0xB9, mnem: 'ADCA', page: 0, mode: modes.extended, code: 'xtnd;ftch8;ld2 regA;adc8;st1 regA'},
+    {op: 0xBA, mnem: 'ORA', page: 0, mode: modes.extended, code: 'xtnd;ftch8;ld2 regA;or8;st1 regA'},
+    {op: 0xBB, mnem: 'ADDA', page: 0, mode: modes.extended, code: 'xtnd;ftch8;ld2 regA;add8;st1 regA'},
+    {op: 0xBC, mnem: 'CMPX', page: 0, mode: modes.extended | modes.bits16, code: 'xtnd;ftch16;ld2 regX;sub16'},
+    {op: 0xBC, mnem: 'CMPY', page: 0x10, mode: modes.extended | modes.bits16, code: 'xtnd;ftch16;ld2 regY;sub16'},
+    {op: 0xBC, mnem: 'CMPS', page: 0x11, mode: modes.extended | modes.bits16, code: 'xtnd;ftch16;ld2 regS;sub16'},
+    {op: 0xBD, mnem: 'JSR', page: 0, mode: modes.extended | modes.bits16, code: 'xtnd;stck16 regPC;ea1;st1 regPC;ntck'},
+    {op: 0xBE, mnem: 'LDX', page: 0, mode: modes.extended | modes.bits16, code: 'xtnd;ftch16;tst16;st1 regX'},
+    {op: 0xBE, mnem: 'LDY', page: 0x10, mode: modes.extended | modes.bits16, code: 'xtnd;ftch16;tst16;st1 regY'},
+    {op: 0xBF, mnem: 'STX', page: 0, mode: modes.extended | modes.bits16, code: 'xtnd;ld1 regX;tst16;stor16'},
+    {op: 0xBF, mnem: 'STY', page: 0x10, mode: modes.extended | modes.bits16, code: 'xtnd;ld1 regY;tst16;stor16'},
+
+    {op: 0xC0, mnem: 'SUBB', page: 0, mode: modes.immediate, code: 'pcb;ld2 regB;sub8;st1 regB'},
+    {op: 0xC1, mnem: 'CMPB', page: 0, mode: modes.immediate, code: 'pcb;ld2 regB;sub8'},
+    {op: 0xC2, mnem: 'SBCB', page: 0, mode: modes.immediate, code: 'pcb;ld2 regB;sbc8;st1 regB'},
+    {op: 0xC3, mnem: 'ADDD', page: 0, mode: modes.immediate | modes.bits16, code: 'pcw;ld2 regD;add16;st1 regD'},
+    {op: 0xC4, mnem: 'ANDB', page: 0, mode: modes.immediate, code: 'pcb;ld2 regB;and8;st1 regB'},
+    {op: 0xC5, mnem: 'BITB', page: 0, mode: modes.immediate, code: 'pcb;ld2 regB;and8'},
+    {op: 0xC6, mnem: 'LDB', page: 0, mode: modes.immediate, code: 'pcb;tst8; st1 regB'},
+    {op: 0xC7, mnem: 'ERR', page: 0, mode: modes.immediate, code: 'err'},
+    {op: 0xC8, mnem: 'EORB', page: 0, mode: modes.immediate, code: 'pcb;ld2 regB;eor8;st1 regB'},
+    {op: 0xC9, mnem: 'ADCB', page: 0, mode: modes.immediate, code: 'pcb;ld2 regB;adc8;st1 regB'},
+    {op: 0xCA, mnem: 'ORB', page: 0, mode: modes.immediate, code: 'pcb;ld2 regB;or8;st1 regB'},
+    {op: 0xCB, mnem: 'ADDB', page: 0, mode: modes.immediate, code: 'pcb;ld2 regB;add8;st1 regB'},
+    {op: 0xCC, mnem: 'LDD', page: 0, mode: modes.immediate | modes.bits16, code: 'pcw;tst16;st1 regD'},
+    {op: 0xCD, mnem: 'ERR', page: 0, mode: modes.simple, code: 'err'},
+    {op: 0xCE, mnem: 'LDU', page: 0, mode: modes.immediate | modes.bits16, code: 'pcw;tst16;st1 regU'},
+    {op: 0xCE, mnem: 'LDS', page: 0x10, mode: modes.immediate | modes.bits16, code: 'pcw;tst16;st1 regS'},
+    {op: 0xCF, mnem: 'ERR', page: 0, mode: modes.simple, code: 'err'},
+
+    {op: 0xD0, mnem: 'SUBB', page: 0, mode: modes.direct, code: 'drct;ftch8;ld2 regB;sub8;st1 regB'},
+    {op: 0xD1, mnem: 'CMPB', page: 0, mode: modes.direct, code: 'drct;ftch8;ld2 regB;sub8'},
+    {op: 0xD2, mnem: 'SBCB', page: 0, mode: modes.direct, code: 'drct;ftch8;ld2 regB;sbc8;st1 regB'},
+    {op: 0xD3, mnem: 'ADDD', page: 0, mode: modes.direct | modes.bits16, code: 'drct;ftch16;ld2 regD;add16;st1 regD'},
+    {op: 0xD4, mnem: 'ANDB', page: 0, mode: modes.direct, code: 'drct;ftch8;ld2 regB;and8;st1 regB'},
+    {op: 0xD5, mnem: 'BITB', page: 0, mode: modes.direct, code: 'drct;ftch8;ld2 regB;and8'},
+    {op: 0xD6, mnem: 'LDB', page: 0, mode: modes.direct, code: 'drct;ftch8;tst8; st1 regB'},
+    {op: 0xD7, mnem: 'STB', page: 0, mode: modes.direct, code: 'drct;ld1 regB;tst8;stor8'},
+    {op: 0xD8, mnem: 'EORB', page: 0, mode: modes.direct, code: 'drct;ftch8;ld2 regB;eor8;st1 regB'},
+    {op: 0xD9, mnem: 'ADCB', page: 0, mode: modes.direct, code: 'drct;ftch8;ld2 regB;adc8;st1 regB'},
+    {op: 0xDA, mnem: 'ORB', page: 0, mode: modes.direct, code: 'drct;ftch8;ld2 regB;or8;st1 regB'},
+    {op: 0xDB, mnem: 'ADDB', page: 0, mode: modes.direct, code: 'drct;ftch8;ld2 regB;add8;st1 regB'},
+    {op: 0xDC, mnem: 'LDD', page: 0, mode: modes.direct | modes.bits16, code: 'drct;ftch16;tst16;st1 regD'},
+    {op: 0xDD, mnem: 'STD', page: 0, mode: modes.direct | modes.bits16, code: 'drct;ld1 regD;tst16;stor16'},
+    {op: 0xDE, mnem: 'LDU', page: 0, mode: modes.direct | modes.bits16, code: 'drct;ftch16;tst16;st1 regU'},
+    {op: 0xDF, mnem: 'STU', page: 0, mode: modes.direct | modes.bits16, code: 'drct;ld1 regU;tst16;stor16'},
+    {op: 0xDE, mnem: 'LDS', page: 0x10, mode: modes.direct | modes.bits16, code: 'drct;ftch16;tst16;st1 regS'},
+    {op: 0xDF, mnem: 'STS', page: 0x10, mode: modes.direct | modes.bits16, code: 'drct;ld1 regS;tst16;stor16'},
+
+    {op: 0xE0, mnem: 'SUBB', page: 0, mode: modes.indexed, code: 'indx;ftch8;ld2 regB;sub8;idxu;st1 regB'},
+    {op: 0xE1, mnem: 'CMPB', page: 0, mode: modes.indexed, code: 'indx;ftch8;ld2 regB;sub8;idxu'},
+    {op: 0xE2, mnem: 'SBCB', page: 0, mode: modes.indexed, code: 'indx;ftch8;ld2 regB;sbc8;idxu;st1 regB'},
+    {
+      op: 0xE3,
+      mnem: 'ADDD',
+      page: 0,
+      mode: modes.indexed | modes.bits16,
+      code: 'indx;ftch16;ld2 regD;add16;idxu;st1 regD',
+    },
+    {op: 0xE4, mnem: 'ANDB', page: 0, mode: modes.indexed, code: 'indx;ftch8;ld2 regB;and8;idxu;st1 regB'},
+    {op: 0xE5, mnem: 'BITB', page: 0, mode: modes.indexed, code: 'indx;ftch8;ld2 regB;and8;idxu'},
+    {op: 0xE6, mnem: 'LDB', page: 0, mode: modes.indexed, code: 'indx;ftch8;tst8;idxu;st1 regB'},
+    {op: 0xE7, mnem: 'STB', page: 0, mode: modes.indexed, code: 'indx;ld1 regB;tst8;stor8;idxu'},
+    {op: 0xE8, mnem: 'EORB', page: 0, mode: modes.indexed, code: 'indx;ftch8;ld2 regB;eor8;idxu;st1 regB'},
+    {op: 0xE9, mnem: 'ADCB', page: 0, mode: modes.indexed, code: 'indx;ftch8;ld2 regB;adc8;idxu;st1 regB'},
+    {op: 0xEA, mnem: 'ORB', page: 0, mode: modes.indexed, code: 'indx;ftch8;ld2 regB;or8;idxu;st1 regB'},
+    {op: 0xEB, mnem: 'ADDB', page: 0, mode: modes.indexed, code: 'indx;ftch8;ld2 regB;add8;idxu;st1 regB'},
+    {op: 0xEC, mnem: 'LDD', page: 0, mode: modes.indexed | modes.bits16, code: 'indx;ftch16;tst16;idxu;st1 regD'},
+    {op: 0xED, mnem: 'STD', page: 0, mode: modes.indexed | modes.bits16, code: 'indx;ld1 regD;tst16;stor16;idxu'},
+    {op: 0xEE, mnem: 'LDU', page: 0, mode: modes.indexed | modes.bits16, code: 'indx;ftch16;tst16;idxu;st1 regU'},
+    {op: 0xEF, mnem: 'STU', page: 0, mode: modes.indexed | modes.bits16, code: 'indx;ld1 regU;tst16;stor16;idxu'},
+    {op: 0xEE, mnem: 'LDS', page: 0x10, mode: modes.indexed | modes.bits16, code: 'indx;ftch16;tst16;idxu;st1 regS'},
+    {op: 0xEF, mnem: 'STS', page: 0x10, mode: modes.indexed | modes.bits16, code: 'indx;ld1 regS;tst16;stor16;idxu'},
+
+    {op: 0xF0, mnem: 'SUBB', page: 0, mode: modes.extended, code: 'xtnd;ftch8;ld2 regB;sub8;st1 regB'},
+    {op: 0xF1, mnem: 'CMPB', page: 0, mode: modes.extended, code: 'xtnd;ftch8;ld2 regB;sub8'},
+    {op: 0xF2, mnem: 'SBCB', page: 0, mode: modes.extended, code: 'xtnd;ftch8;ld2 regB;sbc8;st1 regB'},
+    {op: 0xF3, mnem: 'ADDD', page: 0, mode: modes.extended | modes.bits16, code: 'xtnd;ftch16;ld2 regD;add16;st1 regD'},
+    {op: 0xF4, mnem: 'ANDB', page: 0, mode: modes.extended, code: 'xtnd;ftch8;ld2 regB;and8;st1 regB'},
+    {op: 0xF5, mnem: 'BITB', page: 0, mode: modes.extended, code: 'xtnd;ftch8;ld2 regB;and8'},
+    {op: 0xF6, mnem: 'LDB', page: 0, mode: modes.extended, code: 'xtnd;ftch8;tst8; st1 regB'},
+    {op: 0xF7, mnem: 'STB', page: 0, mode: modes.extended, code: 'xtnd;ld1 regB;tst8;stor8'},
+    {op: 0xF8, mnem: 'EORB', page: 0, mode: modes.extended, code: 'xtnd;ftch8;ld2 regB;eor8;st1 regB'},
+    {op: 0xF9, mnem: 'ADCB', page: 0, mode: modes.extended, code: 'xtnd;ftch8;ld2 regB;adc8;st1 regB'},
+    {op: 0xFA, mnem: 'ORB', page: 0, mode: modes.extended, code: 'xtnd;ftch8;ld2 regB;or8;st1 regB'},
+    {op: 0xFB, mnem: 'ADDB', page: 0, mode: modes.extended, code: 'xtnd;ftch8;ld2 regB;add8;st1 regB'},
+    {op: 0xFC, mnem: 'LDD', page: 0, mode: modes.extended | modes.bits16, code: 'xtnd;ftch16;tst16;st1 regD'},
+    {op: 0xFD, mnem: 'STD', page: 0, mode: modes.extended | modes.bits16, code: 'xtnd;ld1 regD;tst16;stor16'},
+    {op: 0xFE, mnem: 'LDU', page: 0, mode: modes.extended | modes.bits16, code: 'xtnd;ftch16;tst16;st1 regU'},
+    {op: 0xFF, mnem: 'STU', page: 0, mode: modes.extended | modes.bits16, code: 'xtnd;ld1 regU;tst16;stor16'},
+    {op: 0xFE, mnem: 'LDS', page: 0x10, mode: modes.extended | modes.bits16, code: 'xtnd;ftch16;tst16;st1 regS'},
+    {op: 0xFF, mnem: 'STS', page: 0x10, mode: modes.extended | modes.bits16, code: 'xtnd;ld1 regS;tst16;stor16'},
+
+    {op: 0x01, mnem: 'FCB', page: 0, mode: modes.pseudo, code: ''},
+    {op: 0x01, mnem: 'FCC', page: 0, mode: modes.pseudo, code: ''},
+    {op: 0x01, mnem: '.FCC', page: 0, mode: modes.pseudo, code: ''},
+    {op: 0x01, mnem: 'FDB', page: 0, mode: modes.pseudo, code: ''},
+    {op: 0x01, mnem: '.WORD', page: 0, mode: modes.pseudo, code: ''},
+    {op: 0x01, mnem: 'DB', page: 0, mode: modes.pseudo, code: ''},
+    {op: 0x01, mnem: '.BYTE', page: 0, mode: modes.pseudo, code: ''},
+    {op: 0x01, mnem: 'DW', page: 0, mode: modes.pseudo, code: ''},
+    {op: 0x01, mnem: 'EQU', page: 0, mode: modes.pseudo, code: ''},
+    {op: 0x01, mnem: '=', page: 0, mode: modes.pseudo, code: ''},
+    {op: 0x01, mnem: 'FILL', page: 0, mode: modes.pseudo, code: ''},
+    {op: 0x01, mnem: 'ORG', page: 0, mode: modes.pseudo, code: ''},
+    {op: 0x01, mnem: 'RMB', page: 0, mode: modes.pseudo, code: ''},
+    {op: 0x01, mnem: 'DS', page: 0, mode: modes.pseudo, code: ''},
+    {op: 0x01, mnem: 'DIRECT', page: 0, mode: modes.pseudo, code: ''},
+    {op: 0x01, mnem: 'SETDP', page: 0, mode: modes.pseudo, code: ''},
+    {op: 0x01, mnem: 'CONST', page: 0, mode: modes.pseudo, code: ''},
+    {op: 0x01, mnem: 'VAR', page: 0, mode: modes.pseudo, code: ''},
+    {op: 0x01, mnem: 'END', page: 0, mode: modes.pseudo, code: ''},
+
+  ];
+
+  function inHex(n, l) {
+    var s = n.toString(16).toUpperCase();
+    while (s.length < l) {s = '0' + s;}
+    return s;
+  };
+
+  function signedHex(n, bits, symbol) {
+    var digits = (bits > 8) ? 4 : 2;
+    if (n & (1 << (bits - 1))) {
+      return '-' + symbol + inHex((1 << bits) - n, digits);
+    } else {
+      return symbol + inHex(n, digits);
+    }
+  };
+
+  function inBinary(n, l) {
+    var s = n.toString(2);
+    while (s.length < l) {s = '0' + s;}
+    return s;
+  };
+
+  function signed8(w) {
+    var b = w & 0xff;
+    return (b & 0x80) ? ((b & 0x7f) - 0x80) : b;
+  }
+
+  function signed16(l) {
+    var w = l & 0xffff;
+    return (w & 0x8000) ? ((w & 0x7fff) - 0x8000) : w;
+  }
+
+  function plural(word, n, wordPlural) {
+    if (n == 1) {
+      return word;
+    } else {
+      if (wordPlural) {
+        return (wordPlural);
+      } else {
+        return word + 's';
+      }
+    }
+  }
+
+  function deSelect() {
+    var selection = ('getSelection' in window)
+        ? window.getSelection()
+        : ('selection' in document)
+            ? document.selection
+            : null;
+    if ('removeAllRanges' in selection) selection.removeAllRanges();
+    else if ('empty' in selection) selection.empty();
+  }
+
+  function disCode(address) {
+    this.address = address;
+    this.label = '';
+    this.bytes = [];
+    this.operation = '';
+    this.operand = '';
+    this.maxInstructionLength = 5;
+    this.show = function() {
+      var i;
+      var s = inHex(this.address, 4) + ': ';
+      for (i = 0; i < this.maxInstructionLength; i++) {
+        if (i < this.bytes.length) {s += inHex(this.bytes[i], 2) + ' ';} else {s += '   ';}
+      }
+      return s + this.operation + ' ' + this.operand;
+    };
+  }
+
+  function systemInterface(cpuOwner, address) {
+    this.cpu = cpuOwner;
+    this.base = address;
+    cpuOwner.ram.addWindow(this, address, 0x20);
+    this.update = function(holder, address, value) {
+      var key;
+      switch (address - this.base) {
+        case SIrefreshOn:
+          if (!this.cpu.refreshOn) {
+//                          this.cpu.refreshOn=true;
+//                          mc6809.refresh (1)
+//                          console.log ("Refresh on");
+            machineRefresh();
+          }
+          break;
+        case SIrefreshOff:
+          this.cpu.refresh(1);
+          this.cpu.refreshOn = false;
+//                         console.log ("Refresh off");
+          break;
+        case SIgraphicsMode:
+          holder.cpu.graphicsRAM.setMode(value);
+          break;
+        case SIkeyInterface:
+          if (value == 0) {
+            if (key = holder.cpu.keyBuffer.shift()) {
+              trc('Keypress', key, 1);
+              switch (key) {
+                case 'Enter':
+                  key = 13;
+                  break;
+                case 'Backspace':
+                  key = 8;
+                  break;
+                case 'Escape':
+                  key = 27;
+                  break;
+                default:
+                  key = key.charCodeAt();
+                  break;
+              }
+              trc('Keycode', key, 1);
+              holder.cpu.ram.poke(address, key);
+            } else {
+              holder.cpu.ram.poke(address, 255);
+            }
+          } else if (value == 255) {
+            holder.cpu.keyBuffer = [];
+          }
+          break;
+
+      }
+    };
+  }
+
+  function cellEdit(cellTD, cpu, cellAddress) {
+    this.verify = function() {
+      cpu.pcVal = this.address;
+      cpu.foundError = 0;
+      cpu.passNo = 2;
+      var encoded = cpu.asmLine(this.input.value, false);
+      if (cpu.foundError) {
+        this.input.style = 'color: #f02020';
+//      alert ('Machine language contains errors');
+        return null;
+      } else {
+        if (encoded.length > 0) {
+          trc('cellEdit Assemble @ ', inHex(this.address, 4));
+          cpu.pcVal = cpu.ram.fill(this.address, encoded);
+        }
+      }
+      return this.input.value;
+    };
+    cpu.cellEditing = this;
+    this.parent = cellTD;
+    this.address = cellAddress;
+    this.oldContents = this.parent.innerText;
+    this.input = document.createElement('input');
+    this.input.setAttribute('type', 'text');
+    this.input.setAttribute('value', this.oldContents);
+    this.input.className = 'cellEdit';
+    this.input.addEventListener('contextmenu', function(event) {
+      trc('input right click', event);
+      event.preventDefault();
+    }, true);
+    this.input.addEventListener('keydown', function(event) {
+      var keyDown;
+      if (!event.defaultPrevented) {
+        keyDown = event.key.toString().toUpperCase();
+        trc('Event triggered', keyDown);
+        if (keyDown == 'ESCAPE') {
+          cpu.closeEdit(false);
+          event.preventDefault();
+        }
+        if (keyDown == 'ENTER') {
+          cpu.closeEdit(true);
+          event.preventDefault();
+        }
+      }
+    }, true);
+    this.parent.innerHTML = '';
+    this.parent.appendChild(this.input);
+    this.input.focus();
+    this.input.select();
+    this.input.setSelectionRange(this.oldContents.length, this.oldContents.length);
+
+  }
+
+  function memory8(size) {
+    var i;
+    this.mask = size - 1;
+    this.windows = [];
+    if (size > 0) {
+      this.ram = new Array(size);
+      for (i = 0; i < size; i++) {this.ram[i] = 0;}
+    }
+    this.wrap = function(address) {
+      return address & this.mask;
+    };
+    this.plus = function(address) {
+      return (address + 1) & this.mask;
+    };
+    this.plusplus = function(address) {
+      return (address + 2) & this.mask;
+    };
+    this.peek = function(address) {
+      return this.ram[address & this.mask];
+    };
+    this.deek = function(address) {
+      return (this.ram[address & this.mask] << 8) + this.ram[(address + 1) & this.mask];
+    };
+    this.poke = function(address, byte) {
+      byte = byte & 0xff;
+      this.ram[address] = byte;
+      this.checkWindow(address, byte);
+    };
+    this.read = function(address) {
+      return [this.wrap(address + 1), this.peek(address)];
+    };
+    this.fill = function(address, bytes) {
+      var i = 0;
+      while (i < bytes.length) {
+        this.poke(address + i, bytes[i]);
+        trc('Fill', inHex(bytes[i], 2));
+        if ((address + i + 1) != this.wrap(address + i + 1)) {
+          break;
+        } else {
+          i++;
+        }
+      }
+      return address + i;
+    };
+    this.addWindow = function(holder, base, length) {
+      var freshWin = new RAMWindow(holder, base, length);
+      this.windows.push(freshWin);
+      return freshWin;
+    };
+    this.removeWindow = function(base, length, handle) {
+      var i;
+      if (handle == null) {
+        for (i = this.windows.length - 1; i >= 0; i--) {
+          if ((this.windows[i].base == base) && (this.windows[i].ending == base + length)) {
+            this.windows.splice(i, 1);
+            trc('Removed array splice at ', i + ' with base=' + base + ' length=' + length);
+          }
+        }
+      } else {
+        i = this.windows.indexOf(handle);
+        trc('removeWindow by handle', i);
+        if (i >= 0) {
+          this.windows.splice(i, 1);
+        }
+      }
+    };
+    this.checkWindow = function(address, value) {
+      var i, window;
+//    var window=this.windows.find (function (element) {
+//      return (address>=element.base) && (address<element.ending)
+//    });
+      for (i = 0; i < this.windows.length; i++) {
+        window = this.windows[i];
+        if ((address >= window.base) && (address < window.ending)) {
+          window.holder.update(window.holder, address, value);
+        }
+      }
+    };
+
+  }
+
+  RAMWindow = function(holderObject, RAMbase, RAMLength) {
+    this.base = RAMbase;
+    this.ending = this.base + RAMLength;
+    this.holder = holderObject;
+//  trc ("RAMWindow ending", inHex (this.ending, 4),1);
+  };
+
+  function Register(called, size, n, cpuOwner, usebinary) {
+    this.bits = 8;
+    this.binary = '';
+    this.regValue = n;
+    this.regLabel = '';
+    this.regName = '';
+    this.cpu = cpuOwner;
+    this.notify = 0;
+    trc('Init Register called', called);
+    this.digGroups = function(s, count) {
+      var groups = [];
+      while (s.length >= count) {
+        groups.push(s.substr(0, count));
+        s = s.substr(count);
+      }
+      return groups;
+    };
+    this.toggleBit = function(bitNo) {
+      trc('toggleBit', bitNo);
+      this.change(this.regValue ^ (0x01 << bitNo), 1);
+      this.selectInput(null, 0);
+    };
+    this.selectInput = function(cell, cellno) {
+      trc('Hex cell select', cellno);
+      if (this.cpu.hexInputCell) {
+        this.cpu.hexInputCell.style.backgroundColor = '';
+      }
+      if (cell != this.cpu.hexInputCell) {
+        this.cpu.hexInputCell = cell;
+        this.cpu.hexInputCellNo = cellno;
+        this.cpu.hexInputRegister = this;
+        if (cell) {
+          cell.style.backgroundColor = '#20c020';
+        }
+      } else {
+        this.cpu.hexInputCell = null;
+      }
+    };
+    this.digitRow = function(t, c, l, notify, labelTop) {
+      var i, row, cell;
+      row = t.insertRow();
+      if (!labelTop) {
+        cell = row.insertCell();
+        cell.innerHTML = this.regLabel + '&nbsp;';
+        cell.className = 'reglabel';
+      }
+      for (i = 0; i < l; i++) {
+        cell = row.insertCell();
+        cell.setAttribute('name', this.regName);
+        cell.className = c;
+        if (this.binary.length > 1) {
+          cell.innerHTML = this.binary[i];
+          if (notify) {
+            trc('Notifiable binary cell', i);
+            (function(register, cellno) {
+              cell.onclick = function(cell) { register.toggleBit(cellno); };
+            }(this, l - i - 1));
+          }
+        } else {
+          cell.innerHTML = '-';
+          if (notify) {
+            (function(register, cell, cellno) {
+              cell.onclick = function(e) { register.selectInput(cell, cellno); };
+            }(this, cell, l - i - 1));
+          }
+        }
+      }
+    };
+    this.createHTML = function(calledp) {
+      var i, table, arow, acell, cells;
+      this.regLabel = called;
+      this.regName = 'reg' + called;
+      table = document.getElementById(this.regName);
+      cells = this.bits;
+      if (this.binary.length <= 1) {cells = cells / 4;}
+      if (this.binary) {
+        arow = table.insertRow();
+        acell = arow.insertCell();
+        acell.innerHTML = this.regLabel;
+        acell.setAttribute('colspan', cells);
+        acell.className = 'reglabel';
+      }
+      if (table != null) {
+        switch (this.binary) {
+          case '':
+            this.digitRow(table, 'anydig hex', cells, 1, 0);
+            break;
+          case 'Y':
+            this.digitRow(table, 'anydig hex big', cells, 1, 1);
+            this.digitRow(table, 'anydig bin', cells, 0, 1);
+            break;
+          default:
+            this.digitRow(table, 'anydig label', cells, 0, 1);
+            this.digitRow(table, 'anydig flag', cells, 1, 1);
+            break;
+        }
+        ;
+      }
+    };
+    this.refresh = function(force) {
+      var w, i, cells, sBinary, sHex, sFlags;
+      if (!(this.cpu.refreshOn || force)) {return;}
+      w = this.regValue & 0xffff;
+      sBinary = this.digGroups(inBinary(w, this.bits), 4);
+      sFlags = this.digGroups(inBinary(w, this.bits), 1);
+      sHex = this.digGroups(inHex(w, this.bits / 4), 1);
+//    trc ("Register refresh", this.regName);
+      document.getElementsByName(this.regName).forEach((element) => {
+        switch (element.className) {
+          case 'anydig hex':
+          case 'anydig hex big':
+            element.innerHTML = sHex.shift();
+            break;
+          case 'anydig bin':
+            element.innerHTML = sBinary.shift();
+            break;
+          case 'anydig flag':
+            element.innerHTML = sFlags.shift();
+            break;
+        }
+      });
+    };
+    this.update = function(n) {
+      this.setValue(n);
+      this.refresh();
+    };
+    this.change = function(n, force) {
+//    trc ("Change ", inHex (n));
+      this.regValue = n;
+      this.refresh(force);
+      if (this.notify) {
+        this.cpu.notify(this.regName, force);
+      }
+    };
+    this.setValue = function(n) {
+      var mask;
+      switch (this.bits) {
+        case 8:
+          mask = 0xff;
+          break;
+        case 16:
+          mask = 0xffff;
+          break;
+      }
+      this.regValue = n & mask;
+    };
+    this.setbits = function(size) {
+      if ((size == 8) || (size == 16)) {this.bits = size;}
+    };
+    this.setbinary = function(b) {
+      if ((b == '') || (b == 'Y') || (b.length == this.bits)) {
+        this.binary = b;
+      }
+    };
+    this.inputHex = function(cpuCaller, hexValue) {
+      var mask;
+      trc('inputHex', hexValue);
+      if (cpuCaller.hexInputCell) {
+        mask = (0x000f << (cpuCaller.hexInputCellNo * 4)) ^ 0xffff;
+        cpuCaller.hexInputRegister.change(
+            (cpuCaller.hexInputRegister.regValue & mask) | (hexValue << (cpuCaller.hexInputCellNo * 4)), 1);
+        if (cpuCaller.hexInputCellNo > 0) {
+          cpuCaller.hexInputRegister.selectInput(cpuCaller.hexInputCell.nextSibling, cpuCaller.hexInputCellNo - 1);
+        } else {
+          cpuCaller.hexInputRegister.selectInput(null, 0);
+        }
+      }
+    };
+    this.setbits(size);
+    this.setValue(n);
+    this.setbinary(usebinary);
+    this.createHTML(called);
+  };
+
+  function ALU816(cpu) {
+    this.r1 = 0;
+    this.r2 = 0;
+    this.ea = 0;
+    this.eaLast = 0;
+    this.notick = 0;
+    this.quit = 0;
+    this.indexReg = '';
+    this.indexInc = 0;
+    this.indexBase = 0;
+    this.syncing = 0;
+    this.waiting = 0;
+    this.condition = 0;
+    this.nextPage = 0;
+    this.regs = cpu.registers;
+    this.cpu = cpu;
+    this.iLines = {'irq': 0, 'firq': 0, 'nmi': 0, 'reset': 0};
+    this.execute = function(microcode) {
+      var i, ops, matches, operation, operand;
+      this.notick = 0;
+      this.quit = 0;
+      i = 0;
+      this.nextPage = 0;
+      ops = microcode.split(';');
+      while ((i < ops.length) && (this.quit == 0)) {
+//      trc ("ops[i] ("+i+")", ops[i], 1);
+        if (matches = /(\w+)(\s*)(\w*)/.exec(ops[i])) {
+          operation = matches[1];
+          if (matches.length > 2) {
+            operand = matches[3];
+          }
+          this[operation](operand);
+        } else {
+          trc('Operation unknown', ops[i] + ' in ' + microcode, 1);
+        }
+        i++;
+      }
+      if (this.notick == 0) {
+        this.cpu.registers['regPC'].refresh();
+      }
+      this.cpu.opPage = this.nextPage;
+    };
+    this.interrupt = function(irqName) {
+      trc('ALU interrupt', irqName);
+      if (irqName in this.iLines) {
+        trc('set iLine', irqName);
+        this.iLines[irqName] = 1;
+      }
+    };
+    this.checkInterrupts = function() {
+//    trc ("checkInterrupts", 0);
+      if (this.iLines['reset']) {
+        this.syncing = 0;
+        this.waiting = 1;
+        trc('found interrupt', 'reset');
+        this.serviceInterrupt(0, 0xfffe, 'FI');
+        this.iLines['reset'] = 0;
+      }
+      if (this.iLines['nmi']) {
+        this.syncing = 0;
+        trc('found interrupt', 'nmi');
+        this.serviceInterrupt(1, 0xfffc, 'FI');
+        this.iLines['nmi'] = 0;
+      }
+      if (this.iLines['firq']) {
+        this.syncing = 0;
+        this.iLines['firq'] = 0;
+        if (!this.cpu.flagCheck('F')) {
+          trc('found interrupt', 'firq');
+          this.serviceInterrupt(0, 0xfff6, 'FI');
+        }
+      }
+      if (this.iLines['irq']) {
+        this.syncing = 0;
+        this.iLines['irq'] = 0;
+        if (!this.cpu.flagCheck('I')) {
+          trc('found interrupt', 'irq');
+          this.serviceInterrupt(1, 0xfff8, 'FI');
+        }
+      }
+    };
+    this.swi = function(operand) {
+      switch (operand) {
+        case '1':
+          this.serviceInterrupt(1, 0xfffa, 'FI');
+          break;
+        case '2':
+          this.serviceInterrupt(1, 0xfff4, '');
+          break;
+        case '3':
+          this.serviceInterrupt(1, 0xfff2, '');
+          break;
+      }
+
+    };
+    this.serviceInterrupt = function(entire, vector, flags) {
+      trc('serviceInterrupt', inHex(vector, 4));
+      if (!this.waiting) {
+        if (entire) {
+          this.cpu.flags('E');
+          trc('Interrupt push CC value', inHex(this.cpu.registers['regCC'].regValue));
+          this.pushPostByte('regS', 0xFF);
+        } else {
+          this.cpu.flags('e');
+          this.pushPostByte('regS', 0x81);
+        }
+      } else {
+        this.waiting = 0;
+      }
+      this.cpu.flags(flags);
+      this.ea = vector;
+      this.ftch16();
+      machineOrg(this.r1, 0);
+    };
+    this.chk = function(operand) {
+      var cc = this.cpu.registers['regCC'].regValue;
+      this.condition = 0;
+//    trc ("chk CC",cc);
+//    trc ("chk operand",operand);
+      switch (operand) {
+        case 'Z':
+//        trc ("Zero",this.cpu.flagBits.Z);
+          if (cc & this.cpu.flagBits.Z) {this.condition = 1;}
+          break;
+        case 'C':
+//        trc ("Carry",this.cpu.flagBits.C);
+          if (cc & this.cpu.flagBits.C) {this.condition = 1;}
+          break;
+        case 'N':
+//        trc ("Negative",this.cpu.flagBits.N);
+          if (cc & this.cpu.flagBits.N) {this.condition = 1;}
+          break;
+        case 'V':
+//        trc ("Overflow",this.cpu.flagBits.N);
+          if (cc & this.cpu.flagBits.V) {this.condition = 1;}
+          break;
+        case 'LS':
+//        trc ("LS",this.cpu.flagBits.C);
+          if ((cc & this.cpu.flagBits.C) || (cc & this.cpu.flagBits.Z)) {this.condition = 1;}
+          break;
+        case 'LT':
+//        trc ("LT",this.cpu.flagBits.C);
+          if ((cc & this.cpu.flagBits.V) != (cc & this.cpu.flagBits.N)) {this.condition = 1;}
+          break;
+        case 'LE':
+//        trc ("LE",this.cpu.flagBits.C);
+          if ((cc & this.cpu.flagBits.Z) ||
+              ((cc & this.cpu.flagBits.V) != (cc & this.cpu.flagBits.N))) {this.condition = 1;}
+          break;
+      }
+//    trc ("Chk result",this.condition);
+    };
+    this.sync = function() {
+      this.syncing = 1;
+    };
+    this.exx = function() {
+      var r = this.r1;
+      this.r1 = this.r2;
+      this.r2 = r;
+    };
+    this.mnus = function() {
+      this.r1 = this.cpu.ram.wrap(this.r1 - 1);
+    };
+    this.qt = function() {
+      if (this.condition != 0) {this.quit = 1;}
+    };
+    this.qf = function() {
+      if (this.condition == 0) {this.quit = 1;}
+    };
+    this.ld = function(operand) {
+      if (operand == 'regD') {
+        return (this.regs['regA'].regValue << 8) | this.regs['regB'].regValue;
+      } else {
+        return this.regs[operand].regValue;
+      }
+    };
+    this.ld1 = function(operand) {
+      this.r1 = this.ld(operand);
+    };
+    this.ld2 = function(operand) {
+      this.r2 = this.ld(operand);
+    };
+    this.st = function(operand, value) {
+//    trc ("ST operand",operand);
+//    trc ("ST value",value);
+      if (operand == 'regD') {
+        this.regs['regA'].change(value >>> 8, 0);
+        this.regs['regB'].change(value & 0xff, 0);
+      } else {
+        this.regs[operand].change(value, 0);
+      }
+    };
+    this.st1 = function(operand) {
+      this.st(operand, this.r1);
+    };
+    this.st2 = function(operand) {
+      this.st(operand, this.r2);
+    };
+    this.regPairRead = function(nybble) {
+      var w = this.ld(pairRegsToText[nybble]);
+      if (nybble & 0x08) {
+        w = w | (w << 8);
+      }
+      return w;
+    };
+    this.regPairWrite = function(nybble, value) {
+      var w = value;
+      if (nybble & 0x08) {
+        w = w & 0xff;
+      }
+      this.st(pairRegsToText[nybble], w);
+    };
+    this.rgop = function(operand) {
+      this.pcb();
+      var hn = this.r1 >>> 4;
+      var ln = this.r1 & 0x0f;
+      this.r1 = this.regPairRead(hn);
+      this.r2 = this.regPairRead(ln);
+      switch (operand) {
+        case 'tfr':
+          this.regPairWrite(ln, this.r1);
+          break;
+        case 'exg':
+          this.regPairWrite(ln, this.r1);
+          this.regPairWrite(hn, this.r2);
+          break;
+      }
+    };
+    this.stck16 = function(operand) {
+      var w = this.regs[operand].regValue;
+      var s = this.regs['regS'].regValue;
+//    trc ("STCK16 (s='"+inHex(s,4)+"'",w);
+      s = this.cpu.ram.wrap(s - 1);
+      this.cpu.ram.poke(s, w);
+      s = this.cpu.ram.wrap(s - 1);
+      this.cpu.ram.poke(s, w >>> 8);
+      this.regs['regS'].change(s, 0);
+    };
+    this.wait = function() {
+      this.regs['regCC'].change(this.r1 | this.cpu.flagBits['E'], 0);
+      trc('Wait PC', inHex(this.regs['regPC'].regValue, 4));
+      this.pushPostByte('regS', 0xff);
+      this.waiting = 1;
+    };
+    this.push = function(operand) {
+      this.pcb();
+      this.pushPostByte(operand, this.r1);
+    };
+    this.pushPostByte = function(operand, postByte) {
+      var regValue;
+      var stack = this.regs[operand].regValue;
+      var regList = (operand == 'regS') ? fullRegsToTextS : fullRegsToTextU;
+      var postByteMask = 0x80;
+      var i = 8;
+//    trc ("Push postbyte", postByte);
+      while (postByteMask > 0) {
+        i--;
+        if (postByte & postByteMask) {
+          regValue = this.regs[regList[i]].regValue;
+//        trc ("Push register '"+regList[i]+"'",inHex (regValue,4));
+          stack = this.cpu.ram.wrap(stack - 1);
+          this.cpu.ram.poke(stack, regValue);
+          if (i >= 4) {
+            stack = this.cpu.ram.wrap(stack - 1);
+            this.cpu.ram.poke(stack, regValue >>> 8);
+          }
+        }
+        postByteMask >>>= 1;
+      }
+      this.regs[operand].change(stack, 0);
+      this.eaLast = stack;
+    };
+    this.rti = function() {
+      this.pullPostByte('regS', fullRegsToValue['CC']);
+      trc('RTI cc value', inHex(this.cpu.registers['regCC'].regValue, 2));
+      if (this.cpu.flagCheck('E')) {
+        this.pullPostByte('regS', 0xff ^ fullRegsToValue['CC']);
+      } else {
+        this.pullPostByte('regS', fullRegsToValue['PC']);
+      }
+    };
+    this.pull = function(operand) {
+      this.pcb();
+      this.pullPostByte(operand, this.r1);
+    };
+    this.pullPostByte = function(operand, postByte) {
+      var regValue;
+      var stack = this.regs[operand].regValue;
+      var regList = (operand == 'regS') ? fullRegsToTextS : fullRegsToTextU;
+      var postByteMask = 0x01;
+      var i = 0;
+//    trc ("Pull postbyte", postByte);
+      this.eaLast = stack;
+      while (postByteMask > 0) {
+        if (postByte & postByteMask) {
+//        trc ("Pull register",regList[i]);
+          if (i >= 4) {
+            regValue = this.cpu.ram.peek(stack) << 8;
+            stack = this.cpu.ram.wrap(stack + 1);
+          } else {regValue = 0;}
+          regValue |= this.cpu.ram.peek(stack);
+          stack = this.cpu.ram.wrap(stack + 1);
+          this.regs[regList[i]].change(regValue, 0);
+        }
+        i++;
+        postByteMask = (postByteMask << 1) & 0xff;
+      }
+      this.regs[operand].change(stack, 0);
+    };
+    this.page = function(operand) {
+      this.nextPage = operand;
+    };
+    this.nop = function() {
+    };
+    this.err = function() {
+    };
+    this.or8 = function() {
+      var f = 'v';
+      this.r1 = this.r1 | this.r2;
+      this.cpu.flags(f + (this.r1 ? 'z' : 'Z') + ((this.r1 & 0x80) ? 'N' : 'n'));
+    };
+    this.clr8 = function() {
+      this.r1 = 0;
+      this.cpu.flags('nZvc');
+    };
+    this.tst8 = function() {
+      var f = 'v';
+      this.cpu.flags(f + (this.r1 ? 'z' : 'Z') + ((this.r1 & 0x80) ? 'N' : 'n'));
+    };
+    this.and8 = function() {
+      var f = 'v';
+      this.r1 = (this.r2 & this.r1) & 0xff;
+      this.cpu.flags(f + (this.r1 ? 'z' : 'Z') + ((this.r1 & 0x80) ? 'N' : 'n'));
+    };
+    this.eor8 = function() {
+      var f = 'v';
+      this.r1 = (this.r2 ^ this.r1) & 0xff;
+      this.cpu.flags(f + (this.r1 ? 'z' : 'Z') + ((this.r1 & 0x80) ? 'N' : 'n'));
+    };
+    this.or8 = function() {
+      var f = 'v';
+      this.r1 = (this.r2 | this.r1) & 0xff;
+      this.cpu.flags(f + (this.r1 ? 'z' : 'Z') + ((this.r1 & 0x80) ? 'N' : 'n'));
+    };
+    this.sub8 = function() {
+      // set high bit IFF signs of operand differ;
+      var mask = (this.r2 ^ this.r1);
+      var result = this.r2 - this.r1;
+      var f = (mask & (this.r2 ^ result)) & 0x80 ? 'V' : 'v';
+      this.r1 = result & 0xff;
+      this.cpu.flags(f + (this.r1 ? 'z' : 'Z') + ((this.r1 & 0x80) ? 'N' : 'n') + ((result & 0x100) ? 'C' : 'c'));
+    };
+    this.sub16 = function() {
+      // set high bit IFF signs of operand differ;
+      var mask = (this.r2 ^ this.r1);
+      var result = this.r2 - this.r1;
+      var f = (mask & (this.r2 ^ result)) & 0x8000 ? 'V' : 'v';
+      this.r1 = result & 0xffff;
+      this.cpu.flags(f + (this.r1 ? 'z' : 'Z') + ((this.r1 & 0x8000) ? 'N' : 'n') + ((result & 0x10000) ? 'C' : 'c'));
+    };
+    this.sbc8 = function() {
+      var mask = (this.r2 ^ this.r1) ^ 0x80;
+      var result = this.r2 - this.r1 - (this.cpu.flagCheck('C') ? 1 : 0);
+      var f = (mask & (this.r2 ^ result)) & 0x80 ? 'V' : 'v';
+      this.r1 = result & 0xff;
+      this.cpu.flags(f + (this.r1 ? 'z' : 'Z') + ((this.r1 & 0x80) ? 'N' : 'n') + ((result & 0x100) ? 'C' : 'c'));
+    };
+    this.add8 = function() {
+      // set high bit IFF signs of operand the same;
+      var mask = (this.r2 ^ this.r1) ^ 0x80;
+      var result = this.r2 + this.r1;
+      var f = ((this.r2 & 0x0f) + (this.r1 & 0x0f) >= 0x10) ? 'H' : 'h';
+      // set overflow IFF signs of original and result differ, and mask bit set;
+      f += (mask & (this.r2 ^ result)) & 0x80 ? 'V' : 'v';
+      this.r1 = result & 0xff;
+      this.cpu.flags(f + (this.r1 ? 'z' : 'Z') + ((this.r1 & 0x80) ? 'N' : 'n') + ((result & 0x100) ? 'C' : 'c'));
+    };
+    this.add16 = function() {
+      // set high bit IFF signs of operand the same;
+      var mask = (this.r2 ^ this.r1) ^ 0x8000;
+      var result = this.r2 + this.r1;
+      // set overflow IFF signs of original and result differ, and mask bit set;
+      var f = (mask & (this.r2 ^ result)) & 0x8000 ? 'V' : 'v';
+      this.r1 = result & 0xffff;
+      this.cpu.flags(f + (this.r1 ? 'z' : 'Z') + ((this.r1 & 0x8000) ? 'N' : 'n') + ((result & 0x10000) ? 'C' : 'c'));
+    };
+    this.adc8 = function() {
+      var mask = (this.r2 ^ this.r1) ^ 0x80;
+      var result = this.r2 + this.r1 + (this.cpu.flagCheck('C') ? 1 : 0);
+      var f = (mask & (this.r2 ^ result)) & 0x80 ? 'V' : 'v';
+      this.r1 = result & 0xff;
+      this.cpu.flags(f + (this.r1 ? 'z' : 'Z') + ((this.r1 & 0x80) ? 'N' : 'n') + ((result & 0x100) ? 'C' : 'c'));
+    };
+    this.mul = function() {
+      var product = (this.regs['regA'].regValue & 0xff) * (this.regs['regB'].regValue & 0xff);
+      var f = (product & 0x80) ? 'C' : 'c';
+      this.regs['regA'].change(product >>> 8, 0);
+      this.regs['regB'].change(product & 0xff, 0);
+      this.cpu.flags(f + (product ? 'z' : 'Z'));
+    };
+    this.abx = function() {
+      this.regs['regX'].change((this.regs['regX'].regValue + this.regs['regB'].regValue) & 0xffff, 0);
+    };
+    this.zero = function() {
+      this.cpu.flags(this.r1 ? 'z' : 'Z');
+    };
+    this.tst16 = function() {
+      var f = 'v';
+      this.cpu.flags(f + (this.r1 ? 'z' : 'Z') + ((this.r1 & 0x8000) ? 'N' : 'n'));
+    };
+    this.inc8 = function() {
+      var f = (this.r1 == 127) ? 'V' : 'v';
+      this.r1 = (this.r1 + 1) & 0xff;
+      this.cpu.flags(f + (this.r1 ? 'z' : 'Z') + ((this.r1 & 0x80) ? 'N' : 'n'));
+    };
+    this.dec8 = function() {
+      var f = (this.r1 == 0x80) ? 'V' : 'v';
+      this.r1 = (this.r1 - 1) & 0xff;
+      this.cpu.flags(f + (this.r1 ? 'z' : 'Z') + ((this.r1 & 0x80) ? 'N' : 'n'));
+    };
+    this.neg8 = function() {
+      var f = (this.r1 ? 'C' : 'c') + ((this.r1 == 0x80) ? 'V' : 'v');
+      this.r1 = (0x100 - this.r1) & 0xff;
+      this.cpu.flags(f + (this.r1 ? 'z' : 'Z') + ((this.r1 & 0x80) ? 'N' : 'n'));
+    };
+    this.com8 = function() {
+      var f = 'vC';
+      this.r1 = (this.r1 ^ 0xff) & 0xff;
+      this.cpu.flags(f + (this.r1 ? 'z' : 'Z') + ((this.r1 & 0x80) ? 'N' : 'n'));
+    };
+    this.lsr8 = function() {
+      var f = 'n' + ((this.r1 & 0x01) ? 'C' : 'c');
+      this.r1 = (this.r1 >>> 1) & 0xff;
+      this.cpu.flags(f + (this.r1 ? 'z' : 'Z'));
+    };
+    this.ror8 = function() {
+      var f = 'n' + ((this.r1 & 0x01) ? 'C' : 'c');
+      var carry = this.cpu.flagCheck('C') ? 0x80 : 0;
+      this.r1 = ((this.r1 >>> 1) | carry) & 0xff;
+      this.cpu.flags(f + (this.r1 ? 'z' : 'Z'));
+    };
+    this.asr8 = function() {
+      var f = (this.r1 & 0x01) ? 'C' : 'c';
+      var sign = this.r1 & 0x80;
+      this.r1 = ((this.r1 >>> 1) | sign) & 0xff;
+      this.cpu.flags(f + (this.r1 ? 'z' : 'Z') + ((this.r1 & 0x80) ? 'N' : 'n'));
+    };
+    this.lsl8 = function() {
+      var sign = this.r1 & 0x80;
+      var f = sign ? 'C' : 'c';
+      this.r1 = (this.r1 << 1) & 0xff;
+      this.cpu.flags(
+          f + (((this.r1 & 0x80) != sign) ? 'V' : 'v') + (this.r1 ? 'z' : 'Z') + ((this.r1 & 0x80) ? 'N' : 'n'));
+    };
+    this.rol8 = function() {
+      var sign = this.r1 & 0x80;
+      var carry = this.cpu.flagCheck('C') ? 0x01 : 0;
+      var f = sign ? 'C' : 'c';
+      this.r1 = ((this.r1 << 1) | carry) & 0xff;
+      this.cpu.flags(
+          f + (((this.r1 & 0x80) != sign) ? 'V' : 'v') + (this.r1 ? 'z' : 'Z') + ((this.r1 & 0x80) ? 'N' : 'n'));
+    };
+    this.sx = function() {
+      // sign extend r1
+      this.r1 &= 0xff;
+      this.r1 |= (this.r1 & 0x80) ? 0xff00 : 0;
+    };
+    this.shft = function() {
+      // shift high byte to low byte of r1
+      this.r1 = this.r1 >>> 8;
+      var f = this.r1 ? 'z' : 'Z';
+      this.cpu.flags(f + ((this.r1 & 0x80) ? 'N' : 'n'));
+    };
+    this.daa = function() {
+      var f;
+      var b = this.regs['regA'].regValue;
+      trc('DAA b', b);
+      var hn = b >>> 4;
+      var ln = b & 0x0f;
+      trc('DAA ln', ln);
+      if (this.cpu.flagCheck('C') || (hn > 9) || ((hn > 8) && (ln > 9))) {
+        hn += 6;
+      }
+      if (this.cpu.flagCheck('H') || (ln > 9)) {
+        ln += 6;
+        hn += 1;
+      }
+      f = (hn & 0x10) ? 'C' : 'c';
+      b = ((hn & 0x0f) << 4) | (ln & 0x0f);
+      this.regs['regA'].change(b, 0);
+      this.cpu.flags(f + (b ? 'z' : 'Z') + ((b & 0x80) ? 'N' : 'n'));
+    };
+    this.indx = function() {
+// process indexing post byte, leaving effective address in EA, index register in indexReg, auto-increment in indexInc
+      var offset = 0;
+      var indirect = 0;
+      this.indexReg = '';
+      this.indexInc = 0;
+      this.indexBase = 0;
+      this.pcb();
+//    trc ("Index postbyte",inHex(this.r1,2));
+// find index register name
+      switch ((this.r1 & 0x60) >>> 5) {
+        case 0:
+          this.indexReg = 'regX';
+          break;
+        case 1:
+          this.indexReg = 'regY';
+          break;
+        case 2:
+          this.indexReg = 'regU';
+          break;
+        case 3:
+          this.indexReg = 'regS';
+          break;
+      }
+// extract 5 bit offset
+      if (!(this.r1 & 0x80)) {
+        offset = (this.r1 & 0x10) ? (this.r1 & 0x0f) - 0x10 : (this.r1 & 0x0f);
+      } else {
+        indirect = this.r1 & 0x10;
+        switch (this.r1 & 0x0f) {
+          case 0x00:
+            this.indexInc = 1;
+            break;
+          case 0x01:
+            this.indexInc = 2;
+            break;
+          case 0x02:
+            this.indexInc = -1;
+            break;
+          case 0x03:
+            this.indexInc = -2;
+            break;
+          case 0x04:
+            break;
+          case 0x05:
+            offset = signed8(this.regs['regB'].regValue);
+            break;
+          case 0x06:
+            offset = signed8(this.regs['regA'].regValue);
+            break;
+          case 0x07:
+            break;
+          case 0x08:
+            this.pcb();
+            offset = signed8(this.r1);
+            break;
+          case 0x09:
+            this.pcw();
+            offset = signed16(this.r1);
+            break;
+          case 0x0A:
+            break;
+          case 0x0B:
+            offset = signed16(this.ld('regD'));
+            break;
+          case 0x0C:
+            this.indexReg = 'regPC';
+            this.pcb();
+            offset = signed8(this.r1);
+            break;
+          case 0x0D:
+            this.indexReg = 'regPC';
+            this.pcw();
+            offset = signed16(this.r1);
+            break;
+          case 0x0E:
+            break;
+          case 0X0F:
+            this.indexReg = '';
+            this.pcw();
+            offset = signed16(this.r1);
+            break;
+        }
+      }
+      if (this.indexReg) {
+//      trc ("Index postbyte regname",this.indexReg);
+        this.indexBase = this.regs[this.indexReg].regValue;
+//        trc ("Index postbyte reg",this.indexBase);
+// perform pre-decrement, leave post-increment for later
+        if (this.indexInc < 0) {
+          this.indexBase += this.indexInc;
+          this.regs[this.indexReg].change(this.indexBase & 0xffff, 0);
+        }
+      }
+      this.ea = this.indexBase + offset;
+      if (indirect) {
+        trc('Indirection from', inHex(this.ea, 4));
+        this.ftch16(this.ea);
+        this.ea = this.r1;
+        trc('Indirection ea', inHex(this.ea, 4));
+      }
+//    trc ("indexInc",this.indexInc);
+    };
+    this.idxu = function() {
+//    trc ("Index update",this.indexInc);
+//    trc ("Index update",this.indexBase);
+      if (this.indexInc > 0) {
+        this.regs[this.indexReg].change((this.indexBase + this.indexInc) & 0xffff, 0);
+      }
+    };
+    this.pcb = function() {
+      // read byte from PC+ to r1, leaving updated PC in ea
+      this.ea = this.regs['regPC'].regValue;
+//    trc ("PCB ea", inHex (this.ea));
+      this.r1 = this.cpu.ram.peek(this.ea);
+//    trc ("PCB r1", inHex (this.r1));
+      this.ea = this.cpu.ram.wrap(this.ea + 1);
+      this.regs['regPC'].setValue(this.ea);
+    };
+    this.pcw = function() {
+      // read word from PC++ to r1, leaving updated PC in ea
+      this.ea = this.regs['regPC'].regValue;
+//    trc ("PCW ea", inHex (this.ea));
+      this.r1 = this.cpu.ram.peek(this.ea);
+      this.ea = this.cpu.ram.wrap(this.ea + 1);
+      this.r1 = (this.r1 << 8) + this.cpu.ram.peek(this.ea);
+//    trc ("PCW r1", inHex (this.r1));
+      this.ea = this.cpu.ram.wrap(this.ea + 1);
+      this.regs['regPC'].setValue(this.ea);
+    };
+    this.rel8 = function() {
+      // find address via 8 bit PCR and leave in r1
+      this.pcb();
+      this.r1 |= this.r1 & 0x80 ? 0xff00 : 0;
+      this.r1 = this.cpu.ram.wrap(this.ea + this.r1);
+    };
+    this.rel16 = function() {
+      // find address via 16 bit PCR and leave in r1
+      this.pcw();
+      this.r1 = this.cpu.ram.wrap(this.ea + this.r1);
+    };
+    this.drct = function() {
+      // set ea via direct addressing
+      this.pcb();
+      this.ea = (this.regs['regDP'].regValue << 8) + this.r1;
+    };
+    this.ea1 = function() {
+      this.r1 = this.ea;
+    };
+    this.ea2 = function() {
+      this.r2 = this.ea;
+    };
+    this.xtnd = function() {
+      // set ea via extended addressing
+      this.pcw();
+      this.ea = this.r1;
+    };
+    this.pull8 = function(operand) {
+      this.ea = this.regs[operand].regValue;
+      this.r1 = this.cpu.ram.peek(this.ea);
+      this.regs[operand].change(this.cpu.ram.wrap(this.ea + 1), 0);
+    };
+    this.pull16 = function(operand) {
+      this.ea = this.regs[operand].regValue;
+      this.r1 = (this.cpu.ram.peek(this.ea) << 8) | (this.cpu.ram.peek(this.cpu.ram.wrap(this.ea + 1)));
+      this.regs[operand].change(this.cpu.ram.wrap(this.ea + 2), 0);
+    };
+    this.ftch8 = function() {
+      this.eaLast = this.ea;
+      this.r1 = this.cpu.ram.peek(this.ea);
+    };
+    this.ftch16 = function() {
+      this.eaLast = this.ea;
+      this.r1 = (this.cpu.ram.peek(this.ea) << 8) + this.cpu.ram.peek(this.cpu.ram.wrap(this.ea + 1));
+    };
+    this.stor8 = function() {
+      this.eaLast = this.ea;
+      this.cpu.ram.poke(this.ea, this.r1);
+    };
+    this.stor16 = function() {
+      this.eaLast = this.ea;
+      this.cpu.ram.poke(this.ea, this.r1 >>> 8);
+      this.cpu.ram.poke(this.cpu.ram.wrap(this.ea + 1), this.r1);
+    };
+    this.r1ea = function() {
+      this.ea = this.r1;
+    };
+//  this.adda=function () {
+//    this.r1=this.cpu.ram.wrap (this.r1+this.ea);
+//    trc ("ADDA", inHex (this.r1,4));
+//  }
+    this.ntck = function() {
+      this.notick = 1;
+    };
+  };
+
+  function watchWindow(id, cpuOwner, firstAddress) {
+    this.table = null;
+    this.cpu = cpuOwner;
+    this.lastWatch = null;
+    this.update = function(holder, address, value) {
+      trc('Watchwindow update', inHex(address, 4));
+      if (!this.cpu.refreshOn) {return;}
+      var row;
+      var base = this.cpu.ram.wrap(address & 0xfff0);
+      var baseText = inHex(base, 4);
+      var rowNo = 0;
+//    trc ('watch update address', inHex (address, 4),1);
+      while (rowNo < this.table.rows.length) {
+        row = this.table.rows[rowNo];
+        if (row.cells[1].innerText == baseText) {
+          this.setHex(row, base);
+        }
+        rowNo++;
+      }
+//    this.table.rows.length
+    };
+    this.refresh = function(force) {
+      var i;
+      if (!(this.cpu.refreshOn || force)) {return;}
+//    trc ("watchwindow refresh this", this, 1);
+//    console.dir (this);
+      for (i = 0; i < this.table.rows.length; i++) {
+//      trc ('watchWindow refresh row', i,1);
+//      trc ('address',this.table.rows[i].cells[1].innerText,1);
+        this.setHex(this.table.rows[i], parseInt('0x' + this.table.rows[i].cells[1].innerText));
+      }
+    };
+    this.createTable = function(tableId) {
+      var container;
+      if (container = document.getElementById(tableId + '-container')) {
+        trc('Found container', tableId);
+        this.table = document.createElement('table');
+        this.table.setAttribute('id', tableId);
+        this.table.className = 'watchWindow';
+        container.appendChild(this.table);
+      }
+    };
+    this.setHex = function(row, base) {
+      var i;
+      var bytes = '';
+      for (i = 0; i < 0x10; i++) {
+        row.cells[i + 2].innerText = inHex(this.cpu.ram.peek(base + i), 2);
+      }
+    };
+    this.addWatch = function(address) {
+      var base, i;
+      var hexCells = [];
+      var newRow = this.table.insertRow();
+      var offCell = newRow.insertCell();
+      var addrCell = newRow.insertCell();
+      var cpuOwner = this.cpu;
+      trc('addWatch', 0);
+      for (i = 0; i < 0x10; i++) {
+        hexCells[i] = newRow.insertCell();
+        hexCells[i].className = 'watchHex';
+        (function(ram, cellNo, register) {
+          hexCells[cellNo].onclick = function(event) {
+            hexCells[cellNo].innerText = inHex(register.regValue, 2);
+            ram.poke(base + cellNo, register.regValue);
+          };
+        })(this.cpu.ram, i, this.cpu.registers['regA']);
+        (function(ram, cellNo, register) {
+          hexCells[cellNo].oncontextmenu = function(event) {
+            event.preventDefault();
+            hexCells[cellNo].innerText = inHex(register.regValue, 2);
+            ram.poke(base + cellNo, register.regValue);
+            return false;
+          };
+        })(this.cpu.ram, i, this.cpu.registers['regB']);
+      }
+
+      function removeWatch(row) {
+        trc('removeWatch ', row.cells[1].innerText);
+        cpuOwner.ram.removeWindow(parseInt(row.cells[1].innerText, 16), 0x10);
+        row.parentNode.removeChild(row);
+      }
+
+      offCell.className = 'watchControl';
+      offCell.innerHTML = '&#x2718;';
+      offCell.onclick = function(event) { removeWatch(event.target.parentNode); };
+      addrCell.className = 'watchAddr';
+      base = this.cpu.ram.wrap(address & 0xfff0);
+      addrCell.innerText = inHex(base, 4);
+      this.setHex(newRow, base);
+      this.cpu.ram.addWindow(this, base, 0x10);
+//    trc ("addwatch base",inHex(base,4),1);
+      this.lastWatch = base;
+    };
+    this.createTable(id);
+    this.addWatch(firstAddress);
+  }
+
+  function labelList(id, cpuOwner) {
+    this.cpu = cpuOwner;
+    this.list = null;
+    this.createList = function(listId) {
+      var container;
+      trc('labeList id', listId);
+      if (container = document.getElementById(listId + '-container')) {
+        trc('LabelList container', '');
+        this.list = document.createElement('select');
+//      this.list.setAttribute ('id', 'listId');
+//      this.list.setAttribute ('id', listId);
+        this.list.setAttribute('size', '30');
+//      this.list.style='flex-grow: 1';
+        this.list.className = 'labelsContainer';
+        container.appendChild(this.list);
+      }
+    };
+    this.fill = function(labels) {
+      var label, option;
+      trc('Labels fill', 0);
+//    console.log (labels);
+      for (label in labels) {
+        option = document.createElement('option');
+//      option=new Option (label, 1);
+        option.text = label;
+        option.value = 1;
+//      option.innerText=label;
+//      option.appendChild(document.createTextNode(label));
+        trc('Label: ', label);
+        option.className = 'labelList';
+        (function(cpuOwner, optLabel) {
+          option.onclick = function(event) {
+//          cpuOwner.dsmTable.lineOff ();
+            trc('reloadtable call label \'' + optLabel + '\' value', labels[optLabel]);
+            cpuOwner.dsmTable.reloadTable(labels[optLabel]);
+            cpuOwner.dsmTable.lineOn(cpuOwner.registers['regPC'].regValue, true, true);
+          };
+        }(this.cpu, label));
+        this.list.add(option);
+      }
+    };
+    this.empty = function() {
+      while (this.list.length > 0) {
+        this.list.remove(this.list.length - 1);
+      }
+    };
+    this.createList(id);
+  }
+
+  function DSMWindow(id, cpu, rows) {
+    this.lineMap = [];
+    this.lineHi = null;
+    this.table = null;
+    this.cpuOwner = cpu;
+    this.rowCount = rows;
+    this.editContents = null;
+    this.baseAddress = 0;
+    this.codeLength = 0;
+    this.watch = null;
+    this.createTable = function(tableId) {
+      var newRow, container, rowNo;
+
+      function newCell(thisRow, cellClass, content) {
+        var cell = thisRow.insertCell();
+        cell.className = cellClass;
+        cell.innerHTML = content;
+//      console.dir (cell);
+      }
+
+      trc('createTable tableId', tableId);
+      if (container = document.getElementById(tableId + '-container')) {
+        trc('Found container, rows', this.rowCount);
+        this.table = document.createElement('table');
+        this.table.setAttribute('id', 'tableId');
+        this.table.style.backgroundColor = 'black';
+        this.table.className = 'DSM';
+        for (rowNo = 1; rowNo <= this.rowCount; rowNo++) {
+          trc('newRow', rowNo);
+          newRow = this.table.insertRow();
+          newCell(newRow, 'DSM ADDR', 'addr &nbsp;');
+          newCell(newRow, 'DSM BYTES', 'bytes &nbsp;');
+          newCell(newRow, 'DSM MNEM', 'mnem &nbsp;');
+        }
+        container.appendChild(this.table);
+      }
+    };
+    this.setRow = function(rowNo, code, cpu) {
+      var row, address, bytes, mnemonic;
+
+      function jump(event) {
+        event.preventDefault();
+        if (!cpu.cellEditing) {
+          cpu.closeEdit(false);
+          cpu.jumpTo(cpu, code.address);
+        }
+        return false;
+      }
+
+//    trc ("setRow", rowNo);
+      if (this.table && (rowNo < this.table.rows.length)) {
+        row = this.table.rows[rowNo];
+        bytes = '';
+        if (code) {
+          this.lineMap[code.address] = row;
+//        row.onclick=function (event) { cpu.closeEdit (false); cpu.jumpTo (cpu, code.address) }
+          address = inHex(code.address, 4) + ':';
+//        trc ("Setting dsm table address",inHex (address,4));
+          for (i = 0; i < code.maxInstructionLength; i++) {
+            if (i < code.bytes.length) {
+              bytes += inHex(code.bytes[i], 2) + ' ';
+              this.codeLength++;
+            } else {bytes += '&nbsp;&nbsp; ';}
+          }
+          mnemonic = code.operation + ' ' + code.operand;
+        } else {
+          address = '';
+          mnemonic = '&nbsp;';
+        }
+        row.cells[0].innerHTML = address;
+        row.cells[0].oncontextmenu = function(event) {
+          cpu.setBreakpoint(cpu, event, code.address);
+          return false;
+        };
+        row.cells[0].onclick = jump;
+        row.cells[0].style.backgroundColor = (code.address in cpu.breakpoints) ? 'red' : '';
+        row.cells[1].innerHTML = bytes;
+        row.cells[1].onclick = jump;
+        row.cells[2].innerHTML = mnemonic;
+        row.cells[2].onclick = jump;
+        row.cells[2].oncontextmenu = function(event) {
+          if (cpu.cellEditing) {
+            cpu.cellEditing.input.focus();
+            return false;
+          }
+          cpu.editCode(cpu, event, code.address);
+          event.preventDefault();
+          return false;
+        };
+      }
+    };
+    this.reloadTable = function(address) {
+      if (this.watch != null) {
+        this.cpuOwner.ram.removeWindow(0, 0, this.watch);
+        this.watch = null;
+      }
+      this.setTable(this.cpuOwner.disassemble(address, 0x10000, this.cpuOwner.dsmTableSize));
+    };
+    this.lineOff = function() {
+      if (this.lineHi) {
+        this.lineHi.className = 'DSMlo';
+        this.lineHi = null;
+      }
+    };
+    this.lineOn = function(address, force, notRequired) {
+      var disassembly;
+      if (!(this.cpuOwner.refreshOn || force)) {return;}
+      trc('lineOn address', inHex(address, 4));
+      this.lineOff();
+      if (!(address in this.lineMap)) {
+        if (notRequired) {return;} else {this.reloadTable(address);}
+      }
+      this.lineHi = this.lineMap[address];
+      this.lineHi.className = 'DSMhi';
+    };
+    this.setTable = function(lines) {
+      var i;
+      trc('setTable for code lines count', lines.length);
+      this.lineMap = [];
+      this.baseAddress = lines[0].address;
+      this.codeLength = 0;
+      if (this.table) {
+        trc('this.table rows length', this.table.rows.length);
+        for (i = 0; i < this.table.rows.length; i++) {
+//        trc ("this.table row", i);
+          this.setRow(i, (i < lines.length) ? lines[i] : null, this.cpuOwner);
+        }
+        this.watch = this.cpuOwner.ram.addWindow(this, this.baseAddress, this.codeLength);
+        trc('Add DASM watch length', this.codeLength);
+      }
+    };
+    this.doTrace = function() {
+      trc('DSMWindow doTrace', 0);
+    };
+    this.update = function(holder, address, value) {
+      trc('DASM window update address', inHex(address, 4));
+      holder.doTrace();
+      trc('Assembling', holder.cpuOwner.assembling);
+      if ((holder.cpuOwner.cellEditing == null) && (holder.cpuOwner.assembling == false)) {
+        holder.reloadTable(holder.baseAddress);
+      }
+    };
+    this.createTable(id);
+  }
+
+  function GraphicsScreen(videoRAM, videoBase, width, height, colours, zoom) {
+    this.ram = videoRAM;
+    this.base = videoBase;
+    this.wide = width;
+    this.high = height;
+    this.scale = zoom;
+    this.bitsPerPixel = 1;
+    this.sourceBitmap = null;
+    this.canvas = null;
+    this.colourMap = [
+      '#000000', '#a00000', '#00a000', '#a0a000', '#0000a0', '#a000a0', '#00a0a0', '#808080',
+      '#404040', '#ff0000', '#00ff00', '#ffff00', '#0000ff', '#ff00ff', '#00ffff', '#ffffff'];
+    this.palettes = [[], [0, 2], [0, 9, 2, 12], [], [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]];
+    this.setMode = function(colours) {
+      switch (colours) {
+        case 2:
+          this.bitsPerPixel = 1;
+          break;
+        case 4:
+          this.bitsPerPixel = 2;
+          break;
+        case 16:
+          this.bitsPerPixel = 4;
+          break;
+        default:
+          this.bitsPerPixel = 1;
+          break;
+      }
+    };
+    this.clearScreen = function() {
+      var ctx = this.canvas.getContext('2d');
+      ctx.fillStyle = this.colourMap[0];
+      ctx.fillRect(0, 0, this.wide * this.scale, this.high * this.scale);
+    };
+    this.clearVideoRAM = function(colourByte) {
+      var x;
+      for (x = this.base; x < this.base + this.high * Defaults.lineBytes; x++) {
+        this.ram.poke(x, colourByte);
+      }
+    };
+    this.update = function(holder, address, value) {
+      var pixel, dx, dy;
+      var byte = value;
+      switch (this.bitsPerPixel) {
+        case 1:
+          dx = 1;
+          dy = 1;
+          break;
+        case 2:
+          dx = 2;
+          dy = 1;
+          break;
+        case 4:
+          dx = 2;
+          dy = 2;
+          break;
+      }
+      var xPos = ((address - this.base) & ((Defaults.lineBytes * dy) - 1)) * (8 / dy);
+      var yPos = Math.trunc((address - this.base) / (Defaults.lineBytes * dy)) * dy;
+      var ctx = this.canvas.getContext('2d');
+      for (i = 0; i < 8; i += this.bitsPerPixel) {
+//      trc ("byte",inHex(byte,2),true);
+        byte <<= this.bitsPerPixel;
+        pixel = byte >>> 8;
+//      trc ("Pixel",inHex(pixel,2),true);
+        byte &= 0xff;
+        ctx.fillStyle = this.colourMap[this.palettes[this.bitsPerPixel][pixel]];
+//      trc ("Colour",this.colourMap[this.palettes[this.bitsPerPixel][pixel]],true);
+        ctx.fillRect(xPos * this.scale, yPos * this.scale, this.scale * dx, this.scale * dy);
+        xPos += dx;
+      }
+    };
+    if (this.canvas = document.getElementById('graphicsScreen')) {
+      this.setMode(colours);
+      this.clearScreen();
+      this.ram.addWindow(this, this.base, (this.wide * this.high) / 8);
+    }
+
+  }
+
+  function TextScreen(videoRAM, videoBase, width, height) {
+    this.ram = videoRAM;
+    this.base = videoBase;
+    this.wide = width;
+    this.high = height;
+    this.charSet = '@ABCDEFGHIJKLMNO' + 'PQRSTUVWXYZ[\\]\u2191\u2190' + ' !"#$%&\'()*+,-./' + '0123456789:;<=>?';
+    this.update = function(holder, address, value) {
+      var cell;
+      var element = document.getElementById('txtScreenTable');
+      if (element) {
+        trc('Update element found', '');
+//      console.dir (holder);
+        cell = element.rows[Math.trunc((address - holder.base) / width)].cells[Math.trunc(
+            (address - holder.base) % width)];
+        if (cell) {
+          if (value >= 0x80) {
+            cell.innerHTML = blockChars[value & 0x0f];
+            cell.className = blockClasses[(value & 0x70) >> 4];
+          } else {
+            if ((value & 0x3f) == 0x20) {
+              cell.innerHTML = '&nbsp;';
+            } else {
+              cell.innerHTML = holder.charSet[value & 0x3f];
+            }
+            switch (value & 0x40) {
+              case 0:
+                cell.className = 'txtBG';
+                break;
+              case 0x40:
+                cell.className = 'txtFG';
+                break;
+            }
+          }
+        }
+      }
+    };
+    this.createScreenTable = function(tableId, width, height) {
+      var rows, cells, newRow, newCell, container, table;
+      table = null;
+      if (container = document.getElementById(tableId + '-container')) {
+//      trc ("Found table container", tableId,1);
+        table = document.createElement('table');
+        table.setAttribute('id', tableId);
+        table.setAttribute('tabindex', 0);
+        table.className = 'txtScreen';
+        for (rows = 0; rows < height; rows++) {
+          newRow = document.createElement('tr');
+          for (cells = 0; cells < width; cells++) {
+            newCell = document.createElement('td');
+            newCell.className = 'txtBG';
+            newCell.innerText = '@';
+            newRow.appendChild(newCell);
+          }
+          table.appendChild(newRow);
+          table.addEventListener('keypress', keyPressHandler);
+        }
+        container.appendChild(table);
+      }
+      return table;
+    };
+    this.ram.addWindow(this, this.base, this.wide * this.high);
+    this.table = this.createScreenTable('txtScreenTable', 32, 16);
+  }
+
+  function keyPressHandler(event) {
+    mc6809.keyBuffer.push(event.key);
+    event.preventDefault();
+  }
+
+  function codeBlock(startAddr) {
+    this.base = startAddr;
+    this.bytes = [];
+    this.addCode = function(code) {
+      trc('addCode', code);
+      this.bytes = this.bytes.concat(code);
+    };
+    this.writeCode = function() {
+      return ('this.ram.fill (0x' + inHex(this.base, 4) + ', ' + JSON.stringify(this.bytes) + ');');
+    };
+  }
+
+  function CPU() {
+    this.flagBits = {C: 1, V: 2, Z: 4, N: 8, I: 16, H: 32, F: 64, E: 128};
+    this.registers = [];
+    this.ops = ops6809;
+    this.ram = new memory8(64 * 1024);
+    this.videoRAM = new TextScreen(this.ram, 0x400, 32, 16);
+    this.graphicsRAM = new GraphicsScreen(this.ram, 0x600, 256, 192, 2, 2);
+    this.dsmTableSize = 30;
+    this.dsmTable = new DSMWindow('DSMTable', this, this.dsmTableSize);
+    this.labelMap = new labelList('labelMap', this);
+    this.watchList = null;
+    this.asmText = '';
+    this.labels = [];
+    this.mapLabels = [];
+    this.mapAddrs = [];
+    this.lastLabel = '';
+    this.codeBlocks = [];
+    this.opPage = 0;
+    this.ended = false;
+    this.dpVal = 0;
+    this.dpUse = false;
+    this.pcVal = null;
+    this.passNo = 0;
+    this.assembling = false;
+    this.intervalID = null;
+    this.irqID = null;
+    this.firqID = null;
+    this.irqMils = 500;
+    this.firqMils = 50;
+    this.asmIntervalID = null;
+    this.asmIntervalMils = 2;
+    this.asmProgram = [];
+    this.asmLineNo = 0;
+    this.passes = 3;
+    this.hexInputCell = null;
+    this.hexInputCellNo = 0;
+    this.hexInputRegister = null;
+    this.intervalMils = 1000;
+    this.intervalTimes = 1;
+    this.speedMils = {'1': 1000, '2': 500, '3': 250, '4': 100, '5': 50, '6': 25, '7': 10, '8': 5, '9': 2, '10': 1};
+    this.speedMils = {
+      '1': 1000,
+      '2': 500,
+      '3': 250,
+      '4': 100,
+      '5': 50,
+      '6': 10,
+      '7': 1,
+      '8': 0.1,
+      '9': 0.01,
+      '10': 0.002,
+    };
+    this.refreshOn = true;
+    this.SI = null;
+    this.breakpoints = [];
+    this.breakpoints[Defaults.org] = true;
+    this.defaultStart = 0x4000;
+    this.cellEditing = null;
+    this.keyBuffer = [];
+    this.closeEdit = function(updateValue) {
+      var newValue;
+      trc('closeEdit, update=', updateValue);
+      if (this.cellEditing) {
+        if (updateValue) {
+          newValue = this.cellEditing.verify();
+          if (newValue == null) {return false;}
+        } else {
+          newValue = this.cellEditing.oldContents;
+        }
+        trc('newValue', newValue);
+        this.cellEditing.parent.removeChild(this.cellEditing.input);
+        this.cellEditing.parent.innerText = newValue;
+        this.cellEditing = null;
+        this.dsmTable.reloadTable(this.dsmTable.baseAddress);
+        return true;
+      } else {return false;}
+    };
+    this.flags = function(flagList) {
+      var i, flagsV, c, cu, b;
+      flagsV = this.registers['regCC'].regValue;
+//    trc ("Flags in", inHex (this.registers['regCC'].regValue, 2));
+//    trc ("Flags list", flagList);
+
+      for (i = 0; i < flagList.length; i++) {
+        c = flagList[i];
+        cu = c.toUpperCase(c);
+        b = this.flagBits[cu];
+        flagsV &= ~b;
+        if (c == cu) {
+          flagsV |= b;
+        }
+      }
+      this.registers['regCC'].change(flagsV, 0);
+//    trc ("Flags out", inHex (this.registers['regCC'].regValue, 2));
+    };
+    this.flagCheck = function(flag) {
+      var flagsV = this.registers['regCC'].regValue;
+      trc('flagCheck', flagsV);
+      trc('flagCheck', this.flagBits[flag]);
+      return (this.registers['regCC'].regValue & this.flagBits[flag]) ? 1 : 0;
+    };
+    this.addReg = function(called, size, n, usebinary) {
+      trc('CPU addReg', 'reg' + called);
+      this.registers['reg' + called] = new Register(called, size, n, this, usebinary);
+    };
+    this.refresh = function(force) {
+      var key, refresh;
+      for (key in this.registers) {
+        this.registers[key].refresh(force);
+      }
+      this.registers['regPC'].notify = 1;
+      this.dsmTable.lineOn(this.registers['regPC'].regValue, force);
+      this.watchList.refresh(force);
+    };
+    this.notify = function(regName, force) {
+//    trc ("Notify", regName);
+      switch (regName) {
+        case 'regPC':
+          this.dsmTable.lineOn(this.registers['regPC'].regValue, force);
+          break;
+      }
+    };
+    this.opFind = function(opcode, page) {
+      var instruction = this.ops.find(function(element) {
+        return (element.op == opcode) && (element.page == page);
+      });
+      if (instruction) {
+        return instruction;
+      } else {
+        trc('Opfind failed for ', opcode);
+      }
+    };
+    this.mnemFind = function(mnemonic, mode) {
+      var instruction = this.ops.find(function(element) {
+        return (element.mnem == mnemonic) && (element.mode & mode);
+      });
+      if (instruction) {
+        return instruction;
+      } else {
+        trc('Mnemfind failed for', mnemonic);
+      }
+    };
+    this.pcr = function(target, bits, pcIn) {
+      trc('this.pcr pcIn', inHex(pcIn, 4));
+      var pc = this.ram.wrap(pcIn + ((bits == 8) ? 1 : 2));
+      trc('PCR pc value', inHex(pc, 4), 0);
+      trc('PCR target', inHex(target, 4), 0);
+      trc('PCR bits', bits, 0);
+      var n = this.nextVal(target, false);
+      trc('this.pcr nextVal', n, 0);
+      if (n == null) {
+        if (bits > 8) {return [null, 0, 0];} else {return [null, 0];}
+      }
+      n = n - pc;
+      if (n < -0x8000) {n += 0x10000;}
+      trc('PCR offset value', inHex(n), 0);
+      switch (bits) {
+        case 7:
+        case 8:
+          if (((n < -0x80) || (n >= 0x80)) && (this.passNo > 1)) {
+            this.error('PC relative offset (\'' + inHex(target, 4) + '\') outside 8 bit range', n);
+          }
+          return [n, n & 0xff];
+        case 0:
+        case 15:
+        case 16:
+          if (((n < -0x8000) || (n >= 0x10000)) && (this.passNo > 1)) {
+            this.error('PC relative offset (\'' + target + '\') outside 16 bit range', n);
+          }
+          return [n, (n & 0xffff) >>> 8, n & 0xff];
+      }
+    };
+    this.findLabel = function(asmLabel) {
+      var key, matches;
+      if (matches = /\s*([a-z\_][\w\_]*)/i.exec(asmLabel)) {
+        key = matches[1].toUpperCase();
+        if (key in this.labels) {
+          trc('Found label \'' + key + '\' of value', inHex(this.labels[key], 4));
+          return this.labels[key];
+        }
+      }
+    };
+    this.assignLabel = function(asmLabel, operand) {
+      var key = asmLabel.toUpperCase();
+      trc('Assigning label (' + key + ') with', inHex(operand, 4));
+      if ((this.findLabel(key) != null) && (this.passNo == 1)) {
+        this.error('Attempt to redefine label', key);
+        return 0;
+      } else {
+        this.labels[key] = operand;
+        return 1;
+      }
+    };
+    this.addMapLabel = function(asmLabel, value) {
+      trc('Setting map label \'' + asmLabel + '\' with value', value);
+//    if (!(this.excludeOSLabels && (value>=Defaults.OSBase))) {
+      this.mapLabels[asmLabel] = value;
+      this.mapAddrs[inHex(value, 4)] = asmLabel;
+//    }
+    };
+    this.nextVal = function(expressionIn, needsValue) {
+      var matches, value, valueNum, minus, radix;
+      var total = 0;
+      var valid = false;
+      var matchValue = /^\s*((\'(.))|(\-|\+|)(\$|\%|0x|)([\w\_]+))/i;
+      var expression = String(expressionIn);
+      trc('nextVal input', expression, 0);
+      while (matches = matchValue.exec(expression)) {
+        minus = 0;
+        radix = 10;
+        if (matches[3]) {
+          trc('matches[3]', matches[3], 0);
+          valueNum = matches[3].charCodeAt();
+        } else {
+          value = matches[6].toUpperCase();
+          trc('nextVal item', value, 0);
+          trc('nextVal radix', matches[5], 0);
+          trc('matches[5] "' + matches[5] + '"  ', matches[5].charCodeAt(), 0);
+          if (matches[4] === '-') {minus = 1;}
+          if ((matches[5] === '$') || (matches[5].toUpperCase() === '0X')) {radix = 16;}
+          if (matches[5] === '%') {radix = 2;}
+          if ((radix <= 10) && value.match(/^[A-Z\_]/)) {
+            trc('findlabel value', value);
+            valueNum = this.findLabel(value);
+            if (valueNum == null) {
+              if ((this.passNo > 1) || (needsValue)) {
+                this.error('Unable to resolve label');
+                return null;
+              } else {
+                trc('Label not yet defined', value);
+                return null;
+              }
+            }
+          } else {
+            trc('Radix', radix, 0);
+            valueNum = parseInt(value, radix);
+          }
+        }
+        if (!isNaN(valueNum)) {
+          if (minus) {valueNum = -valueNum;}
+        } else {
+          this.error('Can\'t read numeric value', valueNum);
+          return;
+        }
+        total = total + valueNum;
+        valid = true;
+        trc('Total', inHex(total, 4));
+        trc('Increment', inHex(valueNum, 4));
+        trc('Expression', expression);
+        expression = expression.substr(matches[0].length);
+      }
+      if ((total < -32768) || (total >= 0x10000)) {
+        this.error('Constant out of range (' + total + ')', expressionIn);
+      }
+      if (valid) {
+        return total;
+      } else {
+        this.error('Unable to interpret expression\'' + expression + '\'');
+      }
+    };
+    this.parseVal = function(s) {
+      var n = Number(s);
+      if (isNAN(n)) {
+        this.error('Number expected \'' + s + '\'');
+      } else {
+        return n;
+      }
+    };
+    this.parseSizedVal = function(s, noError, dp, useDp) {
+      var matches, bits, value;
+      bits = 0;
+      trc('ParseSizedVal', s);
+      matches = /\s*(\<|\>)(.+)/.exec(s);
+      if (matches) {
+        trc('SizedVal match', matches[1]);
+        switch (matches[1]) {
+          case '<':
+            bits = 8;
+            break;
+          case '>':
+            bits = 16;
+            break;
+        }
+        value = this.nextVal(matches[2], false);
+//      trc ("Value",inHex (value, 4), false);
+      } else {
+        value = this.nextVal(s, false);
+      }
+      if (value != null) {
+        switch (bits) {
+          case 16:
+            if (((value < -32768) || (value >= 65536)) && (!noError)) {
+              this.error('Constant out of 16 bit range', value);
+            }
+            break;
+          case 8:
+            if (useDp) {value = (value - (dp << 8) & 0xffff);}
+            if (((value < -128) || (value >= 256)) && (!noError)) {
+              this.error('Constant out of 8 bit range', value);
+            }
+            break;
+        }
+      }
+      return [value, bits];
+    };
+    this.opSize = function(n) {
+      var bits = 7;
+      if (n < -0x80) {
+        bits = 15;
+        if (n < -0x8000) {bits = 32;}
+      } else {
+        if (n >= 0x80) {
+          bits = 8;
+          if (n >= 0x100) {
+            bits = 15;
+            if (n >= 0x8000) {
+              bits = 16;
+              if (n >= 0x10000) {bits = 32;}
+            }
+          }
+        }
+      }
+      return bits;
+    };
+    this.pairPostByte = function(s) {
+      var reg1, reg2;
+
+      function getRegister(regText) {
+        trc('getRegister', regText);
+        if (regText in pairRegsToValue) {
+          return pairRegsToValue[regText];
+        }
+      }
+
+      trc('pairPostByte', s);
+      var matches = /(\w+)\s*\,\s*(\w+)/.exec(s);
+      reg1 = getRegister(matches[1].toUpperCase());
+      reg2 = getRegister(matches[2].toUpperCase());
+      if ((reg1 != null) && (reg2 != null)) {
+        return ((reg1 << 4) | reg2);
+      } else {
+        this.error('Syntax error in register pair postbyte: \'' + s + '\'');
+      }
+    };
+    this.fullPostByte = function(mnemonic, registerString) {
+      var i, reg;
+      var postByte = 0;
+      var thisStack = mnemonic[mnemonic.length - 1].toUpperCase();
+      var regList = registerString.split(',');
+      trc('fullPostByte thisStack', thisStack);
+      for (i = 0; i < regList.length; i++) {
+        reg = regList[i].trim().toUpperCase();
+        trc('fullPostByte register', reg);
+        if (reg in fullRegsToValue) {
+          if (reg === thisStack) {
+            this.error('Can\'t stack register on its own stack', reg);
+          } else {
+            postByte |= fullRegsToValue[reg];
+          }
+        } else {
+          if (reg.match(/\w/)) {this.error('Unknown register', reg);}
+        }
+      }
+      return postByte;
+    };
+    this.getIndexMode = function(s) {
+// determine index register and autoincrement, return index=-1 if error;
+      var matches, index, increment;
+      index = -1;
+      increment = 0;
+      trc('getIndexMode', s);
+      matches = /\s*(\-{0,2})([A-z]{1,3})(\+{0,2})/.exec(s.toUpperCase());
+      if (matches) {
+        trc('Index mode match', matches[2]);
+        switch (matches[2]) {
+          case 'X':
+            index = 0x00;
+            break;
+          case 'Y':
+            index = 0x20;
+            break;
+          case 'U':
+            index = 0x40;
+            break;
+          case 'S':
+            index = 0x60;
+            break;
+          case 'PC':
+            index = 0x8C;
+            break;
+          case 'PCR':
+            index = 0x8D;
+            break;
+          default:
+            this.error('Unrecognised index register', matches[2]);
+        }
+        trc('index postbyte', inHex(index, 2));
+        trc('Postincrement', matches[3]);
+        switch (matches[3]) {
+          case '+':
+            increment = 0x80;
+            break;
+          case '++':
+            increment = 0x81;
+            break;
+        }
+        trc('Predecrement', matches[1]);
+        if (matches[1]) {
+          if (increment > 0) {
+            index = -1;
+            this.error('Index mode error: Can\'t have increment and decrement at the same time', s);
+          } else {
+            switch (matches[1]) {
+              case '-':
+                increment = 0x82;
+                break;
+              case '--':
+                increment = 0x83;
+                break;
+            }
+          }
+        }
+      } else {
+        this.error('Syntax error in index register expression', s);
+      }
+      return [index, increment];
+    };
+    this.adrMode = function(opMode, s, pcrVal) {
+      var matches, bits, forceBits, value, mode, indirect, indexmode, increment, postByte, offset, values, signedValue,
+          withDPValue;
+//    var matches=/^(\#|\<|\>)(.+)/.exec(s);
+      indirect = 0;
+      postByte = -1;
+      hasValue = false;
+      value = 0;
+      bits = 0;
+      forceBits = 0;
+      if (matches = /\s*\#\s*(.+)/.exec(s)) {
+//      trc ("Immediate mode", matches[1],0);
+        value = this.nextVal(matches[1], false);
+//      trc ("this.nextVal", value, 0);
+        bits = (opMode & modes.bits16) ? 16 : 8;
+        mode = modes.immediate;
+      } else {
+        if (matches = /\s*[\(\[]\s*(.+?)[\)\]]\s*/.exec(s)) {
+          trc('Indirect addressing', matches[1], 0);
+          s = matches[1];
+          indirect = 1;
+        }
+        if (matches = /\s*(\S*?)\s*\,\s*(\S+)/.exec(s)) {
+          offset = matches[1].toUpperCase();
+          trc('Indexed addressing', matches[2], 0);
+          trc('Offset', offset, 0);
+          mode = modes.indexed;
+          [indexmode, increment] = this.getIndexMode(matches[2]);
+          if (offset) {
+            if (matches = /^(B|A|D)$/.exec(offset)) {
+              trc('Register offset', matches[1]);
+              indexmode |= {'B': 0x05, 'A': 0x06, 'D': 0x0B}[matches[1]] | 0x80;
+            } else {
+              trc('Constant offset', inHex(offset, 4));
+              [value, forceBits] = this.parseSizedVal(offset, true, 0, false);
+              hasValue = true;
+              trc('forcebits=' + forceBits, value, 0);
+            }
+          }
+          trc('indexmode', indexmode, 0);
+          trc('increment', increment, 0);
+          postByte = indexmode | increment;
+          if (increment) {
+            if ((hasValue) && (value != 0)) {
+              this.error('Indexing error: can\'t have offset with auto inc/decrement', value);
+            }
+          } else {
+            trc('non-autoinc mode postByte', inHex(postByte, 2));
+            if ((indexmode < 0x80) && (value == 0)) {
+              postByte = postByte | 0x84;
+            } else if (hasValue) {
+              trc('Indexed constant offset', value);
+              if (indexmode == '0x8D') {
+                // force 16 bit offset for PCR references unless 8 bit specified
+                if (forceBits == 0) {forceBits = 16;}
+                if (value == null) {value = 0;}
+                values = this.pcr(value, forceBits, pcrVal);
+                signedValue = values[0];
+                value = values[1];
+                if (values.length == 3) {
+                  value = (value << 8) | values[2];
+                }
+                indexmode = '0x8C';
+                postByte = indexmode;
+              } else {
+                signedValue = value;
+              }
+              if (((value >= -16) && (value < 16)) && (indexmode < 0x80) && (!indirect)) {
+                postByte = postByte | (value & 0x1f);
+                trc('5 bit indexed postByte', postByte);
+              } else {
+                // choose between extended and PCR
+                postByte = postByte | ((indexmode < 0x80) ? 0x88 : 0x8C);
+                trc('PCR signed value', signedValue);
+                bits = this.opSize(signedValue);
+                trc('PCR opSize bits', bits);
+                if (forceBits > 0) {
+                  trc('Deal with forceBits', forceBits);
+                  if ((this.passNo > 1) && (bits + 1 > forceBits)) {
+                    this.error('Constant offset out of ' + forceBits + ' bit range', signedValue);
+                  }
+                  bits = forceBits - 1;
+                }
+                if (bits > 7) {
+                  postByte = postByte | 0x01;
+                  bits = 16;
+                }
+                trc(bits + ' bit indexed postByte', inHex(postByte, 2));
+              }
+            }
+          }
+          if (indirect) {postByte |= 0x10;}
+        } else {
+          [value, forceBits] = this.parseSizedVal(s, 0, this.dpVal, this.dpUse);
+          trc('Extended or indirect mode', value);
+          bits = this.opSize(value);
+          ;
+          if ((forceBits == 8) && (indirect == 0)) {
+            mode = modes.direct;
+            trc('Direct mode bit size', bits);
+//          value=(value-(this.dpVal<<8))&0xffff;
+            if ((bits > 8) || (value < 0)) {
+              this.error('Direct mode address ($' + inHex(value, 4) + ') out of range', value);
+            }
+          } else {
+            if (indirect) {
+              postByte = 0x9F;
+              mode = modes.indexed;
+            } else {
+              withDPValue = (value - (this.dpVal << 8) & 0xffff);
+              trc('withDP', inHex(withDPValue, 4), 0);
+              if ((this.dpUse) && (value != null) && (withDPValue < 0x100) && (forceBits != 16)) {
+                trc('Using DP', value, 0);
+                value = withDPValue;
+                bits = 8;
+                mode = modes.direct;
+              } else {
+                mode = modes.extended;
+                bits = 16;
+              }
+            }
+            if (value < 0) {
+              this.error('Extended mode requires a 16 bit unsigned value', value);
+            }
+          }
+        }
+      }
+      return [mode, value, bits, postByte];
+    };
+    this.setStatus = function(colour, alert, message, source) {
+      var statusBox, HTML;
+      var sourceText = source;
+      if (sourceText) {
+        sourceText = sourceText.replace(/\</, '&lt;');
+        sourceText = sourceText.replace(/\>/, '&gt;');
+      }
+      HTML = '<span style=\'color: ' + colour + '\' font-size:large;\'>' + alert + '</span> <i>' + message + '</i>';
+      if (source != null) {
+        HTML += '<br />Input: <span style=\'color: blue\'>' + sourceText + '</span>';
+      }
+      if (statusBox = document.getElementById('assemblyStatus')) {
+        statusBox.innerHTML = HTML;
+      }
+    };
+    this.error = function(message) {
+      this.foundError = 1;
+      console.log('Error ' + message);
+      this.setStatus('red', 'Error @ line ' + (this.asmLineNo + 1) + ':', message, this.asmText);
+      clearInterval(this.asmIntervalID);
+      this.asmIntervalID = null;
+    };
+    this.encodeOp = function(encoding, instruction) {
+      if (instruction.page) {encoding.push(instruction.page);}
+      encoding.push(instruction.op);
+    };
+    this.encodeString = function(encoding, s) {
+      var i, c;
+//    trc ("Encode string", s);
+      for (i = 0; i < s.length; i++) {
+        c = s.charCodeAt(i);
+        trc('String character', inHex(c, 2));
+        if (c < 0x100) {encoding.push(c);}
+      }
+    };
+    this.setdp = function(operand) {
+      var value = this.nextVal(operand, true);
+      if ((value >= 0) && (value < 0x100)) {
+        this.dpVal = value;
+        this.dpUse = true;
+      } else {
+        if (value < 0) {
+          this.dpVal = 0;
+          this.dpUse = false;
+        } else {
+          this.error('Direct page value must be 8 bits');
+        }
+      }
+    };
+    this.fillData = function(encoding, items) {
+      var i, filler, count;
+      if (items.length == 2) {
+        filler = this.nextVal(items[0], false);
+        count = this.nextVal(items[1], true);
+        if (filler == null) {return;}
+        if (filler < 0) {filler += 0x100;}
+        if ((filler >= 0) && (filler < 0x100)) {
+          if ((count > 0) && (count < 0x10000)) {
+            trc('filling ' + count + ' bytes with value', filler, 0);
+            for (i = 0; i < count; i++) {
+              encoding.push(filler);
+            }
+          } else {
+            this.error('Value for fill count out of range');
+          }
+        } else {
+          this.error('Value for data byte out of range');
+        }
+      } else {
+        this.error('Directive requires <data byte> and <count> operands');
+      }
+    };
+    this.encodeValue = function(encoding, value, bits) {
+      var n;
+      trc('Encode value initial', value, 0);
+      if (value) {n = this.nextVal(value, false);} else {n = 0;}
+      trc('Encode value', n, 0);
+      trc('Encode bits', bits, 0);
+      if (bits > 8) {
+        if (n < 0) {n += 0x10000;}
+        if ((n >= 0) && (n < 0x10000)) {
+          encoding.push(n >>> 8);
+          encoding.push(n & 0xff);
+        } else {this.error('Value (16 bits) expected', value);}
+      } else if (bits > 0) {
+        if (n < 0) {n += 0x100;}
+        if ((n >= 0) && (n < 0x100)) {
+          encoding.push(n);
+        } else {this.error('Value (8 bits) expected', value);}
+      }
+    };
+    this.encodeData = function(encoding, items, bits) {
+      var i, item, matches, matched = 0;
+      ;
+      for (i = 0; i < items.length; i++) {
+        item = items[i];
+        trc('Encode data', item, 0);
+        matched = (matches = /\s*\"(.*)\"/.exec(item));
+        if (!matched) {
+          trc('Try to match single quotes', item);
+          matched = (matches = /\s*\'(.*)\'/.exec(item));
+        }
+        if (matched) {
+//        trc ("Encode data string",matches[1]);
+          this.encodeString(encoding, matches[1]);
+        } else {
+          this.encodeValue(encoding, item, bits);
+        }
+      }
+    };
+    this.encodeConstants = function(items) {
+      var i, item, matches, labelValue, matched = 0;
+      ;
+      for (i = 0; i < items.length; i++) {
+        item = items[i];
+//      trc ("Encode constant", item);
+        matched = (matches = /\s*([A-Z\_][\w\_]*)\s*\=\s*(.+)/i.exec(item));
+        if (matched) {
+          if (labelValue = this.nextVal(matches[2], true)) {
+            this.assignLabel(matches[1], labelValue);
+          } else {
+            this.assignLabel(matches[1], 0);
+//          this.error ("Unable to interpret value", matches[1])
+          }
+//        this.assignLabel (matches[1], this.nextVal (matches[2], false));
+        } else {
+          this.error('Unable to interpret constant assignment', item);
+        }
+      }
+    };
+    this.encodeVariables = function(items) {
+      var item, matches, varSize, matched = 0;
+      item = items.shift();
+      if (varSize = this.nextVal(item, false)) {
+        trc('varSize=', varSize);
+        while (item = items.shift()) {
+          if (matches = /\s*([A-Z\_][\w\_]*)/i.exec(item)) {
+            this.assignLabel(matches[1], this.pcVal);
+            this.pcVal += varSize;
+          } else {
+            this.error('Invalid label in variable list', item);
+          }
+        }
+      } else {
+        this.error('Invalid variable size (usually 1 or 2)', item);
+      }
+      this.newOrg(this.pcVal);
+    };
+    this.newOrg = function(baseAddress) {
+      trc('newOrg', inHex(baseAddress, 4));
+      this.pcVal = baseAddress;
+      this.codeBlocks.push(new codeBlock(baseAddress));
+    };
+    this.splitByComma = function(text) {
+      var item;
+      var items = [];
+      var textList = text;
+      trc('splitByComma', text, 0);
+      while (textList.length > 0) {
+        item = '';
+        if (matches = /^(\s*\"[^\"]*\")/.exec(textList)) {
+          item = matches[1];
+        } else if (matches = /^([^\,]*)/.exec(textList)) {
+          item = matches[1];
+        }
+        if (item === '') {
+          textList = '';
+        } else {
+          items.push(item);
+          trc('item', item, 0);
+          textList = textList.substr(item.length).replace(/^\s*\,/, '');
+        }
+      }
+      return (items);
+    };
+    this.encodeDirective = function(encoding, instruction, operand, label) {
+      trc('Encode directive name', instruction.mnem);
+      trc('Encode directive operand', operand, 0);
+      switch (instruction.mnem) {
+        case 'DB':
+        case '.BYTE':
+        case 'FCB':
+//      case 'FCC': this.encodeData (encoding, operand.split (','), 8); break
+        case 'FCC':
+          this.encodeData(encoding, this.splitByComma(operand), 8);
+          break;
+        case 'DW':
+        case '.WORD':
+        case 'FDB':
+          this.encodeData(encoding, operand.split(','), 16);
+          break;
+        case 'FILL':
+          this.fillData(encoding, operand.split(','));
+          break;
+        case 'ORG':
+          this.newOrg(this.nextVal(operand, true));
+          break;
+        case 'DS':
+        case 'RMB':
+          this.newOrg(this.pcVal + this.nextVal(operand, true));
+          break;
+        case 'SETDP':
+        case 'DIRECT':
+          this.setdp(operand);
+          break;
+        case '=':
+        case 'EQU':
+          if (label) {
+            this.labels[label] = this.nextVal(operand, false);
+          } else {
+            this.error('EQU directive must have a label', '');
+          }
+          break;
+        case 'CONST':
+          this.encodeConstants(operand.split(','));
+          break;
+        case 'VAR':
+          this.encodeVariables(operand.split(','));
+          break;
+        case 'END':
+          this.ended = true;
+      }
+    };
+    this.readLabel = function(asmLabel, value, leadingSpace) {
+      var matches, key;
+      trc('Readlabel', asmLabel);
+      trc('leadingSpace', leadingSpace);
+      if (matches = /^\s*([a-z\_][\w\_]*)\:\s*(.*)/i.exec(asmLabel)) {
+        key = matches[1].toUpperCase();
+        trc('readLabel key', key);
+        this.assignLabel(key, value);
+        return [matches[2], key];
+      }
+      if ((!leadingSpace) && (matches = /^([a-z\_][\w\_]*)\s*(.*)/i.exec(asmLabel))) {
+        key = matches[1].toUpperCase();
+        if (!this.mnemFind(key, 0xffff)) {
+          this.assignLabel(key, value);
+          return [matches[2], key];
+        }
+      }
+      return [asmLabel, ''];
+    };
+    this.parseOutComments = function(text) {
+      var trimmed = '';
+      var inQuotes = null;
+      var lastSpace = true;
+      var i, c;
+//    trc ("parseoutcomments",text,1);
+      for (i = 0; i < text.length; i++) {
+        c = text.charAt(i);
+//      trc ("char c",c,1);
+//      if ((c=="'") || (c=='"')) {
+        if (c === '"') {
+          if (inQuotes === c) {
+            inQuotes = null;
+          } else {
+            if (inQuotes == null) {
+              inQuotes = c;
+            }
+          }
+        }
+        if (((c === ';') || (c === '*')) && (inQuotes == null) && (lastSpace === true)) {
+//        trc ("trim comment end",c,1);
+          i = text.length;
+        } else {
+          lastSpace = ((c === ' ') || (c === '\t')) ? true : false;
+          if ((!lastSpace) || (trimmed.length > 0)) {
+            trimmed += c;
+          }
+        }
+      }
+//    trc ("trimmed",trimmed,1);
+      return trimmed.replace(/\s+$/, '');
+    };
+    this.asmLine = function(s, allowLabel) {
+      var matches, opcode, instruction, mode, operand, value, bits, postByte, offsetValues;
+      var encoded = [];
+      var opLabel = '';
+      trc('Asmline', s);
+      this.asmText = this.parseOutComments(s);
+//    this.asmText=s.replace(/\s*\;.*/, '');
+//    this.asmText=this.asmText.replace (/^\s*\*.*/,'');
+//    this.asmText=this.asmText.replace(/\s+$/, '');
+      if (allowLabel) {
+        [this.asmText, opLabel] = this.readLabel(this.asmText, this.pcVal, /^\s+/.test(s));
+        if (opLabel) {this.lastLabel = opLabel;}
+      }
+      this.asmText = this.asmText.replace(/^\s*/, '');
+      trc('asmText', this.asmText);
+      if (matches = /\s*([a-zA-Z\=\.]\w*)($|\s*(.+))/.exec(this.asmText)) {
+        mnemonic = matches[1];
+        trc('asmLine match:', mnemonic);
+        if (instruction = this.mnemFind(mnemonic.toUpperCase(), 0xffff)) {
+          trc('Opcode:', inHex(instruction.op, 2));
+          mode = instruction.mode;
+          operand = matches[3];
+          if (mode & modes.simple) {
+            if (operand) {
+              this.error('Junk after instruction: \'' + operand + '\'');
+            } else {
+              this.encodeOp(encoded, instruction);
+            }
+          } else if ((mode & modes.pseudo)) {
+            this.encodeDirective(encoded, instruction, operand, opLabel);
+          } else if ((mode & modes.simple) == 0) {
+            trc('Memory mode', mode);
+            trc('modes.register', modes.register);
+            if (mode & modes.pcr) {
+              this.encodeOp(encoded, instruction);
+//            console.dir (instruction);
+              trc('ASM mode pcr instruction length', encoded.length, 0);
+              offsetValues = this.pcr(operand, (mode & modes.bits16) ? 16 : 8, this.pcVal + encoded.length);
+              offsetValues.shift();
+              encoded = encoded.concat(offsetValues);
+            } else if (mode & modes.register) {
+              trc('Modes register', '');
+              if (mode & modes.pair) {
+                postByte = this.pairPostByte(operand);
+              } else {
+                postByte = this.fullPostByte(mnemonic, operand);
+              }
+              if (postByte != null) {
+                trc('Postbyte value', postByte);
+                this.encodeOp(encoded, instruction);
+                encoded.push(postByte);
+              }
+            } else {
+              trc('this pcVal', inHex(this.pcVal));
+              [mode, value, bits, postByte] = this.adrMode(instruction.mode, operand,
+                  this.pcVal + (instruction.page ? 3 : 2));
+              trc('Mem mode', mode);
+              trc('postByte', inHex(postByte, 2));
+              if (instruction = this.mnemFind(mnemonic.toUpperCase(), mode)) {
+                trc('mnemFind Bits', bits);
+                if ((instruction.mode & modes.immediate) && (bits > 8) && ((instruction.mode & modes.bits16) == 0)) {
+                  this.error('16 bit value found where 8 bit expected: \'' + value + '\'');
+                } else {
+                  this.encodeOp(encoded, instruction);
+                  if (postByte >= 0) {
+                    encoded.push(postByte);
+                  }
+                  this.encodeValue(encoded, value, bits);
+                }
+              } else {
+                this.error(modesText[mode] + ' addressing mode not allowed with instruction');
+              }
+            }
+          }
+        } else {
+          this.error('Unknown instruction', mnemonic);
+        }
+      }
+      if ((this.lastLabel) && (encoded.length > 0) && !(mode & modes.pseudo)) {
+        this.addMapLabel(this.lastLabel, this.pcVal);
+        this.lastLabel = '';
+      }
+      return encoded;
+    };
+    this.loadOS = function() {
+      /*
+    this.ram.fill (0, [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,23,0,24,150,13,142,0,100,16,142,0,50,23,0,140,48,136,1,49,168,1,140,0,200,37,242,57,52,22,204,0,0,23,0,37,142,6,0,159,4,142,1,0,159,6,142,0,192,159,8,48,141,0,167,159,10,134,0,141,21,134,1,23,0,42,134,0,23,0,65,53,150,15,0,151,1,15,2,215,3,57,151,12,57,52,2,220,2,134,32,61,211,4,31,1,220,0,84,84,84,58,220,0,196,7,53,130,52,18,48,140,15,132,3,125,0,12,39,2,139,4,166,134,151,13,53,146,0,255,0,255,0,85,170,255,52,18,48,140,243,132,3,125,0,12,39,2,139,4,166,134,151,14,53,146,52,54,159,0,16,159,2,141,176,49,140,22,13,12,39,2,203,16,164,165,167,226,166,132,203,8,164,165,170,224,167,132,53,182,128,64,32,16,8,4,2,1,127,191,223,239,247,251,253,254,192,192,48,48,12,12,3,3,63,63,207,207,243,243,252,252,0,0,0,0,0,0,0,0,32,112,112,32,32,0,32,0,216,216,144,0,0,0,0,0,0,80,248,80,80,248,80,0,64,112,128,96,16,224,32,0,200,200,16,32,64,152,152,0,64,160,160,64,168,144,104,0,96,96,64,0,0,0,0,0,32,64,64,64,64,64,32,0,64,32,32,32,32,32,64,0,0,80,112,248,112,80,0,0,0,32,32,248,32,32,0,0,0,0,0,0,0,96,96,64,0,0,0,248,0,0,0,0,0,0,0,0,0,96,96,0,0,8,16,32,64,128,0,0,112,136,152,168,200,136,112,0,32,96,32,32,32,32,112,0,112,136,8,48,64,128,248,0,112,136,8,112,8,136,112,0,16,48,80,144,248,16,16,0,248,128,128,240,8,136,112,0,48,64,128,240,136,136,112,0,248,8,16,32,64,64,64,0,112,136,136,112,136,136,112,0,112,136,136,120,8,16,96,0,0,0,96,96,0,96,96,0,0,0,96,96,0,96,96,64,16,32,64,128,64,32,16,0,0,0,248,0,0,248,0,0,64,32,16,8,16,32,64,0,112,136,8,48,32,0,32,0,112,136,184,168,184,128,112,0,112,136,136,136,248,136,136,0,240,136,136,240,136,136,240,0,112,136,128,128,128,136,112,0,240,136,136,136,136,136,240,0,248,128,128,240,128,128,248,0,248,128,128,240,128,128,128,0,112,136,128,184,136,136,120,0,136,136,136,248,136,136,136,0,112,32,32,32,32,32,112,0,8,8,8,8,136,136,112,0,136,144,160,192,160,144,136,0,128,128,128,128,128,128,248,0,136,216,168,136,136,136,136,0,136,200,168,152,136,136,136,0,112,136,136,136,136,136,112,0,240,136,136,240,128,128,128,0,112,136,136,136,168,144,104,0,240,136,136,240,144,136,136,0,112,136,128,112,8,136,112,0,248,32,32,32,32,32,32,0,136,136,136,136,136,136,112,0,136,136,136,136,136,80,32,0,136,136,168,168,168,168,80,0,136,136,80,32,80,136,136,0,136,136,136,80,32,32,32,0,240,16,32,64,128,128,240,0,112,64,64,64,64,64,112,0,0,128,64,32,16,8,0,0,112,16,16,16,16,16,112,0,32,80,136,0,0,0,0,0,0,0,0,0,0,0,0,248,96,96,32,0,0,0,0,0,0,0,112,8,120,136,120,0,128,128,240,136,136,136,240,0,0,0,112,136,128,136,112,0,8,8,120,136,136,136,120,0,0,0,112,136,240,128,112,0,48,64,64,240,64,64,64,0,0,0,120,136,136,120,8,112,128,128,224,144,144,144,144,0,32,0,32,32,32,32,48,0,16,0,48,16,16,16,144,96,128,128,144,160,192,160,144,0,32,32,32,32,32,32,48,0,0,0,208,168,168,136,136,0,0,0,224,144,144,144,144,0,0,0,112,136,136,136,112,0,0,0,240,136,136,136,240,128,0,0,120,136,136,136,120,8,0,0,176,72,64,64,224,0,0,0,112,128,112,8,112,0,0,64,240,64,64,80,32,0,0,0,144,144,144,176,80,0,0,0,136,136,136,80,32,0,0,0,136,136,168,248,80,0,0,0,144,144,96,144,144,0,0,0,144,144,144,112,32,192,0,0,240,16,96,128,240,0,48,64,64,192,64,64,48,0,32,32,32,0,32,32,32,0,96,16,16,24,16,16,96,0,80,160,0,0,0,0,0,0,32,112,216,136,136,248,0,0]);
+    this.ram.fill (61440, [22,0,24,22,0,20,22,0,17,22,0,14,22,0,11,22,0,8,22,0,5,23,15,247,32,251,59,16,206,128,0,141,5,28,0,22,255,239,204,0,0,31,128,31,1,31,2,31,3,57]);
+    this.ram.fill (65520, []);
+    this.ram.fill (65522, [240,18,240,15,240,12,240,9,240,6,240,3,240,0]);
+*/
+      /*
+    this.ram.fill (0x4000, [57]);
+    this.ram.fill (0xF000, [22,0,86,22,0,20,22,0,17,22,0,14,22,0,11,22,0,8,22,0,6,23,79,232,32,251,59,238,106,79,230,192,88,73,49,141,0,51,52,32,49,141,0,37,49,171,16,172,225,36,2,173,180,239,106,59,57,166,192,38,4,127,255,128,57,127,255,129,57,166,192,183,255,130,57,166,192,183,255,131,57,240,56,240,57,240,69,240,75,16,206,128,0,141,5,28,0,22,255,177,204,0,0,31,139,31,1,31,2,31,3,57]);
+    this.ram.fill (0xFFF0, []);
+    this.ram.fill (0xFFF2, [240,18,240,15,240,12,240,9,240,6,240,3,240,0]);
+*/
+      /*
+  this.ram.fill (0x4000, [57]);
+  this.ram.fill (0xF000, [22,0,75,22,0,20,22,0,17,22,0,14,22,0,11,22,0,8,22,0,6,189,64,0,32,251,59,52,4,31,137,79,88,73,49,141,0,40,52,32,49,141,0,28,49,171,16,172,225,53,4,36,2,173,180,59,57,93,38,4,127,255,128,57,127,255,129,57,247,255,130,57,240,56,240,57,240,68,16,206,128,0,141,5,28,0,22,255,188,204,0,0,31,139,31,1,31,2,31,3,57]);
+  this.ram.fill (0xFFF0, []);
+  this.ram.fill (0xFFF2, [240,18,240,15,240,12,240,9,240,6,240,3,240,0]);
+*/
+      this.ram.fill(0x4000, [57]);
+      this.ram.fill(0xF000, [
+        22,
+        0,
+        75,
+        22,
+        0,
+        20,
+        22,
+        0,
+        17,
+        22,
+        0,
+        14,
+        22,
+        0,
+        11,
+        22,
+        0,
+        8,
+        22,
+        0,
+        6,
+        189,
+        64,
+        0,
+        32,
+        251,
+        59,
+        52,
+        4,
+        31,
+        137,
+        79,
+        88,
+        73,
+        49,
+        141,
+        0,
+        40,
+        52,
+        32,
+        49,
+        141,
+        0,
+        28,
+        49,
+        171,
+        16,
+        172,
+        225,
+        53,
+        4,
+        36,
+        2,
+        173,
+        180,
+        59,
+        57,
+        93,
+        38,
+        4,
+        127,
+        255,
+        128,
+        57,
+        127,
+        255,
+        129,
+        57,
+        247,
+        255,
+        130,
+        57,
+        240,
+        56,
+        240,
+        57,
+        240,
+        68,
+        26,
+        80,
+        28,
+        80,
+        16,
+        206,
+        128,
+        0,
+        141,
+        3,
+        22,
+        255,
+        186,
+        204,
+        0,
+        0,
+        31,
+        139,
+        31,
+        1,
+        31,
+        2,
+        31,
+        3,
+        57]);
+      this.ram.fill(0xFFF0, []);
+      this.ram.fill(0xFFF2, [240, 18, 240, 15, 240, 12, 240, 9, 240, 6, 240, 3, 240, 0]);
+    };
+    this.asmFinalise = function() {
+      var block, disassembly, start;
+      if (this.codeBlocks.length) {
+        start = this.findLabel('START');
+//      if (!start) {start=this.ram.deek (0xfffe)}
+        if (!start) {start = this.defaultStart;}
+        machineOrg(start, 1);
+        this.setStatus('green', 'Ready',
+            'assembly of ' + this.asmProgram.length + ' ' + plural('line', this.asmProgram.length) + ' complete',
+            null);
+//      disassembly=this.disassemble (this.codeBlocks[0].base, 0x10000, this.dsmTableSize);
+        disassembly = this.disassemble(start, 0x10000, this.dsmTableSize);
+        this.assembling = false;
+        this.dsmTable.setTable(disassembly);
+        this.labelMap.fill(this.mapLabels);
+      }
+    };
+    this.asmInit = function(pass) {
+      this.passNo = pass;
+      this.assembling = true;
+      this.ended = false;
+      this.dpVal = 0;
+      this.dpUse = false;
+      this.codeBlocks = [];
+      this.newOrg(Defaults.org);
+      this.asmLineNo = 0;
+      this.lastlabel = '';
+      this.asmIntervalID = setInterval(assemblyCycle, this.asmIntervalMils);
+    };
+    this.assemble = function(program) {
+//    var i, opcode, block, encoded, outputCode;
+      this.labels = [];
+      this.mapLabels = [];
+      this.mapAddrs = [];
+      this.labelMap.empty();
+      this.foundError = 0;
+      this.asmProgram = program;
+      this.asmInit(1);
+    };
+    this.regGroupList = function(postByte, regList) {
+      var i;
+      var theseRegs = [];
+      for (i = 0; i < 8; i++) {
+        if (postByte & (0x01 << i)) {theseRegs.push(regList[i].substr(3));}
+      }
+      return theseRegs.join(',');
+    };
+    this.regPairList = function(postByte, regList) {
+      function regName(regNum) {
+        if (regNum in regList) {return regList[regNum].substr(3);} else {return 'ERR';}
+      }
+
+      return regName((postByte & 0xf0) >>> 4) + ',' + regName((postByte & 0x0f));
+    };
+    this.labelled = function(mapAddresses, word, prefix) {
+      if (word in mapAddresses) {
+//      return "="+mapAddresses[word]+":"+word
+        return mapAddresses[word];
+      } else {
+        return prefix + word;
+      }
+    };
+    this.disassemble = function(startAddress, endAddress, maxLines) {
+      var opCode, opPage, postByte, instruction, disassembly;
+      var pc = startAddress;
+      var lines = [];
+
+      function nextByte(machine) {
+        var byte;
+//      trc ("nextByte from", inHex (pc, 4));
+        [pc, byte] = machine.ram.read(pc);
+        disassembly.bytes.push(byte);
+        return byte;
+      }
+
+      function readWord(machine, bits16, prefix) {
+        var word = nextByte(machine);
+//      trc ("readWord", bits16);
+        if (bits16) {
+          word = (word << 8) | nextByte(machine);
+          return machine.labelled(machine.mapAddrs, inHex(word, 4), prefix);
+        } else {
+          return machine.labelled(machine.mapAddrs, inHex(word, 2), prefix);
+        }
+      }
+
+      function disIndexed(machine, postByte) {
+        var offset = 0;
+        var operand = '';
+//      trc ("Disassemble Index postbyte",inHex(postByte,2));
+// find index register name
+        var indexReg = ['X', 'Y', 'U', 'S'][(postByte & 0x60) >>> 5];
+// extract 5 bit offset
+        if (!(postByte & 0x80)) {
+          trc('5 bit', '');
+          operand = signedHex(postByte & 0x1f, 5, '$') + ',' + indexReg;
+        } else {
+          switch (postByte & 0x0f) {
+            case 0x00:
+              operand = ',' + indexReg + '+';
+              break;
+            case 0x01:
+              operand = ',' + indexReg + '++';
+              break;
+            case 0x02:
+              operand = ',' + '-' + indexReg;
+              break;
+            case 0x03:
+              operand = ',' + '--' + indexReg;
+              break;
+            case 0x04:
+              operand = ',' + indexReg;
+              break;
+            case 0x05:
+              operand = 'B,' + indexReg;
+              break;
+            case 0x06:
+              operand = 'A,' + indexReg;
+              break;
+            case 0x07:
+              operand = 'ERR';
+              break;
+            case 0x08:
+              operand = signedHex(parseInt(readWord(machine, modes.bits8, ''), 16), 8, '$') + ', ' + indexReg;
+              break;
+            case 0x09:
+              operand = signedHex(parseInt(readWord(machine, modes.bits16, ''), 16), 16, '$') + ', ' + indexReg;
+              break;
+            case 0x0A:
+              operand = 'ERR';
+              break;
+            case 0x0B:
+              operand = 'D,' + indexReg;
+              break;
+            case 0x0C:
+              operand = findPCR(machine, parseInt(readWord(machine, modes.bits8, ''), 16), modes.bits8, pc) + ',PCR';
+              break;
+            case 0x0D:
+              operand = findPCR(machine, parseInt(readWord(machine, modes.bits16, ''), 16), modes.bits16, pc) + ',PCR';
+              break;
+            case 0x0E:
+              operand = 'ERR';
+              break;
+            case 0X0F:
+              operand = readWord(machine, modes.bits16, '$');
+              break;
+          }
+          if (postByte & 0x10) {
+            operand = '[' + operand + ']';
+          }
+        }
+        return operand;
+      }
+
+      function findPCR(machine, offset, bits16, pc) {
+        var d = offset;
+        if (!bits16) {d |= (offset & 0x80) ? 0xff00 : 0;}
+        /*      trc ('findPCR offset raw',offset);
+      trc ('findPCR offset',inHex (offset,4));
+      trc ('findPCR pc',inHex (pc, 4)); */
+        return machine.labelled(machine.mapAddrs, inHex((pc + d) & 0xffff, 4), '$');
+      }
+
+      trc('Disassembling from', inHex(startAddress, 4));
+      trc('PC', inHex(pc, 4));
+      trc('endAddress', inHex(endAddress, 4));
+      trc('maxLines', maxLines);
+      while ((pc < endAddress) && (lines.length < maxLines)) {
+        opPage = 0;
+        instruction = null;
+        disassembly = new disCode(pc);
+        opCode = nextByte(this);
+        if (instruction = this.opFind(opCode, opPage)) {
+          if (instruction.mode & modes.pager) {
+            trc('Pager', opCode);
+            opPage = opCode;
+            opCode = nextByte(this);
+            instruction = this.opFind(opCode, opPage);
+          }
+        }
+        if (instruction) {
+//        trc ("Disassemble mnemonic", instruction.mnem+' = '+instruction.mode);
+          disassembly.operation = instruction.mnem;
+          if (instruction.mode & modes.simple) {
+          } else if (instruction.mode & modes.immediate) {
+            disassembly.operand = '#' + readWord(this, instruction.mode & modes.bits16, '$');
+          } else if (instruction.mode & modes.direct) {
+            disassembly.operand = '<' + readWord(this, modes.bits8, '$');
+          } else if (instruction.mode & modes.extended) {
+            disassembly.operand = readWord(this, modes.bits16, '$');
+          } else if (instruction.mode & modes.indexed) {
+            disassembly.operand = disIndexed(this, nextByte(this));
+          } else if (instruction.mode & modes.register) {
+            postByte = nextByte(this);
+            if (instruction.mode & modes.pair) {
+              disassembly.operand = this.regPairList(postByte, pairRegsToText);
+            } else {
+//            trc ('dis.op', disassembly.operation[disassembly.operation.length-1]);
+              disassembly.operand = this.regGroupList(postByte,
+                  (disassembly.operation[disassembly.operation.length - 1] == 'S') ? fullRegsToTextS : fullRegsToTextU);
+            }
+          } else if (instruction.mode & modes.pcr) {
+            disassembly.operand = findPCR(this, parseInt(readWord(this, instruction.mode & modes.bits16, ''), 16),
+                instruction.mode & modes.bits16, pc);
+          }
+        } else {
+          disassembly.operation = 'ERR';
+        }
+        lines.push(disassembly);
+      }
+      return lines;
+    };
+    this.jumpTo = function(CPU, address) {
+      if (CPU.intervalID == null) {
+        machineOrg(address, 1);
+      }
+    };
+    this.editCode = function(cpu, event, address) {
+      var editBox, inputBox;
+      var cell = event.target.parentNode.lastChild;
+      trc('editCode', 0);
+//    console.dir (event.target.parentNode);
+      inputBox = new cellEdit(cell, cpu, address);
+      return (false);
+    };
+    this.setBreakpoint = function(cpu, event, address) {
+      var cell = event.target.parentNode.firstChild;
+      if (!(address in cpu.breakpoints)) {
+        cpu.breakpoints[address] = true;
+        cell.style.backgroundColor = 'red';
+      } else {
+        delete (cpu.breakpoints[address]);
+        cell.style.backgroundColor = '';
+      }
+      return false;
+    };
+    this.asmCycle = function() {
+      var encoded;
+      this.setStatus('#d07010', 'Assembling pass ' + this.passNo, 'line number ' + (this.asmLineNo + 1), this.asmText);
+      if ((this.asmLineNo < this.asmProgram.length) && (!this.ended)) {
+        let check = this.asmProgram[this.asmLineNo].trim().toUpperCase();
+        if (check.startsWith('LEA')) {
+          console.log("checkpoint: " + check);
+        }
+        encoded = this.asmLine(this.asmProgram[this.asmLineNo], true);
+        this.asmLineNo++;
+        if (!this.foundError) {
+          if (encoded.length > 0) {
+            trc('Assemble @ ', inHex(this.pcVal, 4));
+            if (this.pcVal != null) {
+              this.pcVal = this.ram.fill(this.pcVal, encoded);
+              this.codeBlocks [this.codeBlocks.length - 1].addCode(encoded);
+            } else {
+              this.error('No value set for origin', 0);
+            }
+          }
+        }
+      } else {
+        clearInterval(this.asmIntervalID);
+        this.asmIintervalID = null;
+        if (this.passNo < this.passes) {
+          this.asmInit(this.passNo + 1);
+        } else {
+          this.asmFinalise();
+        }
+      }
+    };
+    this.cycle = function() {
+      var opcode, instruction, i, numTimes, pcAddress;
+      if (this.intervalID == null) {numTimes = 1;} else {numTimes = this.intervalTimes;}
+      for (i = 1; i <= numTimes; i++) {
+//      trc ("Cycle no.",this.cycles,1);
+        this.cycles++;
+        if (!(this.alu.syncing || this.alu.waiting)) {
+//        trc ("Begin instruction execute PC", inHex (this.registers['regPC'].regValue,4));
+          do {
+//      trc ("opPage",this.opPage);
+            opcode = this.ram.peek(this.registers['regPC'].regValue);
+            this.registers['regPC'].setValue(this.ram.plus(this.registers['regPC'].regValue));
+            if (instruction = this.opFind(opcode, this.opPage)) {
+//            trc ("Found mnemonic", instruction.mnem+' = '+instruction.code);
+              this.alu.execute(instruction.code);
+            } else {
+//            trc ("PC: ", inHex (this.registers['regPC'].regValue,4)+" unknown opcode "+opcode);
+            }
+          } while (this.opPage);
+        } else {
+//        trc ("Syncing or waiting, syncing=", this.alu.syncing,1);
+//        trc ("Syncing or waiting, waiting=", this.alu.waiting,1);
+        }
+        this.alu.checkInterrupts();
+        pcAddress = this.registers['regPC'].regValue;
+        if (this.breakpoints[pcAddress]) {
+          i = numTimes;
+          this.stop();
+          this.refresh(true);
+        }
+      }
+      this.dsmTable.lineOn(pcAddress, 0);
+    };
+    this.stop = function() {
+      function cancelInterval(id) {
+        if (id != null) {clearInterval(id);}
+        return null;
+      }
+
+      this.alu.waiting = 0;
+      this.alu.syncing = 0;
+      this.intervalID = cancelInterval(this.intervalID);
+      this.irqID = cancelInterval(this.irqID);
+      this.firqID = cancelInterval(this.firqID);
+    };
+    this.ready = function() {
+      this.alu = new ALU816(this);
+      this.cycles = 0;
+      this.loadOS();
+      this.SI = new systemInterface(this, SIbaseAddress);
+    };
+    this.execute = function() {
+//    trc ("Execute from "+inHex (this.registers['regPC'].regValue,4)+" with "+this.intervalMils+" delay. (speed factor "+this.intervalTimes+")",0,1);
+      this.stop();
+      this.intervalID = setInterval(machineCycle, this.intervalMils);
+//    trc ("Execute irqMils", this.irqMils,1);
+      this.irqID = setInterval(doIRQ, this.irqMils);
+      this.firqID = setInterval(doFIRQ, this.firqMils);
+    };
+    this.setSpeed = function(speed) {
+      var mils = this.speedMils[speed];
+      if (mils < 1) {
+        this.intervalTimes = Math.round(1 / mils);
+        mils = 1;
+      } else {
+        this.intervalTimes = 1;
+      }
+      this.intervalMils = mils;
+      if (this.intervalID != null) {
+        this.execute();
+      }
+    };
+    this.addEvents = function() {
+      var container;
+      var cpu = this;
+      if (container = document.getElementById('registers-container')) {
+        container.addEventListener('keypress', function(event) {
+          var keyPress;
+          if (!event.defaultPrevented) {
+            keyPress = event.key.toString().toUpperCase();
+            trc('Event keypress triggered', keyPress);
+            if ((keyPress in keyCodesList) && (cpu.hexInputCell)) {
+              trc('Key Event triggered', keyPress, 1);
+              cpu.hexInputRegister.inputHex(cpu, keyCodesList[keyPress]);
+              event.preventDefault();
+            }
+          }
+        }, true);
+        document.addEventListener('keydown', function(event) {
+          trc('keydown event', event.key, 1);
+          if ((event.key == 'Backspace') || (event.key == 'Escape')) {
+            trc('Escape or backspace', event.key, 1);
+            if (mc6809.intervalID != null) {
+              trc('Escape or backspace', 'running', 1);
+              keyPressHandler(event);
+            }
+          }
+        }, true);
+      }
+    };
+    this.addRegisters = function() {
+      this.addReg('PC', 16, 0, '', 0);
+      this.addReg('X', 16, 0, '', 0);
+      this.addReg('Y', 16, 0, '', 0);
+      this.addReg('U', 16, 0, '', 0);
+      this.addReg('S', 16, 0, '', 0);
+      this.addReg('A', 8, 0, 'Y', 1);
+      this.addReg('B', 8, 0, 'Y', 1);
+      this.addReg('CC', 8, 0x50, 'EFHINZVC', 1);
+      this.addReg('DP', 8, 0, '', 0);
+    };
+    this.addRegisters();
+    this.watchList = new watchWindow('watchWindow', this, 0x7ff0);
+    this.watchList.addWatch(0xff80);
+    this.addEvents();
+  };
+
+  function machineCycle() {
+    mc6809.cycle();
+  }
+
+  function assemblyCycle() {
+    mc6809.asmCycle();
+  }
+
+  function machineStep() {
+    mc6809.stop();
+    mc6809.cycle();
+    if (!mc6809.refreshOn) {
+      mc6809.refresh(1);
+    }
+  }
+
+  function machineHalt() {
+    console.dir(document.getElementById('registers-container'));
+    mc6809.stop();
+    mc6809.refresh(1);
+  }
+
+  function machineRun() {
+    machineRefresh();
+    mc6809.execute();
+  }
+
+  function machineReset() {
+//  mc6809.keybuffer=[];
+    machineInterrupt('reset');
+//  mc6809.refresh (1);
+//  mc6809.execute ();
+  }
+
+  function doIRQ() {
+    mc6809.alu.interrupt('irq');
+    mc6809.alu.checkInterrupts();
+  }
+
+  function doFIRQ() {
+    mc6809.alu.interrupt('firq');
+    mc6809.alu.checkInterrupts();
+  }
+
+  function machineInterrupt(irqName) {
+    trc('machineInterrupt', irqName);
+    mc6809.alu.interrupt(irqName);
+    mc6809.alu.checkInterrupts();
+    mc6809.refresh(1);
+    mc6809.execute();
+  }
+
+  function machineOrg(PC, force) {
+    mc6809.registers['regPC'].change(PC, 0);
+    mc6809.dsmTable.lineOn(mc6809.registers['regPC'].regValue, force);
+  }
+
+  function addWatchpoint(where) {
+    switch (where.toUpperCase()) {
+      case 'EA':
+        mc6809.watchList.addWatch(mc6809.alu.eaLast);
+        break;
+      case 'X':
+        mc6809.watchList.addWatch(mc6809.registers['regX'].regValue);
+        break;
+      case 'APPEND':
+        mc6809.watchList.addWatch(mc6809.watchList.lastWatch + 0x10);
+        break;
+    }
+  }
+
+  function machineRefresh() {
+    var refresh;
+    if (refresh = document.getElementById('refreshCheck')) {
+      if (refresh.checked) {
+        mc6809.refresh(1);
+      }
+      mc6809.refreshOn = refresh.checked;
+    }
+  }
+
+  function compileRun(id) {
+    var asmLines, element;
+    if (element = document.getElementById(id)) {
+//    trc ("Assembling program",'');
+      mc6809.assemble(element.value.split('\n'));
+      mc6809.refresh(1);
+    }
+  }
+
+  function codeDump(id) {
+    var block, element;
+    var text = '';
+    for (block in mc6809.codeBlocks) {
+      text += mc6809.codeBlocks[block].writeCode() + '\n';
+    }
+//  console.log (text);
+    if (element = document.getElementById(id)) {
+      element.value = text;
+    }
+  }
+
+  function speedSlider(cpu, speed) {
+    var readout;
+    this.slider = null;
+    this.slider = document.getElementById('speed');
+    this.slider.min = 1;
+    this.slider.max = 10;
+    speed = Math.max(this.slider.min, Math.trunc(speed));
+    this.slider.value = Math.min(speed, this.slider.max);
+    readout = document.getElementById('speedVal');
+    readout.innerHTML = this.slider.value;
+    cpu.intervalMils = cpu.speedMils [this.slider.value];
+    this.slider.oninput = function() {
+      readout.innerHTML = this.value;
+      cpu.setSpeed(this.value);
+    };
+  }
+
+
+</script>
+
+
+<h1>Motorola 6809 Emulator</h1>
+<p style='margin:0'>A single page assembler, disassembler, and emulator for entry-level tinkering with the 6809 CPU. See
+  <a target='6809help' href='http://6809.uk/help.html'>full instructions</a>.</p>
+
+<table id='main-container' style='border-collapse:separate; border-spacing: 0.5em;'>
+  <tr>
+    <td class='machinePanel'>
+
+      <table id='registers-container' tabindex='0'>
+        <tr>
+          <td>
+            <table id='regA' class='regitem'>
+            </table>
+          </td>
+          <td>
+            <table id='regB' class='regitem'>
+            </table>
+          </td>
+        </tr>
+        <tr>
+          <td colspan=2>
+            <table id='regX' class='regitem'>
+            </table>
+          </td>
+        </tr>
+        <tr>
+          <td colspan=2>
+            <table id='regY' class='regitem'>
+            </table>
+          </td>
+        </tr>
+        <tr>
+          <td colspan=2>
+            <table id='regU' class='regitem'>
+            </table>
+          </td>
+        </tr>
+        <tr>
+          <td colspan=2>
+            <table id='regS' class='regitem'>
+            </table>
+          </td>
+        </tr>
+        <tr>
+          <td colspan=2>
+            <table id='regCC' class='regitem'>
+            </table>
+          </td>
+        </tr>
+        <tr>
+          <td colspan=2>
+            <table id='regDP' class='regitem'>
+            </table>
+          </td>
+        </tr>
+        <tr>
+          <td colspan=2>
+            <table id='regPC' class='regitem'>
+            </table>
+          </td>
+        </tr>
+        <tr>
+          <td colspan=2>
+            <table class='interrupts' style='margin-top:0.5em; margin-bottom:0.5em;'>
+              <tr>
+                <td>
+                  <button onclick='machineInterrupt ("irq");' class='buttonStep buttonIRQ'>IRQ</button>
+                </td>
+                <td>
+                  <button onclick='machineInterrupt ("firq");' class='buttonStep buttonIRQ'>FIRQ</button>
+                </td>
+                <td>
+                  <button onclick='machineInterrupt ("nmi");' class='buttonStep buttonIRQ'>NMI</button>
+                </td>
+              </tr>
+              <tr>
+                <td colspan='3'>
+                  <button onclick='machineReset ();' class='buttonStep buttonReset'>RESET</button>
+                </td>
+              </tr>
+            </table>
+          </td>
+        </tr>
+        <tr>
+          <td colspan='2' style='text-align:center'>
+            <input type='range' min='1' max='10' value='3' class='slider' id='speed'/>
+          </td>
+        <tr>
+          <td class='controlCaption' style='text-align:right'><label for="speed">Speed</label></td>
+          <td class='controlData' style='text-align:left'><span class='controlData' id='speedVal'></span></td>
+        </tr>
+        <tr>
+          <td class='controlCaption' style='text-align:right'><label for="refreshCheck">Refresh</label></td>
+          <td class='controlData'><input type='checkbox' id='refreshCheck' onclick='machineRefresh ()'
+                                         style='text-align: left' checked/></td>
+        </tr>
+
+        <tr>
+          <td colspan=2>
+            <table class='interrupts' style='margin-top:0.5em; margin-bottom:0.5em;'>
+              <tr>
+                <td colspan='2' style='text-align:center'>
+                  <button onclick='machineRun ();' class='buttonRun'>Run</button>
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <button onclick='machineHalt ();' class='buttonStep buttonHalt'>&nbsp;Halt&nbsp;</button>
+                </td>
+                <td>
+                  <button onclick='machineStep ();' class='buttonStep'>Step</button>
+                </td>
+              </tr>
+            </table>
+          </td>
+        </tr>
+
+      </table>
+
+    </td>
+
+    <td class='machinePanel'>
+
+      <h3>Disassembly output</h3>
+
+      <div id='DSMTable-container'></div>
+
+      <p class='usageNote'>
+        Right-click on an address to set/reset breakpoints.<br/>
+        Right-click on an instruction to edit.
+      </p>
+
+
+    </td>
+
+    <td class='machinePanel'>
+      <h3>Labels</h3>
+
+      <div id='labelMap-container'></div>
+
+      <p class='usageNote' style='width: 12em'>
+        Click on a label to display disassembled code starting at that address.
+      </p>
+
+    </td>
+
+
+    <td class='machinePanel'>
+
+      <div style='width:max-content'>
+
+        <h3 style='float:left'>Assembly language input</h3>
+
+        <div style='float:right'>
+
+
+          <div class='dropDown' style='display:inline-block'>
+
+            <div class='examplesList' style='margin-top:1em; margin-left:2em;'>
+              <p class='menuItem'
+                 onclick="document.getElementById ('assembly-code').value=document.getElementById ('demo-checks').value">
+                Check pattern</p>
+              <p class='menuItem'
+                 onclick="document.getElementById ('assembly-code').value=document.getElementById ('demo-hiscore').value">
+                High scores</p>
+              <p class='menuItem'
+                 onclick="document.getElementById ('assembly-code').value=document.getElementById ('demo-plotpix').value">
+                Pixel plot</p>
+              <p class='menuItem'
+                 onclick="document.getElementById ('assembly-code').value=document.getElementById ('demo-quickline').value">
+                Line draw</p>
+              <p class='menuItem'
+                 onclick="document.getElementById ('assembly-code').value=document.getElementById ('demo-life').value">
+                Game of Life</p>
+              <p class='menuItem'
+                 onclick="document.getElementById ('assembly-code').value=document.getElementById ('demo-sprite').value">
+                Sprites</p>
+              <p class='menuItem' style='color:#a0a0a0'>- - - - - - -</p>
+              <p class='menuItem'
+                 onclick="document.getElementById ('assembly-code').value=document.getElementById ('demo-helloworld').value">
+                Hello World</p>
+              <p class='menuItem'
+                 onclick="document.getElementById ('assembly-code').value=document.getElementById ('demo-charset').value">
+                Character set</p>
+              <p class='menuItem'
+                 onclick="document.getElementById ('assembly-code').value=document.getElementById ('demo-clearscr').value">
+                Clear screen</p>
+              <p class='menuItem'
+                 onclick="document.getElementById ('assembly-code').value=document.getElementById ('demo-core6809').value">
+                Core OS</p>
+            </div>
+
+            <button class='buttonExamples' style='margin-left:1em;'>Examples</button>
+
+          </div>
+
+          <button onclick="document.getElementById ('assembly-code').value=''" class='buttonStep buttonHalt'
+                  style='margin-left:1em;'>Clear
+          </button>
+
+        </div>
+
+      </div>
+
+      <textarea id='assembly-code' name='assembly-code' rows='38' cols='60'>
+        ; pmode set x,y,c
+
+; entry
+; A is Y (0-191)
+; B is X (0-127)
+; Y is colour 0-7 (with 4 dithered colours)
+
+        org $4000
+start:
+        lda #73
+        ldb #127
+        ldy #3
+
+	; Initial part, normalise co-ordinates
+	; Want out pixel number 0-3
+	; Screen byte position 0-6143
+
+
+	pshs d	; save co-ordinates
+	andb #3	; get pixel number
+	stb ,s	; save it
+	ldb 1,s	; restore b
+	subb ,s ; ensure no carries out of the bottom of b
+
+	aslb 	; b <128 so no carry
+	rora	; join X + Y
+	rorb	; d = x + y * 128
+
+	rora
+	rorb	; d = x/2 + y * 64
+
+	rora
+	rorb	; d = x/4 + y * 32
+
+	tfr d,x	; x now has byte address
+	lda ,s++ ; stack restored, pix num in a
+
+; determine plot
+; get byte pixel pattern
+; and byte mask
+
+
+	leax $c00,x		; add screen base with dos
+	leau ptble,y	; pix table entry
+	andb #$20		; check for dither adjust
+	beq si			; if even line, skip increment
+	leau 8,u		; chose alternate dither entry
+
+si:
+	ldb ,u			; get pixel pattern
+	leay mtble,y	; get mask address
+	andb ,y  		; mask it
+
+; now	 x is screen address
+; 		 b is pixel pattern to add
+;		 need com of mask to clear screen byte
+
+	coma
+
+; plot
+
+;	x byte address
+;	b pixel value
+;	a clr screen pixel mask
+
+	anda ,x
+	sta <$0f	; ECB temporary result byte in direct
+	orb <$0f
+	stb ,x
+	rts
+
+
+mtble:
+	fcb $c0
+	fcb $30
+	fcb $0c
+	fcb $03
+
+ptble:
+	fcb $FF		; red
+	fcb $cc		; red / green
+	fcb $dd		; red / yellow
+	fcb $55		; yellow
+	fcb $11		; yellow / green
+	fcb $00		; green
+	fcb $88		; green / blue
+	fcb $99		; blue
+
+
+	fcb $FF
+	fcb $33		; green / red
+	fcb $77		; switched etc
+	fcb $55
+	fcb $44
+	fcb $00
+	fcb $22
+	fcb $99
+
+</textarea>
+
+      <textarea id='demo-helloworld' rows='38' cols='60' style='display:none'>
+;
+;  Enter your 6809 assembly language program here
+;  Press the Assemble button below
+;
+;  No errors? Press Run in the panel to the left
+;  The CPU will stop on breakpoints (in red)
+;  Press Run to continue
+;
+
+
+start:
+    leay helloworld,pcr
+    jsr print
+    rts
+
+const textscreenbase=$400
+
+print:
+    pshs a,x,y
+    ldx #textscreenbase
+printloop:
+    lda ,y+
+    beq printover
+    cmpa #$40
+    bhs print6847
+    adda #$40
+print6847:
+    sta ,x+
+    bra printloop
+printover:
+    puls a,x,y
+    rts
+
+
+helloworld:
+    fcb "HELLO WORLD",0
+
+</textarea>
+
+
+      <textarea id='demo-checks' rows='38' cols='60' style='display:none'>
+
+; Display a chequerboard pattern on the text screen
+; Then do the same on the graphics screen
+
+const baseTextScreen=$400, baseGraphicScreen=$0600
+const space=$20, inverse=%01000000
+const widthText=32, heightText=16
+const widthGraphics=32, heightGraphics=24
+const charHeight=8, charVal=%00000000
+
+start:
+  jsr chequerboardText
+
+; Un-comment the next lines for the graphics version
+; Warning: it is slow
+
+;  ldd #$0204       ; select 4 colour graphics mode
+;  swi3
+;  jsr chequerboardGraphics
+
+  rts
+
+chequerboardText:
+  ldx #baseTextScreen
+  lda #heightText
+  pshs a
+  lda #space
+loopRow:
+  ldb #widthText
+loopChar:
+  sta ,x+
+  eora #inverse
+  decb
+  bne loopChar
+  eora #inverse
+  dec ,s
+  bne loopRow
+  puls a,pc
+
+chequerboardGraphics:
+  ldx #baseGraphicScreen
+  lda #heightGraphics
+  pshs a
+  lda #charVal
+loopRowG:
+  ldb #widthGraphics
+loopCharG:
+  bsr drawChar
+  leax 1,x
+  coma
+  decb
+  bne loopCharG
+  coma
+  leax ,y
+  dec ,s
+  bne loopRowG
+  puls a,pc
+
+drawChar;
+  pshs b,x
+  ldb #charHeight
+drawCLp:
+  sta ,x
+  leax widthGraphics,x
+  decb
+  bne drawCLp
+  leay -widthGraphics+1,x
+  puls b,x,pc
+
+</textarea>
+
+
+      <textarea id='demo-hiscore' rows='38' cols='60' style='display:none'>
+
+; High score table routine for games
+; Scores are stored as <scLen> ASCII characters
+; They are followed by <scInitials> initials
+; Here we use text screen memory to see what's happening
+; Note ASCII chars less than $40 show as inverse video
+
+const scLen=7, scInitials=3, scDif=32, hiScores=10
+
+start:
+  leax score,pcr     ; X points to the player's score
+  leay hiTable,pcr   ; Y points to the high score table
+  jsr insertHiTable
+  rts
+
+insertHiTable:
+; Insert a score at X into high score table at Y
+  pshs a,b,y
+  lda #hiScores-1
+  ldb #scDif
+  mul
+  leay d,y           ; Y points at hi score to compare
+  lda #$ff           ; flag true only on first pass
+  ldb #hiScores
+insertHiLp:
+  bsr scoreCompare   ; compare X with Y
+  bcs insertHiDone   ; carry set if less than or equal
+  leay -scDif,y      ; move one row higher up table
+  clra               ; clear flag
+  decb               ; keep count of digits
+  bne insertHiLp
+insertHiDone:
+  puls a,b,y,pc
+
+scoreCompare:
+; Compare a score at X with one at Y
+; If higher, move the score at Y down one row
+;   then insert X in its place
+; If A non-zero means at lowest score so don't shift down
+  pshs a,b,x,y
+  ldb #scLen
+scCmpLp:
+  lda ,x+
+  cmpa ,y+           ; compare digits, highest first
+  blo scCmpOut       ; if X is lower then quit
+  bhi scInsert       ; if X is higher then insert score
+  decb               ; keep count of digits
+  bne scCmpLp
+  orcc #$01          ; equal scores, set carry then quit
+  bra scCmpOut
+scInsert:
+  tst ,s             ; test last entry flag (A was stacked)
+  bne scSkipShift    ; don't shift down a row if first pass
+  ldx 4,s            ; X is loaded with Y value from stack
+  leay scDif,x       ; destination is one row down
+  bsr scCopy         ; copy score from Y to Y+scDif
+scSkipShift:
+  ldx 2,s            ; restore X & Y from stack
+  ldy 4,s
+  bsr scCopy         ; copy score from X to Y
+scCmpOut:
+  puls a,b,x,y,pc
+
+scCopy:
+; Copy a score from address X to address Y
+  ldb #scLen+scInitials
+scCpLp:
+  lda ,x+            ; copy from X into table
+  sta ,y+
+  decb
+  bne scCpLp         ; keep count of chars
+  rts
+
+
+const textScreen=$0400, indent=11
+const spacing=scDif-scLen-scInitials
+
+  org textScreen
+
+  fill $20, $200
+
+  org textScreen+$20+indent
+
+score:
+  fcb "1271300 ME"
+
+  org textScreen+$60+indent
+
+hiTable:
+  fcb "1272700 JM"
+  rmb spacing
+  fcb "1271100 RL"
+  rmb spacing
+  fcb "1260700 RL"
+  rmb spacing
+  fcb "1259000 JM"
+  rmb spacing
+  fcb "1249500 JM"
+  rmb spacing
+  fcb "1247700 RL"
+  rmb spacing
+  fcb "1230100 RL"
+  rmb spacing
+  fcb "1218000 WC"
+  rmb spacing
+  fcb "1195100 WC"
+  rmb spacing
+  fcb "1190200 RL"
+  rmb spacing
+
+</textarea>
+
+
+      <textarea id='demo-plotpix' rows='38' cols='60' style='display:none'>
+
+const graphicsBase=$600, gLineBytes=$20
+
+start:
+    ldd #$0210       ; select 16 colour graphics mode
+    swi3
+    bsr testPixels
+    rts
+
+testPixels:
+    lda #$00
+    ldy #16
+testP2:
+    ldx #16
+testP1:
+    anda #$0f
+    pshs a
+    lsla
+    lsla
+    lsla
+    lsla
+    ora ,s+
+    lbsr plotPix4bit
+    inca
+    leax 2,x
+    cmpx #80
+    blo testP1
+    deca
+    leay 2,y
+    cmpy #80
+    blo testP2
+    rts
+
+; Mask lookup tables, x=xPos, y=yPos, a=colour
+; repeated at all 8 bit positions, eg. $00 or $ff
+
+plotMask1bit:
+    fcb %10000000, %01000000, %00100000, %00010000
+    fcb %00001000, %00000100, %00000010, %00000001
+plotMask2bit:
+    fcb %11000000, %11000000, %00110000, %00110000
+    fcb %00001100, %00001100, %00000011, %00000011
+plotMask4bit:
+    fcb %11110000, %11110000, %00001111, %00001111
+    fcb %11110000, %11110000, %00001111, %00001111,
+
+; Plot a pixel at 4, 2, or 1 bits be pixel
+; Inputs:-
+; X-coordinate in X, Y-coordinate in Y
+; Logical grid is always (0,0) top left
+; to (255,191) bottom right
+; Physical pixels are 2:2, 2:1, 1:1
+; for 4, 2, or 1 bit modes respectively
+; stored left to right, top to bottom
+; Colour in A, repeated 2, 4 or 8 times
+; for 4, 2, or 1 bit modes respectively
+; to fill the byte
+; eg. in 2 bit mode colour %01 is %01010101
+
+plotPix4bit:
+    pshs d,x,y,u
+    leau <plotMask4bit,pcr
+    tfr y,d
+    andb #$fe
+    lda #gLineBytes
+    mul
+    addd #graphicsBase
+    tfr d,x
+    ldd 2,s
+    bra plotPix2
+
+plotPix2bit:
+    pshs d,x,y,u
+    leau <plotMask2bit,pcr
+    bra plotPix1
+
+plotPix1bit:
+    pshs d,x,y,u
+    leau <plotMask1bit,pcr
+plotPix1:
+    tfr y,d
+    lda #gLineBytes
+    mul
+    addd #graphicsBase
+    tfr d,x
+    ldd 2,s
+    lsrb
+plotPix2:
+    lsrb
+    lsrb
+    abx
+    ldb 3,s
+    andb #$07
+    leau b,u
+    lda ,u          ; mask out screen bits of pixel
+    coma
+    anda ,x
+    sta ,x
+    lda ,u
+    anda ,s         ; merge with foreground colours
+    ora ,x
+    sta ,x
+    puls d,x,y,u,pc
+
+</textarea>
+
+      <textarea id='demo-quickline' rows='38' cols='60' style='display:none'>
+
+; Graphics demo:- draw some lines
+
+const graphicsBase=$600, gLineBytes=$20
+
+start:
+    ldd #$0202       ; select 2 colour graphics mode
+    swi3
+    bsr testQLine
+    rts
+
+testQLine:
+    ldd #$00f3
+tql1:
+    lbsr quickLine
+    decb
+    adda #3
+    cmpa #183
+    blo tql1
+    rts
+
+; quickLine A=height, B=width
+;
+; Simplified line draw illustrating Bresenham algorithm
+; Starting point is a fixed byte
+; Displacements to the right and down (width, height)
+; are passed in B & A respectively (width >= height)
+; The algorithm works simply by subtracting the fractional
+; gradient (height/width) on every pixel step to the right
+; until the running total is <=0 . Then the line moves down
+; and 1 is added to the running total
+; The initial fraction is width/2 to even out the steps
+; Pixels are drawn by ORing an onscreen byte with a
+; bit mask that is rotated with every pixel
+
+quickLine:
+   pshs d,x          ; save registers used
+   lda #$80          ; initial mask is leftmost pixel
+   pshs d            ; save mask @ < ,s >, width @ < 1,s >
+   ldx #graphicsBase+gLineBytes+1
+   lsrb              ; fraction initial value=width/2
+   lda ,x            ; grab first byte from the screen
+qline3:
+   ora ,s            ; combine 1 pixel to the fragment of
+   lsr ,s            ; screen cached in A
+   bcc qline1        ; rotate mask one pixel to the right
+   ror ,s            ; wrap around if necessary
+   sta ,x+           ; restoring cached byte, incrementing
+   lda ,x            ; and caching the next byte
+qline1:
+   subb 2,s          ; sub (rolling fraction, height)
+   bhi qline2        ; if fraction <=0,
+   addb 3,s          ; add width to fraction,
+   sta ,x            ; restore cached byte and
+   leax gLineBytes,x ; move down 1 line
+   lda ,x            ; fetch another cached byte
+qline2:
+   dec 1,s           ; dec loop count (initially=width)
+   bne qline3
+   sta ,x            ; restore final cached byte
+   leas 2,s          ; clean up stack
+   puls d,x,pc       ; restore registers and return
+
+</textarea>
+
+      <textarea id='demo-life' rows='38' cols='60' style='display:none'>
+
+; Game of Life demo on 256 x 192 grid
+; 6809 assembly language
+; for Dragon 32 & compatibles
+
+const pixWide=256, pixHigh=192
+const baseGraphicScreen=$0600, bytesWide=32
+const liveCellBase=7
+const generations=50000
+
+start:
+;  ldd #$0202       ; select 2 colour graphics mode
+;  swi3             ; (optional depending on hardware)
+  ldd #0
+lifeLoop:
+  lbsr initVars
+  lbsr lifeCycle
+  addd #1
+  cmpd #generations
+  blo lifeLoop
+  rts
+
+lifeCycle:
+  pshs d
+  ldd #-1
+  pshs d
+lCycleLp:
+; Loop from lines -1 to <pixHigh-2>
+; followed by the final line
+; X, Y, U point to three line buffers
+; of unpacked screen pixels which
+; are cycled in turn
+  pshs y,u
+  lbsr countPixRow
+; Count a line of screen pixels
+; into three line buffers
+  ldd 4,s
+  cmpd #0
+  blt onFirstRun
+; Don't write pixels for first runthrough
+  ldu >screenPtr
+; X=oldest buffer + pixWide
+  lbsr writePixRow
+; Display a completed line of cells
+  bra lCycleNoSkip
+onFirstRun:
+  leau -pixWide,x
+lCycleNoSkip:
+  ldx >screenPtr
+  leax bytesWide,x
+; U=written buffer start
+  lbsr initBuffer
+  puls x, y
+; X=middle buffer
+; Y=last buffer
+  ldd ,s
+  addd #1
+  std ,s
+  cmpd #pixHigh-1
+  blt lCycleLp
+; Write out final contents of buffer
+  leax pixWide,x
+  ldu >screenPtr
+  leau bytesWide,u
+  lbsr writePixRow
+  leas 2,s
+  puls d,pc
+
+
+countPixRow:
+; Read row of pixels and count into buffers
+; X points to line-1 buffer start
+; Y points to line buffer start
+; U points to line+1 buffer start
+; X, Y, U incremented by pixWide
+; <screenPtr> incremented by bytesWide
+  lda #bytesWide
+  pshs a
+next8Pix:
+; Read A from screen at screenPtr
+; Self-modifying code
+; Quick and saves a register
+  lda >0
+next8Ptr:
+const screenPtr=next8Ptr-2
+; Move to next screen byte
+  inc screenPtr+1
+  bne not256
+  inc screenPtr
+not256:
+  ldb #8
+nextPix
+  tsta
+  beq noMoreCells
+  lsla
+  bcc noCell
+; If cell present, increment 8 neighbours
+  inc ,x+
+  inc ,x
+  inc 1,x
+  inc ,y+
+  inc 1,y
+  inc ,u+
+  inc ,u
+  inc 1,u
+  bra nextCell
+noCell:
+  leax 1,x
+  leay 1,y
+  leau 1,u
+nextCell:
+  decb
+  bne nextPix
+  bra skipPix
+nomoreCells:
+  leax b,x
+  leay b,y
+  leau b,u
+skipPix:
+  dec ,s
+  bne next8Pix
+  puls a,pc
+
+
+writePixRow:
+; Display row of cells on screen, right to left
+; U=(row+1)+bytesWide
+; X=buffer+pixWide
+; Return freed buffer start in U
+  leau -bytesWide,u
+  leax 1,x
+  ldy #cellNextGenList
+  lda #bytesWide
+  pshs a
+wPixRowLp:
+  clra
+  ldb ,-x
+  adda b,y
+  lsra
+  ldb ,-x
+  adda b,y
+  lsra
+  ldb ,-x
+  adda b,y
+  lsra
+  ldb ,-x
+  adda b,y
+  lsra
+  ldb ,-x
+  adda b,y
+  lsra
+  ldb ,-x
+  adda b,y
+  lsra
+  ldb ,-x
+  adda b,y
+  lsra
+  ldb ,-x
+  adda b,y
+  sta ,-u
+  dec ,s
+  bne wPixRowLp
+  leau -1,x
+  puls a,pc
+
+
+initBuffer:
+; Unpack screen pixels into byte buffer, right to left
+; X points to screen line start - unchanged
+; U points to buffer start - unchanged
+  cmpx #$0700
+  blo ok1
+  nop
+ok1:
+  pshs dp, u
+; init 4 zero bytes
+  clrb
+  tfr b,dp
+  ldy #0
+; point to end of line for predecrement
+  leax bytesWide,x
+; point to end of buffer, allowing for border bytes
+  leau pixWide+1,u
+  lda #bytesWide
+  pshs a
+iBufLp:
+  lda ,-x
+  bne iBufCells
+; quick write for empty pixels
+  pshu b, dp, y
+  pshu b, dp, y
+  dec ,s
+  bne iBufLp
+  bra iBufOut
+iBufCells:
+  ldb #liveCellBase
+iBufCell0:
+  lsra
+  bcs iBufCellLive1
+  clr ,-u
+  bra iBufCell1
+iBufCellLive1:
+  pshu b
+iBufCell1:
+  lsra
+  bcs iBufCellLive2
+  clr ,-u
+  bra iBufCell2
+iBufCellLive2:
+  pshu b
+iBufCell2:
+  lsra
+  bcs iBufCellLive3
+  clr ,-u
+  bra iBufCell3
+iBufCellLive3:
+  pshu b
+iBufCell3:
+  lsra
+  bcs iBufCellLive4
+  clr ,-u
+  bra iBufCell4
+iBufCellLive4:
+  pshu b
+iBufCell4:
+  lsra
+  bcs iBufCellLive5
+  clr ,-u
+  bra iBufCell5
+iBufCellLive5:
+  pshu b
+iBufCell5:
+  lsra
+  bcs iBufCellLive6
+  clr ,-u
+  bra iBufCell6
+iBufCellLive6:
+  pshu b
+iBufCell6:
+  lsra
+  bcs iBufCellLive7
+  clr ,-u
+  bra iBufCell7
+iBufCellLive7:
+  pshu b
+iBufCell7:
+  lsra
+  bcs iBufCellLive8
+  clr ,-u
+  bra iBufCellDone
+iBufCellLive8:
+  pshu b
+iBufCellDone:
+  clrb
+  dec ,s
+  bne iBufLp
+iBufOut:
+  leas 1,s
+  puls dp, u, pc
+
+
+initVars:
+  pshs d
+  ldx #baseGraphicScreen
+  stx >screenPtr
+  ldu #buf2
+  lbsr initBuffer
+  leax bytesWide,x
+  ldu #buf3
+  lbsr initBuffer
+  ldx #buf1
+  ldy #buf2
+  puls d,pc
+
+cellNextGenList:
+  fcb 0,0,0,$80,0,0,0
+  fcb 0,0,$80,$80,0,0,0,0,0
+
+buf1 rmb pixWide+2
+buf2 rmb pixWide+2
+buf3 rmb pixWide+2
+
+org baseGraphicScreen
+  fill 0,$1800
+
+org baseGraphicScreen
+glider:
+  fcb %00000000
+  rmb bytesWide-1
+  fcb %01000000
+  rmb bytesWide-1
+  fcb %00100000
+  rmb bytesWide-1
+  fcb %11100000
+
+org baseGraphicScreen+$000d
+glidergun:
+  fcb %00000000, %00000000, %00000000, %01000000
+  rmb bytesWide-4
+  fcb %00000000, %00000000, %00000001, %01000000
+  rmb bytesWide-4
+  fcb %00000000, %00000110, %00000110, %00000000, %00011000
+  rmb bytesWide-5
+  fcb %00000000, %00001000, %10000110, %00000000, %00011000
+  rmb bytesWide-5
+  fcb %01100000, %00010000, %01000110
+  rmb bytesWide-3
+  fcb %01100000, %00010001, %01100001, %01000000
+  rmb bytesWide-4
+  fcb %00000000, %00010000, %01000000, %01000000
+  rmb bytesWide-4
+  fcb %00000000, %00001000, %10000000
+  rmb bytesWide-3
+  fcb %00000000, %00000110,
+  rmb bytesWide-2
+
+org baseGraphicScreen+$0b90
+rPentomino:
+  fcb %01100000
+  rmb bytesWide-1
+  fcb %11000000
+  rmb bytesWide-1
+  fcb %01000000
+  rmb bytesWide-1
+
+org baseGraphicScreen+$17a0
+  fcb %01000000
+  rmb bytesWide-1
+  fcb %01000110
+  rmb bytesWide-1
+  fcb %01000110
+
+</textarea>
+
+
+      <textarea id='demo-sprite' rows='38' cols='60' style='display:none'>
+
+; Graphics demo:- animate and move a sprite
+
+const graphicsBase=$600, gLineBytes=$20, vectorFIRQ=$fff6, vectorIRQ=$fff8
+
+start:
+    ldd #$0204       ; select 4 colour graphics mode
+    swi3
+    bsr testSprites
+    rts
+
+testSprites:
+    leax serviceIRQ,pcr         ; point interrupt vector
+    stx vectorIRQ               ; at flag-clearing sub
+    andcc #$EF                  ; clear IRQ mask flag
+    ldd #$0808                  ; starting coordinates
+testSpr1:
+    leay invadera00,pcr         ; sprite of 16-bit lines
+    bsr drawSprite88c           ; draw animation frame 1
+    lbsr syncIRQ                ; wait
+    bsr drawSprite88c           ; erase (repeat EOR)
+    leay invadera01,pcr
+    bsr drawSprite88c           ; draw animation frame 2
+    lbsr syncIRQ                ; wait
+    bsr drawSprite88c           ; erase
+    adda #2                     ; move sprite
+    addb #1
+    cmpa #224
+    blo testSpr1
+    rts
+
+
+drawSprite88c:
+    pshs d,x,y
+    ldx #graphicsBase
+    lda #gLineBytes
+    mul                     ; calculate starting
+    leax d,x                ; line on graphics screen
+    ldb ,s                  ; as (32*Y)
+    lsrb                    ; plus TRUNC (X/8)
+    lsrb
+    lsrb
+    abx
+    ldb ,s
+    andb #$07               ; calculate loopback offset
+    lslb                    ; -4 bytes per rotation
+    lslb                    ; minus a constant
+    negb
+    subb #d88cloopcalc-d88cloopmin
+    stb d88cloopback+1
+    ldb #8+1
+    pshs d                  ; counter & overflow byte
+    bra d88cloopin          ; join WHILE loop
+d88cloopfull:
+    lsra                    ; rotate right 1 bit
+    rorb
+    ror ,s
+    lsra                    ; repeat up to 7 times
+    rorb
+    ror ,s
+    lsra
+    rorb
+    ror ,s
+    lsra
+    rorb
+    ror ,s
+    lsra
+    rorb
+    ror ,s
+    lsra
+    rorb
+    ror ,s
+    lsra
+    rorb
+    ror ,s
+d88cloopmin:
+    eora ,x                 ; once each sprite line
+    eorb 1,x                ; is rotated, draw it
+    std ,x                  ; to screen using
+    lda ,s                  ; exclusive-or operation
+    eora 2,x
+    sta 2,x
+    leax GLineBytes,x       ; move 1 line down
+d88cloopin:
+    ldd ,y++                ; fetch next line of sprite
+    clr ,s                  ; clear overflow byte
+    dec 1,s                 ; loop count
+d88cloopback:
+    bne d88cloopfull        ; loopback is self-modified
+d88cloopcalc:
+    leas 2,s
+    puls d,x,y,pc
+
+invadera00:
+    fdb %0000100000100000
+    fdb %1000101010100010
+    fdb %1010011010011010
+    fdb %0010101010101000
+    fdb %0000101111100000
+    fdb %0000111010110000
+    fdb %0011110000111100
+    fdb %0011000000001100
+
+invadera01:
+    fdb %0010000000001000
+    fdb %0000101010100000
+    fdb %0010011010011000
+    fdb %1010100101101010
+    fdb %1000101111100010
+    fdb %0011111010111100
+    fdb %1111000000001111
+    fdb %0000000000000000
+
+
+    org $4400
+
+    var 1,flagIRQ
+
+syncIRQ:
+    clr flagIRQ       ; set a flag
+    com flagIRQ
+syncWait;
+    sync              ; wait for interrupt
+    tst flagIRQ       ; if interrupts are enabled
+    bne syncWait      ; the flag will be cleared
+    rts
+
+serviceIRQ:
+    clr flagIRQ       ; clear a flag on interrupt
+    rti
+
+</textarea>
+
+
+      <textarea id='demo-charset' rows='38' cols='60' style='display:none'>
+
+; Display the character set
+; from 0 to 255
+
+start:
+    jsr displayAllChars
+    rts
+
+const textScreenBase=$0400
+
+displayAllChars:
+    lda #0
+    ldx #textScreenBase
+displayLoop:
+    sta ,x+
+    inca
+    bne displayLoop
+    rts
+
+</textarea>
+
+      <textarea id='demo-clearscr' rows='38' cols='60' style='display:none'>
+
+const graphicsBase=$600, gLineBytes=$20
+
+start:
+    ldd #$0210       ; select 16 colour graphics mode
+    swi3
+    bsr refreshScreen
+    bsr clearScreen
+    rts
+
+
+refreshScreen:
+    pshs d,x,y
+    ldx #graphicsBase
+    ldy #$0600
+refreshS1:
+    tst ,x+
+    tst ,x+
+    tst ,x+
+    tst ,x+
+    leay -1,y
+    bne refreshS1
+    puls d,x,y,pc
+
+
+clearScreen:
+    pshs d,x,y
+    ldx #graphicsBase
+    ldd #0
+    ldy #$0600
+clearS1:
+    std ,x++
+    std ,x++
+    leay -1,y
+    bne clearS1
+    puls d,x,y,pc
+
+</textarea>
+
+
+      <textarea id='demo-core6809' rows='38' cols='60' style='display:none'>
+
+const SIbaseaddress=$ff80, SIrefreshOff=0, SIrefreshOn=1, SIgraphicsMode=2
+const textScrBase=$0400, textScrEnd=$0600, graphicsBase=$0600, gLineBytes=$20
+
+
+start:
+  rts
+
+org $f000
+
+hookrestart:
+  lbra servicerestart
+
+hooknmi:
+  lbra servicenop
+
+hookswi:
+  lbra servicenop
+
+hookirq:
+  lbra servicenop
+
+hookfirq:
+  lbra servicenop
+
+hookswi2:
+  lbra servicenop
+
+hookswi3:
+  lbra serviceswi3
+
+osloop:
+  jsr start
+  bra osloop
+
+
+servicenop:
+  rti
+
+; service in A, parameter in B
+
+serviceswi3:
+  pshs b
+  tfr a,b
+  clra
+  lslb
+  rola
+  leay switableend,pcr
+  pshs y
+  leay switable,pcr
+  leay d,y
+  cmpy ,s++
+  puls b
+  bhs servsw0
+  jsr (,y)
+servsw0:
+  rti
+
+servicezero:
+  rts
+
+servicerefresh:
+  tstb
+  bne refreshon
+refreshoff:
+  clr SIbaseAddress+SIrefreshOff
+  rts
+refreshon:
+  clr SIbaseAddress+SIrefreshOn
+  rts
+
+servicegmode:
+  stb SIbaseAddress+SIgraphicsMode
+  rts
+
+switable:
+  fdb servicezero
+  fdb servicerefresh
+  fdb servicegmode
+switableend:
+
+
+servicerestart:
+  orcc #$50
+  andcc #$50
+  lds #$8000
+  bsr osregclear
+  lbra osloop
+
+osregclear:
+  ldd #$0000
+  tfr a,dp
+  tfr d,x
+  tfr d,y
+  tfr d,u
+  rts
+
+
+org $fff0
+
+vreserve: rmb 2
+vswi3: fdb hookswi3
+vswi2: fdb hookswi2
+vfirq: fdb hookfirq
+virq: fdb hookirq
+vswi: fdb hookswi
+vnmi: fdb hooknmi
+vrestart: fdb hookrestart
+
+</textarea>
+
+
+      <br style='clear:both'/>
+      <div style='text-align:center'>
+        <button onclick="compileRun ('assembly-code');" class='buttonRun'>Assemble source code</button>
+        <button onclick="codeDump ('assembly-code');"
+                style='display:none; background-color: green; padding: 0.5em; border: 2px solid black; font-size: 1em; font-weight:bold'>
+          Dump object code
+        </button>
+        <p id='assemblyStatus' class='statusText'>Status</p>
+      </div>
+      <p class='usageNote'>
+        See the <a href='/doc/doku.php?id=assembler_syntax'>assembler syntax reference</a> for full details.
+      </p>
+    </td>
+
+
+  </tr>
+</table>
+
+<br style='clear:both'/>
+
+<div class='panel' style='width:max-content'>
+
+  <button onclick="addWatchpoint ('ea')" style='float:left'><b>Add memory watch point at last effective address</b>
+  </button>
+  <button onclick="addWatchpoint ('append')" style='margin-left: 2em'><b>Extend last memory watch point</b></button>
+  <button onclick="addWatchpoint ('x')" style='margin-left: 2em'><b>Add memory watch point at X</b></button>
+
+  <div id='watchWindow-container'>
+
+  </div>
+  <p class='usageNote'>Left-click on a byte to set its value from register A, right-click from register B</p>
+
+</div>
+
+<br style='clear:both'/>
+
+<div>
+  <table style='border-collapse:separate; border-spacing: 0.5em;'>
+    <tr>
+
+      <td class='screenPanel'>
+        <h3>Text screen</h3>
+        <div id='txtScreenTable-container'>
+        </div>
+        <p class='usageNote' style='width:20em'>Text screen is 16 lines of 32 characters starting at address $0400.</p>
+      </td>
+
+      <td class='screenPanel'>
+        <h3>Graphics screen</h3>
+        <div id='grphScreenHolder'>
+          <canvas id='graphicsScreen' width='512' height='384'></canvas>
+        </div>
+        <p class='usageNote' style='width:36em'>Graphics screen is (256*192 | 128*192 | 128*96) at (1 | 2 | 4) bits per
+          pixel, starting at address $0600.</p>
+      </td>
+
+    </tr>
+  </table>
+
+</div>
+
+<br style='clear:both'/>
+
+
+<script>
+  mc6809 = new CPU();
+  //  console.dir (mc6809.registers);
+  mc6809.ready();
+  speedControl = new speedSlider(mc6809, 5);
+  document.getElementById('assembly-code').value = document.getElementById('demo-helloworld').value
+  machineInterrupt('reset');
+  mc6809.refresh(1);
+  mc6809.execute();
+
+</script>
+
+<p style='background-color:#e0e0e0; font-size:0.75em; margin-top:1em; margin-bottom:0; padding:0.25em; text-align:left'>
+  <a href='http://6809.uk/'><i><b>6809.uk</b></i></a> design and coding &copy; Gwilym Thomas 2020 -
+  <a href='http://6809.ukdragons.org.uk/'><i><b>6809.ukdragons.org.uk</b></i></a> assembler revision by Julian Brown 2022</p>
+
+</body>
+
+</html>
+
+
