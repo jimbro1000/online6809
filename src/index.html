@@ -1,0 +1,1883 @@
+<!DOCTYPE html>
+<html lang='en'>
+<head>
+    <meta charset="utf-8">
+    <meta name="description"
+          content="An online assembler,disassembler and emulator for the Motorola 6809 CPU. Test snippets of machine code and see the results on simulated text and graphic displays.">
+    <title>Online Motorola 6809 Emulator</title>
+
+    <style>
+        body {
+            font-family: Arial, Helvetica, sans-serif;
+        }
+
+        table {
+            border-spacing: 2px;
+        }
+
+        h1 {
+            color: #808080;
+            margin-top: 0;
+            margin-bottom: 0.25em;
+            font-style: italic;
+        }
+
+        h3 {
+            margin-top: 0;
+            margin-bottom: 0.25em;
+        }
+
+        .controlCaption {
+            color: #ff0000;
+            font-weight: bold;
+        }
+
+        .anydig {
+            font-family: monospace, Arial, sans-serif;
+            text-align: center;
+            margin: 0;
+            padding: 2px;
+            background-color: #f8f8f8;
+            border: 1px solid #C0C0C0;
+        }
+
+        .anydig.hex {
+            font-size: 1.5em;
+        }
+
+        .anydig.hex.big {
+            font-size: 2.5em;
+        }
+
+        .anydig.bin {
+            font-size: 0.66em;
+        }
+
+        .anydig.flag {
+            font-size: 0.8em;
+        }
+
+        .anydig.label {
+            font-size: 0.8em;
+        }
+
+        .reglabel {
+            text-align: center;
+            font-size: 1.25em;
+            font-weight: bold;
+            color: #4040F0;
+        }
+
+        .regitem {
+            margin: 0 auto;
+        }
+
+        .txtScreen {
+            font-family: monospace, Arial, sans-serif;
+            font-size: 0.75em;
+            border-spacing: 0;
+        }
+
+        .txtFG {
+            color: #000000;
+            background-color: #20c020;
+            padding: 0;
+            margin: 0;
+        }
+
+        .txtBG {
+            color: #20c020;
+            background-color: #000000;
+            padding: 0;
+            margin: 0;
+        }
+
+        .txtGGreen {
+            color: #20c020;
+            background-color: #000000;
+            padding: 0;
+            margin: 0;
+        }
+
+        .txtGYellow {
+            color: #c0c020;
+            background-color: #000000;
+            padding: 0;
+            margin: 0;
+        }
+
+        .txtGBlue {
+            color: #2020C0;
+            background-color: #000000;
+            padding: 0;
+            margin: 0;
+        }
+
+        .txtGRed {
+            color: #c02020;
+            background-color: #000000;
+            padding: 0;
+            margin: 0;
+        }
+
+        .txtGWhite {
+            color: #c0c0c0;
+            background-color: #000000;
+            padding: 0;
+            margin: 0;
+        }
+
+        .txtGCyan {
+            color: #20c0c0;
+            background-color: #000000;
+            padding: 0;
+            margin: 0;
+        }
+
+        .txtGMagenta {
+            color: #c020c0;
+            background-color: #000000;
+            padding: 0;
+            margin: 0;
+        }
+
+        .txtGOrange {
+            color: #a06020;
+            background-color: #000000;
+            padding: 0;
+            margin: 0;
+        }
+
+        .watchWindow {
+            color: #c0c0c0;
+            background-color: #e0e0e0;
+            font-family: "Courier New", Courier, monospace;
+            font-size: 1.25em;
+            vertical-align: baseline;
+            border-style: solid;
+            border-color: #c0c0c0;
+            border-width: 1px;
+            border-collapse: collapse;
+            border-spacing: 0px;
+            padding-left: 0.25em;
+            padding-right: 0.25em;
+            border-collapse: separate;
+            border-spacing: 0 0.25em;
+        }
+
+        .watchControl {
+            color: red;
+            background-color: orange;
+            font-weight: bold;
+            padding-left: 0.25em;
+            padding-right: 0.25em;
+            cursor: pointer;
+        }
+
+        .watchControl:hover {
+            background-color: magenta;
+        }
+
+        .watchAddr {
+            color: #e0a020;
+            background-color: black;
+            font-weight: bold;
+            padding-left: 1em;
+            padding-right: 1em;
+        }
+
+        .watchHex {
+            background-color: black;
+            color: #e0a020;
+            padding-left: 0.5em;
+            padding-right: 0.5em;
+        }
+
+        .DSM {
+            color: #808080;
+            font-family: "Courier New", Courier, monospace;
+            font-size: 1em;
+            vertical-align: baseline;
+            border-style: solid;
+            border-color: #404040;
+            border-width: 1px;
+            border-collapse: collapse;
+            border-spacing: 0px;
+            padding: 0;
+        }
+
+        .DSMhi {
+            background-color: #107010;
+        }
+
+        .DSMlo {
+            background-color: #000000;
+        }
+
+        .DSM.ADDR {
+            color: #e0a020;
+            font-size: 0.9em;
+            font-weight: bold;
+            padding-left: 0.5em;
+            padding-right: 0.5em;
+            width: 3em;
+        }
+
+        .DSM.BYTES {
+            color: #e0a020;
+            font-size: 0.8em;
+            padding-left: 0.5em;
+            padding-right: 0.5em;
+            width: 9em;
+
+        }
+
+        .DSM.MNEM {
+            color: #c0c0c0;
+            font-weight: bold;
+            padding-left: 0.5em;
+            padding-right: 0.5em;
+            width: 12em
+        }
+
+        .DSM.Edit {
+            color: #f02020;
+            background-color: #d0d0f0;
+            padding-left: 0.5em;
+            padding-right: 0.5em;
+            font-weight: bold;
+            font-size: 0.9em;
+        }
+
+        .cellEdit {
+            color: #2020F0;
+            background-color: #d0d0f0;
+            margin: 0;
+            padding: 0;
+            font-weight: bold;
+            font-size: 0.8em;
+            width: 100%;
+        }
+
+        .usageNote {
+            font-size: 0.9em;
+            font-style: italic;
+            margin-top: 0.25em;
+            margin-bottom: 0.25em;
+        }
+
+        .statusText {
+            color: #606060;
+            background-color: #f0f0f0;
+            border: 1px solid #404040;
+            font-size: 1em;
+            font-weight: bold;
+            padding-top: 0.25em;
+            padding-bottom: 0.25em;
+            padding-left: 1em;
+            padding-right: 1em;
+
+        }
+
+        .panel {
+            background-color: #f0f0f0;
+            padding: 0.5em;
+        }
+
+        .labelsContainer {
+            display: flex;
+            flex-direction: column;
+            border: 1px solid black;
+            height: 40em;
+            width: 12em;
+        }
+
+        .labelList {
+            flex-grow: 1;
+        }
+
+        .interrupts {
+            text-align: center;
+        }
+
+        .buttonRun {
+            background-color: #30d050;
+            border-radius: 16px;
+            border: 3px solid #18ab29;
+            display: inline-block;
+            cursor: pointer;
+            color: #ffffff;
+            font-family: Arial;
+            font-size: 20px;
+            font-weight: bold;
+            padding: 4px 32px;
+            text-decoration: none;
+        }
+
+        .buttonRun:hover {
+            background-color: #5cbf2a;
+        }
+
+        .buttonRun:active {
+            position: relative;
+            top: 1px;
+        }
+
+        .buttonStep {
+            background-color: #c0c040;
+            border-radius: 8px;
+            border: 1px solid #808080;
+            display: inline-block;
+            cursor: pointer;
+            color: #ffffff;
+            font-family: Arial;
+            font-size: 14px;
+            font-weight: bold;
+            padding: 2px 16px;
+            text-decoration: none;
+        }
+
+        .buttonStep:hover {
+            background-color: #e09030;
+        }
+
+        .buttonStep:active {
+            position: relative;
+            top: 1px;
+        }
+
+        .buttonHalt {
+            background-color: #e04040;
+        }
+
+        .buttonHalt:hover {
+            background-color: #e09030;
+        }
+
+        .buttonIRQ {
+            border-radius: 4px;
+            padding: 2px 8px;
+            font-size: 12px;
+            background-color: #6060c0;
+        }
+
+        .buttonIRQ:hover {
+            background-color: #4040e0;
+        }
+
+        .buttonReset {
+            font-size: 16px;
+            background-color: #a060c0;
+        }
+
+        .buttonReset:hover {
+            background-color: #6040e0;
+        }
+
+        .machinePanel {
+            vertical-align: top;
+            padding: 0.5em;
+            background-color: #f4f4f4;
+        }
+
+        .screenPanel {
+            vertical-align: top;
+            padding: 0.5em;
+            background-color: #e8e8e8;
+        }
+
+        .examplesList {
+            display: none;
+            position: absolute;
+            background-color: #d0d0e0;
+            color: #202020;
+            min-width: 8em;
+            box-shadow: 0px 8px 16px 0px rgba(0, 0, 0, 0.2);
+            text-shadow: none;
+            border: 1px solid black;
+            z-index: 1;
+            -webkit-border-radius: 4px;
+            -moz-border-radius: 4px;
+            border-radius: 4px;
+
+        }
+
+        .dropDown {
+            position: relative;
+        }
+
+        .buttonExamples {
+            position: relative;
+            background-color: #c0c040;
+            border-radius: 4px;
+            border: 1px solid #808080;
+            display: inline-block;
+            cursor: pointer;
+            color: #ffffff;
+            font-family: Arial;
+            font-size: 14px;
+            font-weight: bold;
+            padding: 2px 16px;
+            text-decoration: none;
+        }
+
+        .menuItem {
+            color: #4040c0;
+            margin: 0.25em;
+            padding: 0.25em;
+            font-size: 0.9em;
+            font-weight: bold;
+        }
+
+        .menuItem:hover {
+            background-color: #f8f8f8;
+        }
+
+        .dropDown:hover .examplesList {
+            display: block
+        }
+
+        .dropDown:hover .buttonExamples {
+            background-color: #e09030;
+        }
+
+
+    </style>
+
+</head>
+
+<body style='margin:1em'>
+
+<h1>Motorola 6809 Emulator</h1>
+<p style='margin:0'>A single page assembler, disassembler, and emulator for entry-level tinkering with the 6809 CPU. See
+    <a target='6809help' href='http://6809.uk/help.html'>full instructions</a>.</p>
+
+<table id='main-container' style='border-collapse:separate; border-spacing: 0.5em;'>
+    <tr>
+        <td class='machinePanel'>
+
+            <table id='registers-container' tabindex='0'>
+                <tr>
+                    <td>
+                        <table id='regA' class='regitem'>
+                        </table>
+                    </td>
+                    <td>
+                        <table id='regB' class='regitem'>
+                        </table>
+                    </td>
+                </tr>
+                <tr>
+                    <td colspan=2>
+                        <table id='regX' class='regitem'>
+                        </table>
+                    </td>
+                </tr>
+                <tr>
+                    <td colspan=2>
+                        <table id='regY' class='regitem'>
+                        </table>
+                    </td>
+                </tr>
+                <tr>
+                    <td colspan=2>
+                        <table id='regU' class='regitem'>
+                        </table>
+                    </td>
+                </tr>
+                <tr>
+                    <td colspan=2>
+                        <table id='regS' class='regitem'>
+                        </table>
+                    </td>
+                </tr>
+                <tr>
+                    <td colspan=2>
+                        <table id='regCC' class='regitem'>
+                        </table>
+                    </td>
+                </tr>
+                <tr>
+                    <td colspan=2>
+                        <table id='regDP' class='regitem'>
+                        </table>
+                    </td>
+                </tr>
+                <tr>
+                    <td colspan=2>
+                        <table id='regPC' class='regitem'>
+                        </table>
+                    </td>
+                </tr>
+                <tr>
+                    <td colspan=2>
+                        <table class='interrupts' style='margin-top:0.5em; margin-bottom:0.5em;'>
+                            <tr>
+                                <td>
+                                    <button onclick='machineInterrupt ("irq");' class='buttonStep buttonIRQ'>IRQ
+                                    </button>
+                                </td>
+                                <td>
+                                    <button onclick='machineInterrupt ("firq");' class='buttonStep buttonIRQ'>FIRQ
+                                    </button>
+                                </td>
+                                <td>
+                                    <button onclick='machineInterrupt ("nmi");' class='buttonStep buttonIRQ'>NMI
+                                    </button>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td colspan='3'>
+                                    <button onclick='machineReset();' class='buttonStep buttonReset'>RESET</button>
+                                </td>
+                            </tr>
+                        </table>
+                    </td>
+                </tr>
+                <tr>
+                    <td colspan='2' style='text-align:center'>
+                        <input type='range' min='1' max='10' value='3' class='slider' id='speed'/>
+                    </td>
+                <tr>
+                    <td class='controlCaption' style='text-align:right'><label for="speed">Speed</label></td>
+                    <td class='controlData' style='text-align:left'><span class='controlData' id='speedVal'></span></td>
+                </tr>
+                <tr>
+                    <td class='controlCaption' style='text-align:right'><label for="refreshCheck">Refresh</label></td>
+                    <td class='controlData'><input type='checkbox' id='refreshCheck' onclick='machineRefresh()'
+                                                   style='text-align: left' checked/></td>
+                </tr>
+
+                <tr>
+                    <td colspan=2>
+                        <table class='interrupts' style='margin-top:0.5em; margin-bottom:0.5em;'>
+                            <tr>
+                                <td colspan='2' style='text-align:center'>
+                                    <button onclick='machineRun ();' class='buttonRun'>Run</button>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <button onclick='machineHalt ();' class='buttonStep buttonHalt'>&nbsp;Halt&nbsp;
+                                    </button>
+                                </td>
+                                <td>
+                                    <button onclick='machineStep ();' class='buttonStep'>Step</button>
+                                </td>
+                            </tr>
+                        </table>
+                    </td>
+                </tr>
+
+            </table>
+
+        </td>
+
+        <td class='machinePanel'>
+
+            <h3>Disassembly output</h3>
+
+            <div id='DSMTable-container'></div>
+
+            <p class='usageNote'>
+                Right-click on an address to set/reset breakpoints.<br/>
+                Right-click on an instruction to edit.
+            </p>
+
+
+        </td>
+
+        <td class='machinePanel'>
+            <h3>Labels</h3>
+
+            <div id='labelMap-container'></div>
+
+            <p class='usageNote' style='width: 12em'>
+                Click on a label to display disassembled code starting at that address.
+            </p>
+
+        </td>
+
+
+        <td class='machinePanel'>
+
+            <div style='width:max-content'>
+
+                <h3 style='float:left'>Assembly language input</h3>
+
+                <div style='float:right'>
+
+
+                    <div class='dropDown' style='display:inline-block'>
+
+                        <div class='examplesList' style='margin-top:1em; margin-left:2em;'>
+                            <p class='menuItem'
+                               onclick="document.getElementById ('assembly-code').value=document.getElementById ('demo-checks').value">
+                                Check pattern</p>
+                            <p class='menuItem'
+                               onclick="document.getElementById ('assembly-code').value=document.getElementById ('demo-hiscore').value">
+                                High scores</p>
+                            <p class='menuItem'
+                               onclick="document.getElementById ('assembly-code').value=document.getElementById ('demo-plotpix').value">
+                                Pixel plot</p>
+                            <p class='menuItem'
+                               onclick="document.getElementById ('assembly-code').value=document.getElementById ('demo-quickline').value">
+                                Line draw</p>
+                            <p class='menuItem'
+                               onclick="document.getElementById ('assembly-code').value=document.getElementById ('demo-life').value">
+                                Game of Life</p>
+                            <p class='menuItem'
+                               onclick="document.getElementById ('assembly-code').value=document.getElementById ('demo-sprite').value">
+                                Sprites</p>
+                            <p class='menuItem' style='color:#a0a0a0'>- - - - - - -</p>
+                            <p class='menuItem'
+                               onclick="document.getElementById ('assembly-code').value=document.getElementById ('demo-helloworld').value">
+                                Hello World</p>
+                            <p class='menuItem'
+                               onclick="document.getElementById ('assembly-code').value=document.getElementById ('demo-charset').value">
+                                Character set</p>
+                            <p class='menuItem'
+                               onclick="document.getElementById ('assembly-code').value=document.getElementById ('demo-clearscr').value">
+                                Clear screen</p>
+                            <p class='menuItem'
+                               onclick="document.getElementById ('assembly-code').value=document.getElementById ('demo-core6809').value">
+                                Core OS</p>
+                        </div>
+
+                        <button class='buttonExamples' style='margin-left:1em;'>Examples</button>
+
+                    </div>
+
+                    <button onclick="document.getElementById ('assembly-code').value=''" class='buttonStep buttonHalt'
+                            style='margin-left:1em;'>Clear
+                    </button>
+
+                </div>
+
+            </div>
+
+            <textarea id='assembly-code' name='assembly-code' rows='38' cols='60'>
+        ; pmode set x,y,c
+
+; entry
+; A is Y (0-191)
+; B is X (0-127)
+; Y is colour 0-7 (with 4 dithered colours)
+
+        org $4000
+start:
+        lda #73
+        ldb #127
+        ldy #3
+
+	; Initial part, normalise co-ordinates
+	; Want out pixel number 0-3
+	; Screen byte position 0-6143
+
+
+	pshs d	; save co-ordinates
+	andb #3	; get pixel number
+	stb ,s	; save it
+	ldb 1,s	; restore b
+	subb ,s ; ensure no carries out of the bottom of b
+
+	aslb 	; b <128 so no carry
+	rora	; join X + Y
+	rorb	; d = x + y * 128
+
+	rora
+	rorb	; d = x/2 + y * 64
+
+	rora
+	rorb	; d = x/4 + y * 32
+
+	tfr d,x	; x now has byte address
+	lda ,s++ ; stack restored, pix num in a
+
+; determine plot
+; get byte pixel pattern
+; and byte mask
+
+
+	leax $c00,x		; add screen base with dos
+	leau ptble,y	; pix table entry
+	andb #$20		; check for dither adjust
+	beq si			; if even line, skip increment
+	leau 8,u		; chose alternate dither entry
+
+si:
+	ldb ,u			; get pixel pattern
+	leay mtble,y	; get mask address
+	andb ,y  		; mask it
+
+; now	 x is screen address
+; 		 b is pixel pattern to add
+;		 need com of mask to clear screen byte
+
+	coma
+
+; plot
+
+;	x byte address
+;	b pixel value
+;	a clr screen pixel mask
+
+	anda ,x
+	sta <$0f	; ECB temporary result byte in direct
+	orb <$0f
+	stb ,x
+	rts
+
+
+mtble:
+	fcb $c0
+	fcb $30
+	fcb $0c
+	fcb $03
+
+ptble:
+	fcb $FF		; red
+	fcb $cc		; red / green
+	fcb $dd		; red / yellow
+	fcb $55		; yellow
+	fcb $11		; yellow / green
+	fcb $00		; green
+	fcb $88		; green / blue
+	fcb $99		; blue
+
+
+	fcb $FF
+	fcb $33		; green / red
+	fcb $77		; switched etc
+	fcb $55
+	fcb $44
+	fcb $00
+	fcb $22
+	fcb $99
+
+</textarea>
+
+            <textarea id='demo-helloworld' rows='38' cols='60' style='display:none'>
+;
+;  Enter your 6809 assembly language program here
+;  Press the Assemble button below
+;
+;  No errors? Press Run in the panel to the left
+;  The CPU will stop on breakpoints (in red)
+;  Press Run to continue
+;
+
+
+start:
+    leay helloworld,pcr
+    jsr print
+    rts
+
+const textscreenbase=$400
+
+print:
+    pshs a,x,y
+    ldx #textscreenbase
+printloop:
+    lda ,y+
+    beq printover
+    cmpa #$40
+    bhs print6847
+    adda #$40
+print6847:
+    sta ,x+
+    bra printloop
+printover:
+    puls a,x,y
+    rts
+
+
+helloworld:
+    fcb "HELLO WORLD",0
+
+</textarea>
+
+
+            <textarea id='demo-checks' rows='38' cols='60' style='display:none'>
+
+; Display a chequerboard pattern on the text screen
+; Then do the same on the graphics screen
+
+const baseTextScreen=$400, baseGraphicScreen=$0600
+const space=$20, inverse=%01000000
+const widthText=32, heightText=16
+const widthGraphics=32, heightGraphics=24
+const charHeight=8, charVal=%00000000
+
+start:
+  jsr chequerboardText
+
+; Un-comment the next lines for the graphics version
+; Warning: it is slow
+
+;  ldd #$0204       ; select 4 colour graphics mode
+;  swi3
+;  jsr chequerboardGraphics
+
+  rts
+
+chequerboardText:
+  ldx #baseTextScreen
+  lda #heightText
+  pshs a
+  lda #space
+loopRow:
+  ldb #widthText
+loopChar:
+  sta ,x+
+  eora #inverse
+  decb
+  bne loopChar
+  eora #inverse
+  dec ,s
+  bne loopRow
+  puls a,pc
+
+chequerboardGraphics:
+  ldx #baseGraphicScreen
+  lda #heightGraphics
+  pshs a
+  lda #charVal
+loopRowG:
+  ldb #widthGraphics
+loopCharG:
+  bsr drawChar
+  leax 1,x
+  coma
+  decb
+  bne loopCharG
+  coma
+  leax ,y
+  dec ,s
+  bne loopRowG
+  puls a,pc
+
+drawChar;
+  pshs b,x
+  ldb #charHeight
+drawCLp:
+  sta ,x
+  leax widthGraphics,x
+  decb
+  bne drawCLp
+  leay -widthGraphics+1,x
+  puls b,x,pc
+
+</textarea>
+
+
+            <textarea id='demo-hiscore' rows='38' cols='60' style='display:none'>
+
+; High score table routine for games
+; Scores are stored as <scLen> ASCII characters
+; They are followed by <scInitials> initials
+; Here we use text screen memory to see what's happening
+; Note ASCII chars less than $40 show as inverse video
+
+const scLen=7, scInitials=3, scDif=32, hiScores=10
+
+start:
+  leax score,pcr     ; X points to the player's score
+  leay hiTable,pcr   ; Y points to the high score table
+  jsr insertHiTable
+  rts
+
+insertHiTable:
+; Insert a score at X into high score table at Y
+  pshs a,b,y
+  lda #hiScores-1
+  ldb #scDif
+  mul
+  leay d,y           ; Y points at hi score to compare
+  lda #$ff           ; flag true only on first pass
+  ldb #hiScores
+insertHiLp:
+  bsr scoreCompare   ; compare X with Y
+  bcs insertHiDone   ; carry set if less than or equal
+  leay -scDif,y      ; move one row higher up table
+  clra               ; clear flag
+  decb               ; keep count of digits
+  bne insertHiLp
+insertHiDone:
+  puls a,b,y,pc
+
+scoreCompare:
+; Compare a score at X with one at Y
+; If higher, move the score at Y down one row
+;   then insert X in its place
+; If A non-zero means at lowest score so don't shift down
+  pshs a,b,x,y
+  ldb #scLen
+scCmpLp:
+  lda ,x+
+  cmpa ,y+           ; compare digits, highest first
+  blo scCmpOut       ; if X is lower then quit
+  bhi scInsert       ; if X is higher then insert score
+  decb               ; keep count of digits
+  bne scCmpLp
+  orcc #$01          ; equal scores, set carry then quit
+  bra scCmpOut
+scInsert:
+  tst ,s             ; test last entry flag (A was stacked)
+  bne scSkipShift    ; don't shift down a row if first pass
+  ldx 4,s            ; X is loaded with Y value from stack
+  leay scDif,x       ; destination is one row down
+  bsr scCopy         ; copy score from Y to Y+scDif
+scSkipShift:
+  ldx 2,s            ; restore X & Y from stack
+  ldy 4,s
+  bsr scCopy         ; copy score from X to Y
+scCmpOut:
+  puls a,b,x,y,pc
+
+scCopy:
+; Copy a score from address X to address Y
+  ldb #scLen+scInitials
+scCpLp:
+  lda ,x+            ; copy from X into table
+  sta ,y+
+  decb
+  bne scCpLp         ; keep count of chars
+  rts
+
+
+const textScreen=$0400, indent=11
+const spacing=scDif-scLen-scInitials
+
+  org textScreen
+
+  fill $20, $200
+
+  org textScreen+$20+indent
+
+score:
+  fcb "1271300 ME"
+
+  org textScreen+$60+indent
+
+hiTable:
+  fcb "1272700 JM"
+  rmb spacing
+  fcb "1271100 RL"
+  rmb spacing
+  fcb "1260700 RL"
+  rmb spacing
+  fcb "1259000 JM"
+  rmb spacing
+  fcb "1249500 JM"
+  rmb spacing
+  fcb "1247700 RL"
+  rmb spacing
+  fcb "1230100 RL"
+  rmb spacing
+  fcb "1218000 WC"
+  rmb spacing
+  fcb "1195100 WC"
+  rmb spacing
+  fcb "1190200 RL"
+  rmb spacing
+
+</textarea>
+
+
+            <textarea id='demo-plotpix' rows='38' cols='60' style='display:none'>
+
+const graphicsBase=$600, gLineBytes=$20
+
+start:
+    ldd #$0210       ; select 16 colour graphics mode
+    swi3
+    bsr testPixels
+    rts
+
+testPixels:
+    lda #$00
+    ldy #16
+testP2:
+    ldx #16
+testP1:
+    anda #$0f
+    pshs a
+    lsla
+    lsla
+    lsla
+    lsla
+    ora ,s+
+    lbsr plotPix4bit
+    inca
+    leax 2,x
+    cmpx #80
+    blo testP1
+    deca
+    leay 2,y
+    cmpy #80
+    blo testP2
+    rts
+
+; Mask lookup tables, x=xPos, y=yPos, a=colour
+; repeated at all 8 bit positions, eg. $00 or $ff
+
+plotMask1bit:
+    fcb %10000000, %01000000, %00100000, %00010000
+    fcb %00001000, %00000100, %00000010, %00000001
+plotMask2bit:
+    fcb %11000000, %11000000, %00110000, %00110000
+    fcb %00001100, %00001100, %00000011, %00000011
+plotMask4bit:
+    fcb %11110000, %11110000, %00001111, %00001111
+    fcb %11110000, %11110000, %00001111, %00001111,
+
+; Plot a pixel at 4, 2, or 1 bits be pixel
+; Inputs:-
+; X-coordinate in X, Y-coordinate in Y
+; Logical grid is always (0,0) top left
+; to (255,191) bottom right
+; Physical pixels are 2:2, 2:1, 1:1
+; for 4, 2, or 1 bit modes respectively
+; stored left to right, top to bottom
+; Colour in A, repeated 2, 4 or 8 times
+; for 4, 2, or 1 bit modes respectively
+; to fill the byte
+; eg. in 2 bit mode colour %01 is %01010101
+
+plotPix4bit:
+    pshs d,x,y,u
+    leau <plotMask4bit,pcr
+    tfr y,d
+    andb #$fe
+    lda #gLineBytes
+    mul
+    addd #graphicsBase
+    tfr d,x
+    ldd 2,s
+    bra plotPix2
+
+plotPix2bit:
+    pshs d,x,y,u
+    leau <plotMask2bit,pcr
+    bra plotPix1
+
+plotPix1bit:
+    pshs d,x,y,u
+    leau <plotMask1bit,pcr
+plotPix1:
+    tfr y,d
+    lda #gLineBytes
+    mul
+    addd #graphicsBase
+    tfr d,x
+    ldd 2,s
+    lsrb
+plotPix2:
+    lsrb
+    lsrb
+    abx
+    ldb 3,s
+    andb #$07
+    leau b,u
+    lda ,u          ; mask out screen bits of pixel
+    coma
+    anda ,x
+    sta ,x
+    lda ,u
+    anda ,s         ; merge with foreground colours
+    ora ,x
+    sta ,x
+    puls d,x,y,u,pc
+
+</textarea>
+
+            <textarea id='demo-quickline' rows='38' cols='60' style='display:none'>
+
+; Graphics demo:- draw some lines
+
+const graphicsBase=$600, gLineBytes=$20
+
+start:
+    ldd #$0202       ; select 2 colour graphics mode
+    swi3
+    bsr testQLine
+    rts
+
+testQLine:
+    ldd #$00f3
+tql1:
+    lbsr quickLine
+    decb
+    adda #3
+    cmpa #183
+    blo tql1
+    rts
+
+; quickLine A=height, B=width
+;
+; Simplified line draw illustrating Bresenham algorithm
+; Starting point is a fixed byte
+; Displacements to the right and down (width, height)
+; are passed in B & A respectively (width >= height)
+; The algorithm works simply by subtracting the fractional
+; gradient (height/width) on every pixel step to the right
+; until the running total is <=0 . Then the line moves down
+; and 1 is added to the running total
+; The initial fraction is width/2 to even out the steps
+; Pixels are drawn by ORing an onscreen byte with a
+; bit mask that is rotated with every pixel
+
+quickLine:
+   pshs d,x          ; save registers used
+   lda #$80          ; initial mask is leftmost pixel
+   pshs d            ; save mask @ < ,s >, width @ < 1,s >
+   ldx #graphicsBase+gLineBytes+1
+   lsrb              ; fraction initial value=width/2
+   lda ,x            ; grab first byte from the screen
+qline3:
+   ora ,s            ; combine 1 pixel to the fragment of
+   lsr ,s            ; screen cached in A
+   bcc qline1        ; rotate mask one pixel to the right
+   ror ,s            ; wrap around if necessary
+   sta ,x+           ; restoring cached byte, incrementing
+   lda ,x            ; and caching the next byte
+qline1:
+   subb 2,s          ; sub (rolling fraction, height)
+   bhi qline2        ; if fraction <=0,
+   addb 3,s          ; add width to fraction,
+   sta ,x            ; restore cached byte and
+   leax gLineBytes,x ; move down 1 line
+   lda ,x            ; fetch another cached byte
+qline2:
+   dec 1,s           ; dec loop count (initially=width)
+   bne qline3
+   sta ,x            ; restore final cached byte
+   leas 2,s          ; clean up stack
+   puls d,x,pc       ; restore registers and return
+
+</textarea>
+
+            <textarea id='demo-life' rows='38' cols='60' style='display:none'>
+
+; Game of Life demo on 256 x 192 grid
+; 6809 assembly language
+; for Dragon 32 & compatibles
+
+const pixWide=256, pixHigh=192
+const baseGraphicScreen=$0600, bytesWide=32
+const liveCellBase=7
+const generations=50000
+
+start:
+;  ldd #$0202       ; select 2 colour graphics mode
+;  swi3             ; (optional depending on hardware)
+  ldd #0
+lifeLoop:
+  lbsr initVars
+  lbsr lifeCycle
+  addd #1
+  cmpd #generations
+  blo lifeLoop
+  rts
+
+lifeCycle:
+  pshs d
+  ldd #-1
+  pshs d
+lCycleLp:
+; Loop from lines -1 to <pixHigh-2>
+; followed by the final line
+; X, Y, U point to three line buffers
+; of unpacked screen pixels which
+; are cycled in turn
+  pshs y,u
+  lbsr countPixRow
+; Count a line of screen pixels
+; into three line buffers
+  ldd 4,s
+  cmpd #0
+  blt onFirstRun
+; Don't write pixels for first runthrough
+  ldu >screenPtr
+; X=oldest buffer + pixWide
+  lbsr writePixRow
+; Display a completed line of cells
+  bra lCycleNoSkip
+onFirstRun:
+  leau -pixWide,x
+lCycleNoSkip:
+  ldx >screenPtr
+  leax bytesWide,x
+; U=written buffer start
+  lbsr initBuffer
+  puls x, y
+; X=middle buffer
+; Y=last buffer
+  ldd ,s
+  addd #1
+  std ,s
+  cmpd #pixHigh-1
+  blt lCycleLp
+; Write out final contents of buffer
+  leax pixWide,x
+  ldu >screenPtr
+  leau bytesWide,u
+  lbsr writePixRow
+  leas 2,s
+  puls d,pc
+
+
+countPixRow:
+; Read row of pixels and count into buffers
+; X points to line-1 buffer start
+; Y points to line buffer start
+; U points to line+1 buffer start
+; X, Y, U incremented by pixWide
+; <screenPtr> incremented by bytesWide
+  lda #bytesWide
+  pshs a
+next8Pix:
+; Read A from screen at screenPtr
+; Self-modifying code
+; Quick and saves a register
+  lda >0
+next8Ptr:
+const screenPtr=next8Ptr-2
+; Move to next screen byte
+  inc screenPtr+1
+  bne not256
+  inc screenPtr
+not256:
+  ldb #8
+nextPix
+  tsta
+  beq noMoreCells
+  lsla
+  bcc noCell
+; If cell present, increment 8 neighbours
+  inc ,x+
+  inc ,x
+  inc 1,x
+  inc ,y+
+  inc 1,y
+  inc ,u+
+  inc ,u
+  inc 1,u
+  bra nextCell
+noCell:
+  leax 1,x
+  leay 1,y
+  leau 1,u
+nextCell:
+  decb
+  bne nextPix
+  bra skipPix
+nomoreCells:
+  leax b,x
+  leay b,y
+  leau b,u
+skipPix:
+  dec ,s
+  bne next8Pix
+  puls a,pc
+
+
+writePixRow:
+; Display row of cells on screen, right to left
+; U=(row+1)+bytesWide
+; X=buffer+pixWide
+; Return freed buffer start in U
+  leau -bytesWide,u
+  leax 1,x
+  ldy #cellNextGenList
+  lda #bytesWide
+  pshs a
+wPixRowLp:
+  clra
+  ldb ,-x
+  adda b,y
+  lsra
+  ldb ,-x
+  adda b,y
+  lsra
+  ldb ,-x
+  adda b,y
+  lsra
+  ldb ,-x
+  adda b,y
+  lsra
+  ldb ,-x
+  adda b,y
+  lsra
+  ldb ,-x
+  adda b,y
+  lsra
+  ldb ,-x
+  adda b,y
+  lsra
+  ldb ,-x
+  adda b,y
+  sta ,-u
+  dec ,s
+  bne wPixRowLp
+  leau -1,x
+  puls a,pc
+
+
+initBuffer:
+; Unpack screen pixels into byte buffer, right to left
+; X points to screen line start - unchanged
+; U points to buffer start - unchanged
+  cmpx #$0700
+  blo ok1
+  nop
+ok1:
+  pshs dp, u
+; init 4 zero bytes
+  clrb
+  tfr b,dp
+  ldy #0
+; point to end of line for predecrement
+  leax bytesWide,x
+; point to end of buffer, allowing for border bytes
+  leau pixWide+1,u
+  lda #bytesWide
+  pshs a
+iBufLp:
+  lda ,-x
+  bne iBufCells
+; quick write for empty pixels
+  pshu b, dp, y
+  pshu b, dp, y
+  dec ,s
+  bne iBufLp
+  bra iBufOut
+iBufCells:
+  ldb #liveCellBase
+iBufCell0:
+  lsra
+  bcs iBufCellLive1
+  clr ,-u
+  bra iBufCell1
+iBufCellLive1:
+  pshu b
+iBufCell1:
+  lsra
+  bcs iBufCellLive2
+  clr ,-u
+  bra iBufCell2
+iBufCellLive2:
+  pshu b
+iBufCell2:
+  lsra
+  bcs iBufCellLive3
+  clr ,-u
+  bra iBufCell3
+iBufCellLive3:
+  pshu b
+iBufCell3:
+  lsra
+  bcs iBufCellLive4
+  clr ,-u
+  bra iBufCell4
+iBufCellLive4:
+  pshu b
+iBufCell4:
+  lsra
+  bcs iBufCellLive5
+  clr ,-u
+  bra iBufCell5
+iBufCellLive5:
+  pshu b
+iBufCell5:
+  lsra
+  bcs iBufCellLive6
+  clr ,-u
+  bra iBufCell6
+iBufCellLive6:
+  pshu b
+iBufCell6:
+  lsra
+  bcs iBufCellLive7
+  clr ,-u
+  bra iBufCell7
+iBufCellLive7:
+  pshu b
+iBufCell7:
+  lsra
+  bcs iBufCellLive8
+  clr ,-u
+  bra iBufCellDone
+iBufCellLive8:
+  pshu b
+iBufCellDone:
+  clrb
+  dec ,s
+  bne iBufLp
+iBufOut:
+  leas 1,s
+  puls dp, u, pc
+
+
+initVars:
+  pshs d
+  ldx #baseGraphicScreen
+  stx >screenPtr
+  ldu #buf2
+  lbsr initBuffer
+  leax bytesWide,x
+  ldu #buf3
+  lbsr initBuffer
+  ldx #buf1
+  ldy #buf2
+  puls d,pc
+
+cellNextGenList:
+  fcb 0,0,0,$80,0,0,0
+  fcb 0,0,$80,$80,0,0,0,0,0
+
+buf1 rmb pixWide+2
+buf2 rmb pixWide+2
+buf3 rmb pixWide+2
+
+org baseGraphicScreen
+  fill 0,$1800
+
+org baseGraphicScreen
+glider:
+  fcb %00000000
+  rmb bytesWide-1
+  fcb %01000000
+  rmb bytesWide-1
+  fcb %00100000
+  rmb bytesWide-1
+  fcb %11100000
+
+org baseGraphicScreen+$000d
+glidergun:
+  fcb %00000000, %00000000, %00000000, %01000000
+  rmb bytesWide-4
+  fcb %00000000, %00000000, %00000001, %01000000
+  rmb bytesWide-4
+  fcb %00000000, %00000110, %00000110, %00000000, %00011000
+  rmb bytesWide-5
+  fcb %00000000, %00001000, %10000110, %00000000, %00011000
+  rmb bytesWide-5
+  fcb %01100000, %00010000, %01000110
+  rmb bytesWide-3
+  fcb %01100000, %00010001, %01100001, %01000000
+  rmb bytesWide-4
+  fcb %00000000, %00010000, %01000000, %01000000
+  rmb bytesWide-4
+  fcb %00000000, %00001000, %10000000
+  rmb bytesWide-3
+  fcb %00000000, %00000110,
+  rmb bytesWide-2
+
+org baseGraphicScreen+$0b90
+rPentomino:
+  fcb %01100000
+  rmb bytesWide-1
+  fcb %11000000
+  rmb bytesWide-1
+  fcb %01000000
+  rmb bytesWide-1
+
+org baseGraphicScreen+$17a0
+  fcb %01000000
+  rmb bytesWide-1
+  fcb %01000110
+  rmb bytesWide-1
+  fcb %01000110
+
+</textarea>
+
+
+            <textarea id='demo-sprite' rows='38' cols='60' style='display:none'>
+
+; Graphics demo:- animate and move a sprite
+
+const graphicsBase=$600, gLineBytes=$20, vectorFIRQ=$fff6, vectorIRQ=$fff8
+
+start:
+    ldd #$0204       ; select 4 colour graphics mode
+    swi3
+    bsr testSprites
+    rts
+
+testSprites:
+    leax serviceIRQ,pcr         ; point interrupt vector
+    stx vectorIRQ               ; at flag-clearing sub
+    andcc #$EF                  ; clear IRQ mask flag
+    ldd #$0808                  ; starting coordinates
+testSpr1:
+    leay invadera00,pcr         ; sprite of 16-bit lines
+    bsr drawSprite88c           ; draw animation frame 1
+    lbsr syncIRQ                ; wait
+    bsr drawSprite88c           ; erase (repeat EOR)
+    leay invadera01,pcr
+    bsr drawSprite88c           ; draw animation frame 2
+    lbsr syncIRQ                ; wait
+    bsr drawSprite88c           ; erase
+    adda #2                     ; move sprite
+    addb #1
+    cmpa #224
+    blo testSpr1
+    rts
+
+
+drawSprite88c:
+    pshs d,x,y
+    ldx #graphicsBase
+    lda #gLineBytes
+    mul                     ; calculate starting
+    leax d,x                ; line on graphics screen
+    ldb ,s                  ; as (32*Y)
+    lsrb                    ; plus TRUNC (X/8)
+    lsrb
+    lsrb
+    abx
+    ldb ,s
+    andb #$07               ; calculate loopback offset
+    lslb                    ; -4 bytes per rotation
+    lslb                    ; minus a constant
+    negb
+    subb #d88cloopcalc-d88cloopmin
+    stb d88cloopback+1
+    ldb #8+1
+    pshs d                  ; counter & overflow byte
+    bra d88cloopin          ; join WHILE loop
+d88cloopfull:
+    lsra                    ; rotate right 1 bit
+    rorb
+    ror ,s
+    lsra                    ; repeat up to 7 times
+    rorb
+    ror ,s
+    lsra
+    rorb
+    ror ,s
+    lsra
+    rorb
+    ror ,s
+    lsra
+    rorb
+    ror ,s
+    lsra
+    rorb
+    ror ,s
+    lsra
+    rorb
+    ror ,s
+d88cloopmin:
+    eora ,x                 ; once each sprite line
+    eorb 1,x                ; is rotated, draw it
+    std ,x                  ; to screen using
+    lda ,s                  ; exclusive-or operation
+    eora 2,x
+    sta 2,x
+    leax GLineBytes,x       ; move 1 line down
+d88cloopin:
+    ldd ,y++                ; fetch next line of sprite
+    clr ,s                  ; clear overflow byte
+    dec 1,s                 ; loop count
+d88cloopback:
+    bne d88cloopfull        ; loopback is self-modified
+d88cloopcalc:
+    leas 2,s
+    puls d,x,y,pc
+
+invadera00:
+    fdb %0000100000100000
+    fdb %1000101010100010
+    fdb %1010011010011010
+    fdb %0010101010101000
+    fdb %0000101111100000
+    fdb %0000111010110000
+    fdb %0011110000111100
+    fdb %0011000000001100
+
+invadera01:
+    fdb %0010000000001000
+    fdb %0000101010100000
+    fdb %0010011010011000
+    fdb %1010100101101010
+    fdb %1000101111100010
+    fdb %0011111010111100
+    fdb %1111000000001111
+    fdb %0000000000000000
+
+
+    org $4400
+
+    var 1,flagIRQ
+
+syncIRQ:
+    clr flagIRQ       ; set a flag
+    com flagIRQ
+syncWait;
+    sync              ; wait for interrupt
+    tst flagIRQ       ; if interrupts are enabled
+    bne syncWait      ; the flag will be cleared
+    rts
+
+serviceIRQ:
+    clr flagIRQ       ; clear a flag on interrupt
+    rti
+
+</textarea>
+
+
+            <textarea id='demo-charset' rows='38' cols='60' style='display:none'>
+
+; Display the character set
+; from 0 to 255
+
+start:
+    jsr displayAllChars
+    rts
+
+const textScreenBase=$0400
+
+displayAllChars:
+    lda #0
+    ldx #textScreenBase
+displayLoop:
+    sta ,x+
+    inca
+    bne displayLoop
+    rts
+
+</textarea>
+
+            <textarea id='demo-clearscr' rows='38' cols='60' style='display:none'>
+
+const graphicsBase=$600, gLineBytes=$20
+
+start:
+    ldd #$0210       ; select 16 colour graphics mode
+    swi3
+    bsr refreshScreen
+    bsr clearScreen
+    rts
+
+
+refreshScreen:
+    pshs d,x,y
+    ldx #graphicsBase
+    ldy #$0600
+refreshS1:
+    tst ,x+
+    tst ,x+
+    tst ,x+
+    tst ,x+
+    leay -1,y
+    bne refreshS1
+    puls d,x,y,pc
+
+
+clearScreen:
+    pshs d,x,y
+    ldx #graphicsBase
+    ldd #0
+    ldy #$0600
+clearS1:
+    std ,x++
+    std ,x++
+    leay -1,y
+    bne clearS1
+    puls d,x,y,pc
+
+</textarea>
+
+
+            <textarea id='demo-core6809' rows='38' cols='60' style='display:none'>
+
+const SIbaseaddress=$ff80, SIrefreshOff=0, SIrefreshOn=1, SIgraphicsMode=2
+const textScrBase=$0400, textScrEnd=$0600, graphicsBase=$0600, gLineBytes=$20
+
+
+start:
+  rts
+
+org $f000
+
+hookrestart:
+  lbra servicerestart
+
+hooknmi:
+  lbra servicenop
+
+hookswi:
+  lbra servicenop
+
+hookirq:
+  lbra servicenop
+
+hookfirq:
+  lbra servicenop
+
+hookswi2:
+  lbra servicenop
+
+hookswi3:
+  lbra serviceswi3
+
+osloop:
+  jsr start
+  bra osloop
+
+
+servicenop:
+  rti
+
+; service in A, parameter in B
+
+serviceswi3:
+  pshs b
+  tfr a,b
+  clra
+  lslb
+  rola
+  leay switableend,pcr
+  pshs y
+  leay switable,pcr
+  leay d,y
+  cmpy ,s++
+  puls b
+  bhs servsw0
+  jsr (,y)
+servsw0:
+  rti
+
+servicezero:
+  rts
+
+servicerefresh:
+  tstb
+  bne refreshon
+refreshoff:
+  clr SIbaseAddress+SIrefreshOff
+  rts
+refreshon:
+  clr SIbaseAddress+SIrefreshOn
+  rts
+
+servicegmode:
+  stb SIbaseAddress+SIgraphicsMode
+  rts
+
+switable:
+  fdb servicezero
+  fdb servicerefresh
+  fdb servicegmode
+switableend:
+
+
+servicerestart:
+  orcc #$50
+  andcc #$50
+  lds #$8000
+  bsr osregclear
+  lbra osloop
+
+osregclear:
+  ldd #$0000
+  tfr a,dp
+  tfr d,x
+  tfr d,y
+  tfr d,u
+  rts
+
+
+org $fff0
+
+vreserve: rmb 2
+vswi3: fdb hookswi3
+vswi2: fdb hookswi2
+vfirq: fdb hookfirq
+virq: fdb hookirq
+vswi: fdb hookswi
+vnmi: fdb hooknmi
+vrestart: fdb hookrestart
+
+</textarea>
+
+
+            <br style='clear:both'/>
+            <div style='text-align:center'>
+                <button id="compileRun" onclick="compileRun('assembly-code');" class='buttonRun'>Assemble source code</button>
+                <button onclick="codeDump('assembly-code');"
+                        style='display:none; background-color: green; padding: 0.5em; border: 2px solid black; font-size: 1em; font-weight:bold'>
+                    Dump object code
+                </button>
+                <p id='assemblyStatus' class='statusText'>Status</p>
+            </div>
+            <p class='usageNote'>
+                See the <a href='http://6809.uk/doc/doku.php?id=assembler_syntax'>assembler syntax reference</a> for full details.
+            </p>
+        </td>
+
+
+    </tr>
+</table>
+
+<br style='clear:both'/>
+
+<div class='panel' style='width:max-content'>
+
+    <button onclick="addWatchpoint ('ea')" style='float:left'><b>Add memory watch point at last effective address</b>
+    </button>
+    <button onclick="addWatchpoint ('append')" style='margin-left: 2em'><b>Extend last memory watch point</b></button>
+    <button onclick="addWatchpoint ('x')" style='margin-left: 2em'><b>Add memory watch point at X</b></button>
+
+    <div id='watchWindow-container'>
+
+    </div>
+    <p class='usageNote'>Left-click on a byte to set its value from register A, right-click from register B</p>
+
+</div>
+
+<br style='clear:both'/>
+
+<div>
+    <table style='border-collapse:separate; border-spacing: 0.5em;'>
+        <tr>
+
+            <td class='screenPanel'>
+                <h3>Text screen</h3>
+                <div id='txtScreenTable-container'>
+                </div>
+                <p class='usageNote' style='width:20em'>Text screen is 16 lines of 32 characters starting at address
+                    $0400.</p>
+            </td>
+
+            <td class='screenPanel'>
+                <h3>Graphics screen</h3>
+                <div id='grphScreenHolder'>
+                    <canvas id='graphicsScreen' width='512' height='384'></canvas>
+                </div>
+                <p class='usageNote' style='width:36em'>Graphics screen is (256*192 | 128*192 | 128*96) at (1 | 2 | 4)
+                    bits per
+                    pixel, starting at address $0600.</p>
+            </td>
+
+        </tr>
+    </table>
+
+</div>
+
+<br style='clear:both'/>
+
+<p style='background-color:#e0e0e0; font-size:0.75em; margin-top:1em; margin-bottom:0; padding:0.25em; text-align:left'>
+    <a href='http://6809.uk/'><i><b>6809.uk</b></i></a> design and coding &copy; Gwilym Thomas 2020 -
+    <a href='http://6809.ukdragons.org.uk/'><i><b>6809.ukdragons.org.uk</b></i></a> assembler revision by Julian Brown
+    2023</p>
+
+<script src="../dist/bundle.js" type="application/javascript"></script>
+<script src="application.js" type="application/javascript"></script>
+
+</body>
+
+</html>
