@@ -1,20 +1,3 @@
-// function speedSlider(cpu, speed) {
-//   let readout;
-//   this.slider = null;
-//   this.slider = document.getElementById('speed');
-//   this.slider.min = 1;
-//   this.slider.max = 10;
-//   speed = Math.max(this.slider.min, Math.trunc(speed));
-//   this.slider.value = Math.min(speed, this.slider.max);
-//   readout = document.getElementById('speedVal');
-//   readout.innerHTML = this.slider.value;
-//   cpu.intervalMils = cpu.speedMils [this.slider.value];
-//   this.slider.oninput = function () {
-//     readout.innerHTML = this.value;
-//     cpu.setSpeed(this.value);
-//   };
-// }
-
 class SlideControl {
   #cpu;
   #value;
