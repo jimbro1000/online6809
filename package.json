@@ -9,7 +9,10 @@
     "build": "webpack && inline-script-tags src/index.html index.html"
   },
   "devDependencies": {
+    "@babel/plugin-transform-modules-commonjs": "^7.21.5",
     "inline-scripts": "^1.7.4",
+    "jest": "^29.5.0",
+    "jest-environment-jsdom": "^29.5.0",
     "webpack": "^5.81.0",
     "webpack-cli": "^5.0.2"
   }

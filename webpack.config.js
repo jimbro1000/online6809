@@ -6,6 +6,6 @@ module.exports = {
     filename: 'bundle.js',
     library: 'bundle',
   },
-  mode: 'production',
-  // mode: 'development',
+  // mode: 'production',
+  mode: 'development',
 }
