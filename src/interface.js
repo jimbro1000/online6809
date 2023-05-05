@@ -7,8 +7,8 @@ function labelList(id, cpuOwner) {
     this.list = null;
     this.createList = function (listId) {
         let container = document.getElementById(listId + '-container');
-        trc('labeList id', listId);
-        if (container !== null``) {
+        trc('labelList id', listId);
+        if (container !== null) {
             trc('LabelList container', '');
             this.list = document.createElement('select');
 //      this.list.setAttribute ('id', 'listId');

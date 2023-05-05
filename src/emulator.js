@@ -3006,9 +3006,6 @@ function CPU() {
         this.setStatus('#d07010', 'Assembling pass ' + this.passNo, 'line number ' + (this.asmLineNo + 1), this.asmText);
         if ((this.asmLineNo < this.asmProgram.length) && (!this.ended)) {
             let check = this.asmProgram[this.asmLineNo].trim().toUpperCase();
-            if (check.startsWith('LEA')) {
-                console.log("checkpoint: " + check);
-            }
             encoded = this.asmLine(this.asmProgram[this.asmLineNo], true);
             this.asmLineNo++;
             if (!this.foundError) {
