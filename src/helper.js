@@ -1,4 +1,5 @@
 import winston from 'winston';
+import 'setimmediate';
 
 function inHex(n, l) {
     let s = n.toString(16).toUpperCase();
@@ -32,6 +33,7 @@ function trc(caption, data, force) {
     if ((tracing !== 0) || (force)) {
         logger.info(caption + " : " + data);
     }
+    // console.log(caption + ": " + data);
 }
 
 function plural(word, n, wordPlural) {

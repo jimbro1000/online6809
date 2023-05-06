@@ -6,7 +6,7 @@
   "homepage": "https://github.com/jimbro1000/online6809",
   "bugs": "https://github.com/jimbro1000/online6809/issues",
   "scripts": {
-    "build": "webpack && inline-script-tags src/index.html index.html"
+    "build": "webpack --stats-error-details && inline-script-tags src/index.html index.html"
   },
   "devDependencies": {
     "@babel/plugin-transform-modules-commonjs": "^7.21.5",
@@ -17,6 +17,8 @@
     "webpack-cli": "^5.0.2"
   },
   "dependencies": {
+    "node-polyfill-webpack-plugin": "^2.0.1",
+    "setimmediate": "^1.0.5",
     "winston": "^3.8.2"
   }
 }
