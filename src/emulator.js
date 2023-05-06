@@ -14,24 +14,8 @@ import {SIbaseAddress,
     fullRegsToValue} from "./constants"
 import {ops6809} from "./opcodes"
 import {DSMWindow, GraphicsScreen, TextScreen, keyPressHandler, labelList} from "./interface";
-import {inHex} from "./helper";
-
-let tracing = 1;
-
-function trc(caption, data, force) {
-    if ((tracing !== 0) || (force)) {
-        console.log(caption + ': \'' + data + '\'');
-    }
-}
-
-function signedHex(n, bits, symbol) {
-    let digits = (bits > 8) ? 4 : 2;
-    if ((n & (1 << (bits - 1))) !== 0) {
-        return '-' + symbol + inHex((1 << bits) - n, digits);
-    } else {
-        return symbol + inHex(n, digits);
-    }
-}
+import {inHex, trc, plural, signedHex} from './helper';
+import {Memory8} from './memory8';
 
 function inBinary(n, l) {
     let s = n.toString(2);
@@ -49,18 +33,6 @@ function signed8(w) {
 function signed16(l) {
     var w = l & 0xffff;
     return (w & 0x8000) ? ((w & 0x7fff) - 0x8000) : w;
-}
-
-function plural(word, n, wordPlural) {
-    if (n === 1) {
-        return word;
-    } else {
-        if (wordPlural) {
-            return (wordPlural);
-        } else {
-            return word + 's';
-        }
-    }
 }
 
 function deSelect() {
@@ -201,95 +173,6 @@ function cellEdit(cellTD, cpu, cellAddress) {
     this.input.setSelectionRange(this.oldContents.length, this.oldContents.length);
 
 }
-
-function memory8(size) {
-    let i;
-    this.mask = size - 1;
-    this.windows = [];
-    if (size > 0) {
-        this.ram = new Array(size);
-        for (i = 0; i < size; i++) {
-            this.ram[i] = 0;
-        }
-    }
-    this.wrap = function (address) {
-        return address & this.mask;
-    };
-    this.plus = function (address) {
-        return (address + 1) & this.mask;
-    };
-    this.plusplus = function (address) {
-        return (address + 2) & this.mask;
-    };
-    this.peek = function (address) {
-        return this.ram[address & this.mask];
-    };
-    this.deek = function (address) {
-        return (this.ram[address & this.mask] << 8) + this.ram[(address + 1) & this.mask];
-    };
-    this.poke = function (address, byte) {
-        byte = byte & 0xff;
-        this.ram[address] = byte;
-        this.checkWindow(address, byte);
-    };
-    this.read = function (address) {
-        return [this.wrap(address + 1), this.peek(address)];
-    };
-    this.fill = function (address, bytes) {
-        let i = 0;
-        while (i < bytes.length) {
-            this.poke(address + i, bytes[i]);
-            trc('Fill', inHex(bytes[i], 2));
-            if ((address + i + 1) !== this.wrap(address + i + 1)) {
-                break;
-            } else {
-                i++;
-            }
-        }
-        return address + i;
-    };
-    this.addWindow = function (holder, base, length) {
-        var freshWin = new RAMWindow(holder, base, length);
-        this.windows.push(freshWin);
-        return freshWin;
-    };
-    this.removeWindow = function (base, length, handle) {
-        let i;
-        if (handle == null) {
-            for (i = this.windows.length - 1; i >= 0; i--) {
-                if ((this.windows[i].base === base) && (this.windows[i].ending === base + length)) {
-                    this.windows.splice(i, 1);
-                    trc('Removed array splice at ', i + ' with base=' + base + ' length=' + length);
-                }
-            }
-        } else {
-            i = this.windows.indexOf(handle);
-            trc('removeWindow by handle', i);
-            if (i >= 0) {
-                this.windows.splice(i, 1);
-            }
-        }
-    };
-    this.checkWindow = function (address, value) {
-//    var window=this.windows.find (function (element) {
-//      return (address>=element.base) && (address<element.ending)
-//    });
-        for (let i = 0; i < this.windows.length; i++) {
-            let window = this.windows[i];
-            if ((address >= window.base) && (address < window.ending)) {
-                window.holder.update(window.holder, address, value);
-            }
-        }
-    };
-
-}
-
-const RAMWindow = function (holderObject, RAMbase, RAMLength) {
-    this.base = RAMbase;
-    this.ending = this.base + RAMLength;
-    this.holder = holderObject;
-//  trc ("RAMWindow ending", inHex (this.ending, 4),1);
-};
 
 function Register(called, size, n, cpuOwner, usebinary) {
     this.bits = 8;
@@ -1656,7 +1539,7 @@ function CPU() {
     this.flagBits = {C: 1, V: 2, Z: 4, N: 8, I: 16, H: 32, F: 64, E: 128};
     this.registers = [];
     this.ops = ops6809;
-    this.ram = new memory8(64 * 1024);
+    this.ram = new Memory8(64 * 1024);
     this.videoRAM = new TextScreen(this.ram, 0x400, 32, 16);
     this.graphicsRAM = new GraphicsScreen(this.ram, 0x600, 256, 192, 2, 2);
     this.dsmTableSize = 30;

@@ -1,9 +1,49 @@
+import winston from 'winston';
+
 function inHex(n, l) {
-    var s = n.toString(16).toUpperCase();
+    let s = n.toString(16).toUpperCase();
     while (s.length < l) {
         s = '0' + s;
     }
     return s;
 }
 
-export {inHex}
+function signedHex(n, bits, symbol) {
+    let digits = (bits > 8) ? 4 : 2;
+    if ((n & (1 << (bits - 1))) !== 0) {
+        return '-' + symbol + inHex((1 << bits) - n, digits);
+    } else {
+        return symbol + inHex(n, digits);
+    }
+}
+
+let tracing = 1;
+
+const logger = winston.createLogger({
+    level: 'info',
+    format: winston.format.json(),
+    defaultMeta: { service: 'online6809assembler' },
+    transports: [
+        new winston.transports.Console(),
+    ],
+})
+
+function trc(caption, data, force) {
+    if ((tracing !== 0) || (force)) {
+        logger.info(caption + " : " + data);
+    }
+}
+
+function plural(word, n, wordPlural) {
+    if (n === 1) {
+        return word;
+    } else {
+        if (wordPlural) {
+            return (wordPlural);
+        } else {
+            return word + 's';
+        }
+    }
+}
+
+export {inHex, signedHex, trc, plural}
