@@ -94,7 +94,7 @@ export class Assembler {
     let encoded;
     this.#setStatus('#d07010', 'Assembling pass ' + this.passNo, 'line number ' + (this.asmLineNo + 1), this.asmText);
     if ((this.asmLineNo < this.asmProgram.length) && (!this.ended)) {
-      encoded = this.#asmLine(this.asmProgram[this.asmLineNo], true);
+      encoded = this.asmLine(this.asmProgram[this.asmLineNo], true);
       this.asmLineNo++;
       if (!this.foundError) {
         if (encoded.length > 0) {
@@ -293,7 +293,7 @@ export class Assembler {
     encoding.push(instruction.op);
   };
 
-  encodeValue(encoding, value, bits) {
+  #encodeValue(encoding, value, bits) {
     let n;
     trc('Encode value initial', value, 0);
     if (value) {
@@ -348,7 +348,7 @@ export class Assembler {
       if (matches !== null) {
         this.#encodeString(encoding, matches[1]);
       } else {
-        this.encodeValue(encoding, item, bits);
+        this.#encodeValue(encoding, item, bits);
       }
     }
   };
@@ -395,7 +395,7 @@ export class Assembler {
     }
   };
 
-  fillData(encoding, items) {
+  #fillData(encoding, items) {
     let filler;
     if (items.length === 2) {
       filler = this.#nextVal(items[0], false);
@@ -477,7 +477,7 @@ export class Assembler {
         this.#encodeData(encoding, operand.split(','), 16);
         break;
       case 'FILL':
-        this.fillData(encoding, operand.split(','));
+        this.#fillData(encoding, operand.split(','));
         break;
       case 'ORG':
         this.newOrg(this.#nextVal(operand, true));
@@ -509,7 +509,7 @@ export class Assembler {
     }
   };
 
-  pcr(target, bits, pcIn) {
+  #pcr(target, bits, pcIn) {
     trc('this.pcr pcIn', inHex(pcIn, 4));
     let pc = this.ram.wrap(pcIn + ((bits === 8) ? 1 : 2));
     trc('PCR pc value', inHex(pc, 4), 0);
@@ -780,7 +780,7 @@ export class Assembler {
               if (value === null) {
                 value = 0;
               }
-              values = this.pcr(value, forceBits, pcrVal);
+              values = this.#pcr(value, forceBits, pcrVal);
               signedValue = values[0];
               value = values[1];
               if (values.length === 3) {
@@ -857,7 +857,7 @@ export class Assembler {
     return [mode, value, bits, postByte];
   };
 
-  #asmLine(s, allowLabel) {
+  asmLine(s, allowLabel) {
     let encoded = [];
     let opLabel = '';
     let matches, instruction, mode, operand, value, bits, postByte, offsetValues;
@@ -894,7 +894,7 @@ export class Assembler {
             this.#encodeOp(encoded, instruction);
 //            console.dir (instruction);
             trc('ASM mode pcr instruction length', encoded.length, 0);
-            offsetValues = this.pcr(operand, (mode & modes.bits16) !== 0 ? 16 : 8, this.pcVal + encoded.length);
+            offsetValues = this.#pcr(operand, (mode & modes.bits16) !== 0 ? 16 : 8, this.pcVal + encoded.length);
             offsetValues.shift();
             encoded = encoded.concat(offsetValues);
           } else if ((mode & modes.register) !== 0) {
@@ -929,7 +929,7 @@ export class Assembler {
                 if (postByte >= 0) {
                   encoded.push(postByte);
                 }
-                this.encodeValue(encoded, value, bits);
+                this.#encodeValue(encoded, value, bits);
               }
             } else {
               this.#error(modesText[mode] + ' addressing mode not allowed with instruction');
