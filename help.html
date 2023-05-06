@@ -1,0 +1,101 @@
+
+<!DOCTYPE html>
+<html lang='en'>
+
+<head>
+  <meta charset="utf-8">
+  <meta name="description" content="Help for the 6809 emulator">
+
+  <title>6809 Emulator Documentation</title>
+
+  <style>
+      body {
+          font-family: Arial, Helvetica, sans-serif;
+      }
+      .longtext {
+          font-size: 1.25em;
+      }
+      .longtext p  {
+          max-width:40em;
+      }
+
+  </style>
+
+</head>
+
+
+<body>
+<div>
+  <h3><a href='.'>Home</a></h3>
+</div>
+<div class='longtext'>
+  <h1>Introduction</h1>
+  <p>
+    This is an online emulator designed to make it as easy as possible to get started programming the Motorola 6809 CPU in assembly language.
+    There's the obligatory <cite>Hello World</cite> program ready for you to assemble (click the big green button marked <b>Assemble...</b>)
+    and run (click the big green button marked <b>Run</b> (it's beneath all the dials and knobs to the left)).
+    If all goes well you will see a greeting appear on the emulated text screen (the horrid-looking box below with all the green <cite>@</cite> symbols).
+  </p>
+  <p>
+    If you're familiar with the 6809 hopefully the rest is pretty self-explanatory.
+    There are a few short programs included to help you along (move your pointer to <b>Examples</b>).
+  </p>
+  <p>
+    If you know some other machine language than the 6809, then it should be easy to pick up using the documentation here.
+    A reference book wouldn't go amiss though.
+  </p>
+  <p>
+    Even if you know nothing of machine language, try having a go anyway.
+    A grounding in some other programming language will certainly help. Along with one or more reference books or instructional vidoes.
+    But seriously, the best introduction to assembly language I've seen on Youtube is
+    <a href='https://www.youtube.com/watch?v=Kalmryn9_sE' target='_BLANK'>Computerphile:- Game Physics (in Assembler)</a>, which uses the 68000 CPU.
+  </p>
+
+  <h2>The 6809</h2>
+  <p>Motorola launched its advanced 8-bit 6809 in 1977.
+    It was a successor to the 6800 popular in embedded systems, and was mostly source-code compatible with it while offering many extra features.
+    Due mainly to its late arrival it was never as popular as the 6502 and Z80 micros, but it could be found in the Dragon and Tandy Coco home Computers,
+    as well as in less visible platforms such as the Vectrex console and several arcade cabinets including <cite>Defender</cite>.
+  </p>
+  <p>
+    The 6809 has two 8-bit accumulators (A & B), two 16-bit index registers (X & Y), and two 16-bit stack pointers (U & S) which can double as index registers.
+    All the 8 and 16-bit user registers offer Load, Store, and Compare (fully signed) instructions across the four main addressing modes (Immediate, Direct Paged, Direct Extended, and Indexed).
+  </p>
+  <p>
+    The 8-bit accumulators have the usual set of one and two operand arithmetic and logical instructions.
+    They can be combined into the 16-bit D register which has basic instructions for Addition and Subtraction, and also is the destination for the unsigned Multiply of A & B.
+  </p>
+  <p>
+    There are 16 different conditional branches which can all have either 8 or 16 bit offsets, reaching any point in memory.
+    Subroutines can be Branched to as well as Jumped to.
+    The indexed addressing mode includes a mode with an offset from the Program Counter (8 or 16-bit), thus there is no barrier to writing fully position independent code.
+  </p>
+  <p>System registers are the Condition Codes (CC), Program Counter (PC) and the Direct Page register (DP).
+    The DP provides the high 8 bits for an address specified in a single byte in Direct Paged addressing mode.
+    The CC can have any or all bits set or reset at once with the ORCC and ANDCC immediate mode instructions.
+    Otherwise no instructions are provided for manipulating the system registers directly.
+    The Transfer and Exchange instructions must be used instead, which work on any pair of registers the same size.
+    The User (U) and System (S) stacks can have any combination of registers Pushed or Pulled in a single instruction.
+    Subroutine return addresses and interrupts use the System stack only, the User stack has no system function.
+  </p>
+  <p>
+    As well as the standard Interrupt (IRQ) and Non-maskable Interrupt (NMI) there is the Fast Interrupt (FIRQ) which gives faster response by only stacking the CC.
+    There are three Software Interrupts with their own user-definable vectors.
+  </p>
+  <p>
+    Indexed addressing is very flexible, working across all four index registers with options for constant offsets (5, 8, or 16-bit), accumulator offsets (A, B or D),
+    and automatic post-increment and pre-decrement (by 1 or 2).
+    All indexed modes can optionally be made Indirect, where the operand provides the address of the true operand.
+    PC relative comes under the Indexed mode umbrella so is available with indirection, and there's also a plain address Indirect mode.
+    The Load Effective Address is used for initialising pointers to memory objects, or for performing simple arithmetic on index registers.
+    It calculates the address of the operand as normal, but instead of loading a value from the address loads the address itself.
+  </p>
+
+  <p>
+    Altogether the 6809 is a flexible and powerful programming platform that is a pleasure to use.
+    Its weaknesses are its relatively few registers, and low clock speed and good but sub-optimal efficiency.
+  </p>
+
+  <p style='text-align:center'><a href='.'>Back to the emulator</a></p>
+</div>
+</body>
