@@ -40,4 +40,21 @@ describe("assembler", () => {
             }
         })
     })
+    describe('find mnemonic', () => {
+        it('identifies an operation on a single byte code', () => {
+            const operation = asm.opFind(206, 0);
+            expect(operation).not.toBeNull();
+            expect(operation.op).toBe(206);
+            expect(operation.mnem).toBe('LDU');
+        })
+        it.each([
+            [206, 16, 'LDS'],
+            [206, '0x10', 'LDS'],
+        ])('identifies an operation on a double byte code', (code, page, op) => {
+            const operation = asm.opFind(code, page);
+            expect(operation).not.toBeNull();
+            expect(operation.op).toBe(code);
+            expect(operation.mnem).toBe(op);
+        })
+    })
 })

@@ -1148,18 +1148,6 @@ function watchWindow(id, cpuOwner, firstAddress) {
     }
 }
 
-function codeBlock(startAddr) {
-    this.base = startAddr;
-    this.bytes = [];
-    this.addCode = function (code) {
-        trc('addCode', code);
-        this.bytes = this.bytes.concat(code);
-    };
-    this.writeCode = function () {
-        return ('this.ram.fill (0x' + inHex(this.base, 4) + ', ' + JSON.stringify(this.bytes) + ');');
-    };
-}
-
 function CPU() {
     this.flagBits = {C: 1, V: 2, Z: 4, N: 8, I: 16, H: 32, F: 64, E: 128};
     this.registers = [];
@@ -1219,7 +1207,11 @@ function CPU() {
     this.defaultStart = 0x4000;
     this.cellEditing = null;
     this.keyBuffer = [];
-    this.assembler = new Assembler(this.ram, this.dsmTable);
+    this.failCount = 0;
+    this.assembler = new Assembler(this.ram, this, this.dsmTable);
+    this.assemble = function(program) {
+        this.assembler.assemble(program);
+    }
     this.asmLine = function(s) {
         this.assembler.asmLine(s, false);
     }
@@ -1227,7 +1219,7 @@ function CPU() {
         this.assembler.asmCycle();
     }
     this.disassemble = function(startAddress, endAddress, maxLines) {
-        this.assembler.disassemble(startAddress, endAddress, maxLines);
+        return this.assembler.disassemble(startAddress, endAddress, maxLines);
     }
     this.closeEdit = function (updateValue) {
         let newValue;
@@ -1467,12 +1459,10 @@ function CPU() {
         }
     };
     this.editCode = function (cpu, event, address) {
-        var editBox, inputBox;
-        var cell = event.target.parentNode.lastChild;
+        let cell = event.target.parentNode.lastChild;
         trc('editCode', 0);
-//    console.dir (event.target.parentNode);
-        inputBox = new cellEdit(cell, cpu, address);
-        return (false);
+        new cellEdit(cell, cpu, address);
+        return false;
     };
     this.setBreakpoint = function (cpu, event, address) {
         var cell = event.target.parentNode.firstChild;
@@ -1501,7 +1491,18 @@ function CPU() {
 //      trc ("opPage",this.opPage);
                     opcode = this.ram.peek(this.registers['regPC'].regValue);
                     this.registers['regPC'].setValue(this.ram.plus(this.registers['regPC'].regValue));
-                    if (instruction = this.opFind(opcode, this.opPage)) {
+                    try {
+                        instruction = this.assembler.opFind(opcode,
+                            this.opPage);
+                    } catch (ex) {
+                        this.failCount++;
+                        console.log('caught opfind failure in cycle');
+                        if (this.failCount > 10) {
+                            this.failCount = 0;
+                            this.stop();
+                        }
+                    }
+                    if (instruction != null) {
 //            trc ("Found mnemonic", instruction.mnem+' = '+instruction.code);
                         this.alu.execute(instruction.code);
                     } else {

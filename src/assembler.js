@@ -10,6 +10,18 @@ import {
 import {inHex, plural, signedHex, trc} from './helper';
 import {Memory8} from './memory8';
 
+function codeBlock(startAddr) {
+  this.base = startAddr;
+  this.bytes = [];
+  this.addCode = function (code) {
+    trc('addCode', code);
+    this.bytes = this.bytes.concat(code);
+  };
+  this.writeCode = function () {
+    return ('this.ram.fill (0x' + inHex(this.base, 4) + ', ' + JSON.stringify(this.bytes) + ');');
+  };
+}
+
 export class Assembler {
   labelMap;
   asmText;
@@ -21,7 +33,6 @@ export class Assembler {
   asmLineNo;
   asmProgram;
   foundError;
-  newOrg;
   asmIntervalID;
   asmIntervalMils;
   defaultStart;
@@ -29,7 +40,7 @@ export class Assembler {
   dsmTableSize;
   ram;
 
-  constructor(ram, dsmWindow) {
+  constructor(ram, cpu, dsmWindow) {
     this.labelMap = new labelList('labelMap', this);
     this.asmText = '';
     this.labels = [];
@@ -46,6 +57,7 @@ export class Assembler {
     if (ram == null) {
       this.ram = new Memory8(64 * 1024);
     }
+    this.cpu = cpu;
   }
 
   assemble(program) {
@@ -68,7 +80,8 @@ export class Assembler {
     this.newOrg(Defaults.org);
     this.asmLineNo = 0;
     this.lastlabel = '';
-    this.asmIntervalID = setInterval(this.asmCycle, this.asmIntervalMils);
+    let cycle = this.asmCycle.bind(this);
+    this.asmIntervalID = setInterval(cycle, this.asmIntervalMils);
   }
 
   asmFinalise() {
@@ -141,14 +154,18 @@ export class Assembler {
     }
   };
 
-  #opFind(opcode, page) {
+  opFind(opcode, page) {
+    const opPage = parseInt(page);
     const instruction = ops6809.find(function (element) {
-      return (element.op === opcode) && (element.page === page);
+      return (element.op === opcode) && (element.page === opPage);
     });
     if (instruction) {
       return instruction;
     } else {
-      trc('Opfind failed for ', opcode);
+      const errorCode = inHex((page * 256) + opcode);
+      trc('OpFind failed for ', errorCode);
+      this.#error('halt on opFind failed');
+      throw new Error('halt on opFind failed');
     }
   };
 
@@ -351,6 +368,12 @@ export class Assembler {
         this.#encodeValue(encoding, item, bits);
       }
     }
+  };
+
+  newOrg(baseAddress) {
+    trc('newOrg', inHex(baseAddress, 4));
+    this.pcVal = baseAddress;
+    this.codeBlocks.push(new codeBlock(baseAddress));
   };
 
   splitByComma(text) {
@@ -1104,37 +1127,37 @@ export class Assembler {
       instruction = null;
       disassembly = new DisCode(pc);
       opCode = nextByte(this);
-      instruction = this.#opFind(opCode, opPage);
+      instruction = this.opFind(opCode, opPage);
       if (instruction != null) {
         if ((instruction.mode & modes.pager) !== 0) {
           trc('Pager', opCode);
           opPage = opCode;
           opCode = nextByte(this);
-          instruction = this.#opFind(opCode, opPage);
+          instruction = this.opFind(opCode, opPage);
         }
       }
       if (instruction) {
         disassembly.operation = instruction.mnem;
-        if (instruction.mode & modes.simple) {
-        } else if (instruction.mode & modes.immediate) {
-          disassembly.operand = '#' + readWord(this, instruction.mode & modes.bits16, '$');
-        } else if (instruction.mode & modes.direct) {
-          disassembly.operand = '<' + readWord(this, modes.bits8, '$');
-        } else if (instruction.mode & modes.extended) {
-          disassembly.operand = readWord(this, modes.bits16, '$');
-        } else if (instruction.mode & modes.indexed) {
-          disassembly.operand = disIndexed(this, nextByte(this));
-        } else if (instruction.mode & modes.register) {
-          postByte = nextByte(this);
-          if (instruction.mode & modes.pair) {
+        if ((instruction.mode & modes.simple) !== 0) {
+        } else if ((instruction.mode & modes.immediate) !== 0) {
+          disassembly.operand = '#' + readWord(this.cpu, instruction.mode & modes.bits16, '$');
+        } else if ((instruction.mode & modes.direct) !== 0) {
+          disassembly.operand = '<' + readWord(this.cpu, modes.bits8, '$');
+        } else if ((instruction.mode & modes.extended) !== 0) {
+          disassembly.operand = readWord(this.cpu, modes.bits16, '$');
+        } else if ((instruction.mode & modes.indexed) !== 0) {
+          disassembly.operand = disIndexed(this.cpu, nextByte(this.cpu));
+        } else if ((instruction.mode & modes.register) !== 0) {
+          postByte = nextByte(this.cpu);
+          if ((instruction.mode & modes.pair) !== 0) {
             disassembly.operand = this.#regPairList(postByte, pairRegsToText);
           } else {
 //            trc ('dis.op', disassembly.operation[disassembly.operation.length-1]);
             disassembly.operand = this.#regGroupList(postByte,
                 (disassembly.operation[disassembly.operation.length - 1] === 'S') ? fullRegsToTextS : fullRegsToTextU);
           }
-        } else if (instruction.mode & modes.pcr) {
-          disassembly.operand = findPCR(this, parseInt(readWord(this, instruction.mode & modes.bits16, ''), 16),
+        } else if ((instruction.mode & modes.pcr) !== 0) {
+          disassembly.operand = findPCR(this.cpu, parseInt(readWord(this.cpu, instruction.mode & modes.bits16, ''), 16),
               instruction.mode & modes.bits16, pc);
         }
       } else {

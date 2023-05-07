@@ -33,6 +33,14 @@ class SlideControl {
   }
 }
 
+function statusEventHandler(event) {
+  const statusBox = document.getElementById('assemblyStatus');
+  if (statusBox != null) {
+    statusBox.innerHTML = event.detail.message;
+  }
+  event.preventDefault();
+}
+
 function codeDump(id) {
   let block, element;
   let text = '';
@@ -133,6 +141,7 @@ function machineOrg(PC, force) {
   mc6809.dsmTable.lineOn(mc6809.registers['regPC'].regValue, force);
 }
 
+document.addEventListener("assemblerEvent", statusEventHandler);
 const mc6809 = new bundle.CPU();
 mc6809.ready();
 const speed = new SlideControl(mc6809, 5);
