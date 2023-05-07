@@ -15,6 +15,6 @@ module.exports = {
   plugins: [
       new NodePolyfillPlugin(),
   ],
-  // mode: 'production',
-  mode: 'development',
+  mode: 'production',
+  // mode: 'development',
 }
