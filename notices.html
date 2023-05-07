@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="description" content="Updates and notices for the 6809 emulator">
+    <title>Updates and Notices</title>
+    <style>
+        body {
+            font-family: Arial, Helvetica, sans-serif;
+        }
+
+        .longtext {
+            font-size: 1.25em;
+        }
+
+        .longtext p {
+            max-width: 40em;
+        }
+    </style>
+</head>
+<body>
+<div>
+    <h3><a href='.'>Home</a></h3>
+</div>
+<div class='longtext'>
+    <h1>Notices</h1>
+    <p>
+        The updated version of the 6809 emulator is hosted at <a href="http://6809.ukdragons.org.uk">
+        http://6809.ukdragons.org.uk</a> while the original author is uncontactable. If you know the author please
+        get in touch!
+    </p>
+    <p>
+        The source code for the site is held at <a href="https://github.com/jimbro1000/online6809">github.com</a>,
+        this also includes the site wiki and issue tracking. If you find any problems please visit the issues area
+        and enter any information you can provide on the problem.
+    </p>
+    <h1>Updates</h1>
+    <p>
+        Version 1.1.0<br>
+        Fixes:
+    </p>
+    <ul>
+        <li>String literals can be enclosed in single or double quotes</li>
+        <li>Post increment directives in indexed addressing now works in more operations</li>
+        <li>6809 Assembler is now a separate object, decoupled from the emulator</li>
+        <li>Assembler now pushes status updates as events instead of writing to the host page</li>
+    </ul>
+    <p>
+        Version 1.0.1<br>
+        Fixes:
+    </p>
+    <ul>
+        <li>The compiler now makes 3 passes instead of 2 in order to stabilise labels</li>
+    </ul>
+    <h1>Known Problems</h1>
+    <ul>
+        <li>Assembler is over-enthusiastic when decoding mnemonics and likes to include labels and data</li>
+        <li>Assembler does not know how to handle hints to force 8 bit or 16 bit offsets in indexed addressing</li>
+    </ul>
+</div>
+</body>
+</html>

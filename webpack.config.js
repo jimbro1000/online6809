@@ -6,7 +6,9 @@ module.exports = {
       "fs": false,
     },
   },
-  entry: './src/emulator.js',
+  entry: {
+    emulator: './src/emulator.js',
+  },
   output: {
     path: resolve(__dirname, 'dist'),
     filename: 'bundle.js',
