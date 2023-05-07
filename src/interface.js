@@ -1,6 +1,5 @@
 import {blockChars, blockClasses, Defaults} from "./constants";
-import {trc} from "./emulator";
-import {inHex} from "./helper";
+import {inHex, trc} from "./helper";
 
 function labelList(id, cpuOwner) {
     this.cpu = cpuOwner;
@@ -9,14 +8,16 @@ function labelList(id, cpuOwner) {
         let container = document.getElementById(listId + '-container');
         trc('labelList id', listId);
         if (container !== null) {
-            trc('LabelList container', '');
-            this.list = document.createElement('select');
-//      this.list.setAttribute ('id', 'listId');
-//      this.list.setAttribute ('id', listId);
-            this.list.setAttribute('size', '30');
-//      this.list.style='flex-grow: 1';
-            this.list.className = 'labelsContainer';
-            container.appendChild(this.list);
+            const labels = container.childNodes;
+            if (labels.length === 0) {
+                trc('LabelList container', '');
+                this.list = document.createElement('select');
+                this.list.setAttribute('size', '30');
+                this.list.className = 'labelsContainer';
+                container.appendChild(this.list);
+            } else {
+                this.list = labels[0];
+            }
         }
     };
     this.fill = function (labels) {
@@ -159,7 +160,6 @@ function DSMWindow(id, cpu, rows) {
         }
     };
     this.lineOn = function (address, force, notRequired) {
-        var disassembly;
         if (!(this.cpuOwner.refreshOn || force)) {
             return;
         }
