@@ -13,7 +13,7 @@ class SlideControl {
     this.#value = 0;
   }
 
-  bindId(slideElement,  textElement) {
+  bindId(slideElement, textElement) {
     this.#readout = document.getElementById(textElement);
     this.#slider = document.getElementById(slideElement);
     this.#slider.addEventListener('click', this.update.bind(this), false);
@@ -42,12 +42,12 @@ function statusEventHandler(event) {
 }
 
 function codeDump(id) {
-  let block, element;
+  let block; let element;
   let text = '';
   for (block in mc6809.codeBlocks) {
     text += mc6809.codeBlocks[block].writeCode() + '\n';
   }
-//  console.log (text);
+  //  console.log (text);
   element = document.getElementById(id);
   if (element) {
     element.value = text;
@@ -55,7 +55,7 @@ function codeDump(id) {
 }
 
 function compileRun(id) {
-  let asmLines, element;
+  let asmLines; let element;
   element = document.getElementById(id);
   if (element) {
     mc6809.assemble(element.value.split('\n'));
@@ -64,7 +64,7 @@ function compileRun(id) {
 }
 
 function machineRefresh() {
-  let refresh= document.getElementById('refreshCheck');
+  const refresh= document.getElementById('refreshCheck');
   if (refresh) {
     if (refresh.checked) {
       mc6809.refresh(1);
@@ -141,12 +141,12 @@ function machineOrg(PC, force) {
   mc6809.dsmTable.lineOn(mc6809.registers['regPC'].regValue, force);
 }
 
-document.addEventListener("assemblerEvent", statusEventHandler);
+document.addEventListener('assemblerEvent', statusEventHandler);
 const mc6809 = new bundle.CPU();
 mc6809.ready();
 const speed = new SlideControl(mc6809, 5);
 speed.bindId('speed', 'speedVal');
-document.getElementById('assembly-code').value = document.getElementById('demo-helloworld').value
+document.getElementById('assembly-code').value = document.getElementById('demo-helloworld').value;
 machineInterrupt('reset');
 mc6809.refresh(1);
 mc6809.execute();
