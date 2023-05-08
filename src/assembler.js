@@ -795,7 +795,7 @@ export class Assembler {
             postByte = postByte | 0x84;
           } else if (hasValue) {
             trc('Indexed constant offset', value);
-            if (indexMode === '0x8D') {
+            if (indexMode === 0x8D) {
               // force 16 bit offset for PCR references unless 8 bit specified
               if (forceBits === 0) {
                 forceBits = 16;
@@ -809,7 +809,7 @@ export class Assembler {
               if (values.length === 3) {
                 value = (value << 8) | values[2];
               }
-              indexMode = '0x8C';
+              indexMode = 0x8C;
               postByte = indexMode;
             } else {
               signedValue = value;
