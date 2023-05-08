@@ -1885,6 +1885,12 @@ var bundle;(()=>{var e={2289:(e,t,r)=>{var n=r(5108),i={};e.exports=i,i.themes={
   #readout;
   #slider;
 
+  /**
+   * Inject CPU and set default interval.
+   *
+   * @param {CPU} cpu bound CPU
+   * @param {number} speed default step interval
+   */
   constructor(cpu, speed) {
     this.#cpu = cpu;
     this.#speed = Math.trunc(speed);
@@ -1893,6 +1899,12 @@ var bundle;(()=>{var e={2289:(e,t,r)=>{var n=r(5108),i={};e.exports=i,i.themes={
     this.#value = 0;
   }
 
+  /**
+   * Bind control to given UI elements.
+   *
+   * @param {String} slideElement slide control element name
+   * @param {String} textElement text readout element name
+   */
   bindId(slideElement, textElement) {
     this.#readout = document.getElementById(textElement);
     this.#slider = document.getElementById(slideElement);
@@ -1906,6 +1918,11 @@ var bundle;(()=>{var e={2289:(e,t,r)=>{var n=r(5108),i={};e.exports=i,i.themes={
     this.#readout.innerHTML = this.#value;
   }
 
+  /**
+   * Update CPU with new interval step.
+   *
+   * @param {Object} event slide control change event
+   */
   update(event) {
     this.#value = parseInt(event.srcElement.value);
     this.#readout.innerHTML = this.#value;
@@ -1913,6 +1930,11 @@ var bundle;(()=>{var e={2289:(e,t,r)=>{var n=r(5108),i={};e.exports=i,i.themes={
   }
 }
 
+/**
+ * Event consumer for assembly status updates.
+ *
+ * @param {Object} event assembly status event
+ */
 function statusEventHandler(event) {
   const statusBox = document.getElementById('assemblyStatus');
   if (statusBox != null) {
@@ -1921,28 +1943,39 @@ function statusEventHandler(event) {
   event.preventDefault();
 }
 
+/**
+ * Disassemble visible code.
+ *
+ * @param {String} id target elementId name
+ */
 function codeDump(id) {
-  let block; let element;
+  let block;
   let text = '';
   for (block in mc6809.codeBlocks) {
     text += mc6809.codeBlocks[block].writeCode() + '\n';
   }
-  //  console.log (text);
-  element = document.getElementById(id);
-  if (element) {
+  const element = document.getElementById(id);
+  if (element !== null) {
     element.value = text;
   }
 }
 
+/**
+ * Start assembly process.
+ *
+ * @param {String} id elementId name of source container
+ */
 function compileRun(id) {
-  let asmLines; let element;
-  element = document.getElementById(id);
+  const element = document.getElementById(id);
   if (element) {
     mc6809.assemble(element.value.split('\n'));
     mc6809.refresh(1);
   }
 }
 
+/**
+ * Refresh UI with machine state.
+ */
 function machineRefresh() {
   const refresh= document.getElementById('refreshCheck');
   if (refresh) {
@@ -1953,6 +1986,11 @@ function machineRefresh() {
   }
 }
 
+/**
+ * Add watchpoint frame.
+ *
+ * @param {String} where address reference (EA/X/APPEND)
+ */
 function addWatchpoint(where) {
   switch (where.toUpperCase()) {
     case 'EA':
@@ -1967,10 +2005,18 @@ function addWatchpoint(where) {
   }
 }
 
+/**
+ * Force CPU reset.
+ */
 function machineReset() {
   machineInterrupt('reset');
 }
 
+/**
+ * Trigger named interrupt.
+ *
+ * @param {String} irqName interrupt name (NMI/IRQ/FIRQ)
+ */
 function machineInterrupt(irqName) {
   bundle.trc('machineInterrupt', irqName);
   mc6809.alu.interrupt(irqName);
@@ -1979,17 +2025,26 @@ function machineInterrupt(irqName) {
   mc6809.execute();
 }
 
+/**
+ * Stop CPU auto-cycle.
+ */
 function machineHalt() {
   console.dir(document.getElementById('registers-container'));
   mc6809.stop();
   mc6809.refresh(1);
 }
 
+/**
+ * Start CPU auto-cycle.
+ */
 function machineRun() {
   machineRefresh();
   mc6809.execute();
 }
 
+/**
+ * CPU cycle callback.
+ */
 function machineCycle() {
   mc6809.cycle();
 }
@@ -1998,6 +2053,9 @@ function assemblyCycle() {
   mc6809.asmCycle();
 }
 
+/**
+ * Step CPU by 1 instruction.
+ */
 function machineStep() {
   mc6809.stop();
   mc6809.cycle();
@@ -2006,16 +2064,28 @@ function machineStep() {
   }
 }
 
+/**
+ * Trigger Interrupt (IRQ).
+ */
 function doIRQ() {
   mc6809.alu.interrupt('irq');
   mc6809.alu.checkInterrupts();
 }
 
+/**
+ * Trigger Fast Interrupt (FIRQ).
+ */
 function doFIRQ() {
   mc6809.alu.interrupt('firq');
   mc6809.alu.checkInterrupts();
 }
 
+/**
+ * Refresh UI with updated program counter.
+ *
+ * @param {number} PC program counter
+ * @param {boolean} force force update
+ */
 function machineOrg(PC, force) {
   mc6809.registers['regPC'].change(PC, 0);
   mc6809.dsmTable.lineOn(mc6809.registers['regPC'].regValue, force);
@@ -2026,7 +2096,8 @@ const mc6809 = new bundle.CPU();
 mc6809.ready();
 const speed = new SlideControl(mc6809, 5);
 speed.bindId('speed', 'speedVal');
-document.getElementById('assembly-code').value = document.getElementById('demo-helloworld').value;
+document.getElementById('assembly-code').value =
+    document.getElementById('demo-helloworld').value;
 machineInterrupt('reset');
 mc6809.refresh(1);
 mc6809.execute();
