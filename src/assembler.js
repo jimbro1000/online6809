@@ -13,11 +13,11 @@ import {Memory8} from './memory8';
 function codeBlock(startAddr) {
   this.base = startAddr;
   this.bytes = [];
-  this.addCode = function (code) {
+  this.addCode = function(code) {
     trc('addCode', code);
     this.bytes = this.bytes.concat(code);
   };
-  this.writeCode = function () {
+  this.writeCode = function() {
     return ('this.ram.fill (0x' + inHex(this.base, 4) + ', ' + JSON.stringify(this.bytes) + ');');
   };
 }
@@ -80,7 +80,7 @@ export class Assembler {
     this.newOrg(Defaults.org);
     this.asmLineNo = 0;
     this.lastlabel = '';
-    let cycle = this.asmCycle.bind(this);
+    const cycle = this.asmCycle.bind(this);
     this.asmIntervalID = setInterval(cycle, this.asmIntervalMils);
   }
 
@@ -156,7 +156,7 @@ export class Assembler {
 
   opFind(opcode, page) {
     const opPage = parseInt(page);
-    const instruction = ops6809.find(function (element) {
+    const instruction = ops6809.find(function(element) {
       return (element.op === opcode) && (element.page === opPage);
     });
     if (instruction) {
@@ -164,8 +164,8 @@ export class Assembler {
     } else {
       const errorCode = inHex((page * 256) + opcode);
       trc('OpFind failed for ', errorCode);
-      this.#error('halt on opFind failed');
-      throw new Error('halt on opFind failed');
+      // this.#error('halt on opFind failed');
+      // throw new Error('halt on opFind failed');
     }
   };
 
@@ -181,7 +181,7 @@ export class Assembler {
   };
 
   #readLabel(asmLabel, value, leadingSpace) {
-    let matches, key;
+    let matches; let key;
     trc('ReadLabel', asmLabel);
     trc('leadingSpace', leadingSpace);
     matches = /^\s*([a-z_][\w_]*):\s*(.*)/i.exec(asmLabel);
@@ -203,10 +203,10 @@ export class Assembler {
   };
 
   #nextVal(expressionIn, needsValue) {
-    let matches, value, valueNum, minus, radix;
+    let matches; let value; let valueNum; let minus; let radix;
     let total = 0;
     let valid = false;
-    let matchValue = /^\s*(('(.))|(-|\+|)(\$|%|0x|)([\w_]+))/i;
+    const matchValue = /^\s*(('(.))|(-|\+|)(\$|%|0x|)([\w_]+))/i;
     let expression = String(expressionIn);
     trc('nextVal input', expression, 0);
     while (matches = matchValue.exec(expression)) {
@@ -277,7 +277,7 @@ export class Assembler {
     let lastSpace = true;
     for (let i = 0; i < text.length; i++) {
       const c = text.charAt(i);
-//      if ((c=="'") || (c=='"')) {
+      //      if ((c=="'") || (c=='"')) {
       if (c === '"') {
         if (inQuotes === c) {
           inQuotes = null;
@@ -288,7 +288,7 @@ export class Assembler {
         }
       }
       if (
-          ((c === ';') || (c === '*')) &&
+        ((c === ';') || (c === '*')) &&
           (inQuotes === null) &&
           (lastSpace === true)
       ) {
@@ -378,7 +378,7 @@ export class Assembler {
 
   splitByComma(text) {
     let item;
-    let items = [];
+    const items = [];
     let textList = text;
     trc('splitByComma', text, 0);
     while (textList.length > 0) {
@@ -490,7 +490,7 @@ export class Assembler {
       case 'DB':
       case '.BYTE':
       case 'FCB':
-//      case 'FCC': this.encodeData (encoding, operand.split (','), 8); break
+        //      case 'FCC': this.encodeData (encoding, operand.split (','), 8); break
       case 'FCC':
         this.#encodeData(encoding, this.splitByComma(operand), 8);
         break;
@@ -534,7 +534,7 @@ export class Assembler {
 
   #pcr(target, bits, pcIn) {
     trc('this.pcr pcIn', inHex(pcIn, 4));
-    let pc = this.ram.wrap(pcIn + ((bits === 8) ? 1 : 2));
+    const pc = this.ram.wrap(pcIn + ((bits === 8) ? 1 : 2));
     trc('PCR pc value', inHex(pc, 4), 0);
     trc('PCR target', inHex(target, 4), 0);
     trc('PCR bits', bits, 0);
@@ -577,9 +577,9 @@ export class Assembler {
       }
     }
     trc('pairPostByte', s);
-    let matches = /(\w+)\s*,\s*(\w+)/.exec(s);
-    let reg1 = getRegister(matches[1].toUpperCase());
-    let reg2 = getRegister(matches[2].toUpperCase());
+    const matches = /(\w+)\s*,\s*(\w+)/.exec(s);
+    const reg1 = getRegister(matches[1].toUpperCase());
+    const reg2 = getRegister(matches[2].toUpperCase());
     if ((reg1 != null) && (reg2 != null)) {
       return ((reg1 << 4) | reg2);
     } else {
@@ -641,7 +641,7 @@ export class Assembler {
   };
 
   #getIndexMode(s) {
-// determine index register and autoincrement, return index=-1 if error;
+    // determine index register and autoincrement, return index=-1 if error;
     let index = -1;
     let increment = 0;
     trc('getIndexMode', s);
@@ -742,9 +742,9 @@ export class Assembler {
   };
 
   #adrMode(opMode, s, pcrVal) {
-    let matches, bits, forceBits, value, mode, indirect, indexMode, increment, postByte, offset, values,
-        signedValue,
-        withDPValue;
+    let matches; let bits; let forceBits; let value; let mode; let indirect; let indexMode; let increment; let postByte; let offset; let values;
+    let signedValue;
+    let withDPValue;
     indirect = 0;
     postByte = -1;
     let hasValue = false;
@@ -795,7 +795,7 @@ export class Assembler {
             postByte = postByte | 0x84;
           } else if (hasValue) {
             trc('Indexed constant offset', value);
-            if (indexMode === '0x8D') {
+            if (indexMode === 0x8D) {
               // force 16 bit offset for PCR references unless 8 bit specified
               if (forceBits === 0) {
                 forceBits = 16;
@@ -809,13 +809,13 @@ export class Assembler {
               if (values.length === 3) {
                 value = (value << 8) | values[2];
               }
-              indexMode = '0x8C';
+              indexMode = 0x8C;
               postByte = indexMode;
             } else {
               signedValue = value;
             }
             if (
-                ((value >= -16) && (value < 16)) &&
+              ((value >= -16) && (value < 16)) &&
                 (indexMode < 0x80) && (!indirect)
             ) {
               postByte = postByte | (value & 0x1f);
@@ -883,7 +883,7 @@ export class Assembler {
   asmLine(s, allowLabel) {
     let encoded = [];
     let opLabel = '';
-    let matches, instruction, mode, operand, value, bits, postByte, offsetValues;
+    let matches; let instruction; let mode; let operand; let value; let bits; let postByte; let offsetValues;
     this.asmText = this.#parseOutComments(s);
     if (allowLabel) {
       [this.asmText, opLabel] = this.#readLabel(this.asmText, this.pcVal, /^\s+/.test(s));
@@ -895,7 +895,7 @@ export class Assembler {
     trc('asmText', this.asmText);
     matches = /\s*([a-zA-Z=.]\w*)($|\s*(.+))/.exec(this.asmText);
     if (matches !== null) {
-      let mnemonic = matches[1];
+      const mnemonic = matches[1];
       trc('asmLine match:', mnemonic);
       instruction = this.#mnemonicFind(mnemonic.toUpperCase(), 0xffff);
       if (instruction !== null) {
@@ -915,7 +915,7 @@ export class Assembler {
           trc('modes.register', modes.register);
           if ((mode & modes.pcr) !== 0) {
             this.#encodeOp(encoded, instruction);
-//            console.dir (instruction);
+            //            console.dir (instruction);
             trc('ASM mode pcr instruction length', encoded.length, 0);
             offsetValues = this.#pcr(operand, (mode & modes.bits16) !== 0 ? 16 : 8, this.pcVal + encoded.length);
             offsetValues.shift();
@@ -942,7 +942,7 @@ export class Assembler {
             if (instruction !== null) {
               trc('mnemonicFind Bits', bits);
               if (
-                  ((instruction.mode & modes.immediate) !== 0) &&
+                ((instruction.mode & modes.immediate) !== 0) &&
                   (bits > 8) &&
                   ((instruction.mode & modes.bits16) === 0)
               ) {
@@ -964,7 +964,7 @@ export class Assembler {
       }
     }
     if (
-        (this.lastLabel) && (encoded.length > 0) &&
+      (this.lastLabel) && (encoded.length > 0) &&
         ((mode & modes.pseudo) === 0)
     ) {
       this.#addMapLabel(this.lastLabel, this.pcVal);
@@ -974,20 +974,20 @@ export class Assembler {
   }
 
   #setStatus(statusColour, alert, message, source) {
-    let event, HTML;
+    let event; let HTML;
     let sourceText = source;
     if (sourceText) {
       sourceText = sourceText.replace(/</, '&lt;');
       sourceText = sourceText.replace(/>/, '&gt;');
     }
-    HTML = "<span style='color: " + statusColour + "' font-size:large;'>" + alert + "</span> <i>" + message + "</i>";
+    HTML = '<span style=\'color: ' + statusColour + '\' font-size:large;\'>' + alert + '</span> <i>' + message + '</i>';
     if (source != null) {
       HTML += '<br />Input: <span style=\'color: blue\'>' + sourceText + '</span>';
     }
-    event = new CustomEvent("assemblerEvent", {
+    event = new CustomEvent('assemblerEvent', {
       detail: {
-        message : HTML
-      }
+        message: HTML,
+      },
     });
     document.dispatchEvent(event);
   }
@@ -1000,8 +1000,8 @@ export class Assembler {
     this.asmIntervalID = null;
   }
 
-  #regGroupList = function (postByte, regList) {
-    let theseRegs = [];
+  #regGroupList = function(postByte, regList) {
+    const theseRegs = [];
     for (let i = 0; i < 8; ++i) {
       if ((postByte & (0x01 << i)) !== 0) {
         theseRegs.push(regList[i].substring(3));
@@ -1023,9 +1023,9 @@ export class Assembler {
   };
 
   disassemble(startAddress, endAddress, maxLines) {
-    let opCode, opPage, postByte, instruction, disassembly;
+    let opCode; let opPage; let postByte; let instruction; let disassembly;
     let pc = startAddress;
-    let lines = [];
+    const lines = [];
 
     function nextByte(machine) {
       let byte;
@@ -1046,9 +1046,9 @@ export class Assembler {
 
     function disIndexed(machine, postByte) {
       let operand = '';
-// find index register name
-      let indexReg = ['X', 'Y', 'U', 'S'][(postByte & 0x60) >>> 5];
-// extract 5 bit offset
+      // find index register name
+      const indexReg = ['X', 'Y', 'U', 'S'][(postByte & 0x60) >>> 5];
+      // extract 5 bit offset
       if ((postByte & 0x80) === 0) {
         trc('5 bit', '');
         operand = signedHex(postByte & 0x1f, 5, '$') + ',' + indexReg;
@@ -1152,7 +1152,7 @@ export class Assembler {
           if ((instruction.mode & modes.pair) !== 0) {
             disassembly.operand = this.#regPairList(postByte, pairRegsToText);
           } else {
-//            trc ('dis.op', disassembly.operation[disassembly.operation.length-1]);
+            //            trc ('dis.op', disassembly.operation[disassembly.operation.length-1]);
             disassembly.operand = this.#regGroupList(postByte,
                 (disassembly.operation[disassembly.operation.length - 1] === 'S') ? fullRegsToTextS : fullRegsToTextU);
           }
@@ -1176,7 +1176,7 @@ function DisCode(address) {
   this.operation = '';
   this.operand = '';
   this.maxInstructionLength = 5;
-  this.show = function () {
+  this.show = function() {
     let s = inHex(this.address, 4) + ': ';
     for (let i = 0; i < this.maxInstructionLength; i++) {
       if (i < this.bytes.length) {
