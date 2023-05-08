@@ -6,6 +6,7 @@
   "homepage": "https://github.com/jimbro1000/online6809",
   "bugs": "https://github.com/jimbro1000/online6809/issues",
   "scripts": {
+    "test": "jest",
     "build": "webpack --stats-error-details && inline-script-tags src/index.html index.html"
   },
   "devDependencies": {
