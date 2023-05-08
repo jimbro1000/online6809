@@ -164,8 +164,8 @@ export class Assembler {
     } else {
       const errorCode = inHex((page * 256) + opcode);
       trc('OpFind failed for ', errorCode);
-      this.#error('halt on opFind failed');
-      throw new Error('halt on opFind failed');
+      // this.#error('halt on opFind failed');
+      // throw new Error('halt on opFind failed');
     }
   };
 

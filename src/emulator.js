@@ -16,7 +16,7 @@ import {Memory8} from './memory8';
 import {Assembler} from './assembler';
 
 function inBinary(n, l) {
-    let s = n.toString(2);
+    let s = n.toString();
     while (s.length < l) {
         s = '0' + s;
     }
@@ -104,7 +104,7 @@ function cellEdit(cellTD, cpu, cellAddress) {
         cpu.pcVal = this.address;
         cpu.foundError = 0;
         cpu.passNo = 2;
-        var encoded = cpu.asmLine(this.input.value);
+        const encoded = cpu.asmLine(this.input.value);
         if (cpu.foundError) {
             this.input.style = 'color: #f02020';
 //      alert ('Machine language contains errors');
@@ -161,7 +161,7 @@ function Register(called, size, n, cpuOwner, usebinary) {
     this.notify = 0;
     trc('Init Register called', called);
     this.digGroups = function (s, count) {
-        var groups = [];
+        const groups = [];
         while (s.length >= count) {
             groups.push(s.substr(0, count));
             s = s.substr(count);
@@ -190,7 +190,7 @@ function Register(called, size, n, cpuOwner, usebinary) {
         }
     };
     this.digitRow = function (t, c, l, notify, labelTop) {
-        var i, row, cell;
+        let i, row, cell;
         row = t.insertRow();
         if (!labelTop) {
             cell = row.insertCell();
@@ -223,8 +223,8 @@ function Register(called, size, n, cpuOwner, usebinary) {
             }
         }
     };
-    this.createHTML = function (calledp) {
-        let table, arow, acell, cells;
+    this.createHTML = function (called) {
+        let table, aRow, aCell, cells;
         this.regLabel = called;
         this.regName = 'reg' + called;
         table = document.getElementById(this.regName);
@@ -234,11 +234,11 @@ function Register(called, size, n, cpuOwner, usebinary) {
         }
         if (table != null) {
             if (this.binary) {
-                arow = table.insertRow();
-                acell = arow.insertCell();
-                acell.innerHTML = this.regLabel;
-                acell.setAttribute('colspan', cells);
-                acell.className = 'reglabel';
+                aRow = table.insertRow();
+                aCell = aRow.insertCell();
+                aCell.innerHTML = this.regLabel;
+                aCell.setAttribute('colspan', cells);
+                aCell.className = 'reglabel';
             }
             switch (this.binary) {
                 case '':
@@ -293,7 +293,7 @@ function Register(called, size, n, cpuOwner, usebinary) {
         }
     };
     this.setValue = function (n) {
-        var mask;
+        let mask;
         switch (this.bits) {
             case 8:
                 mask = 0xff;
@@ -450,32 +450,30 @@ function ALU816(cpu) {
         machineOrg(this.r1, 0);
     };
     this.chk = function (operand) {
-        var cc = this.cpu.registers['regCC'].regValue;
+        let cc = this.cpu.registers['regCC'].regValue;
         this.condition = 0;
-//    trc ("chk CC",cc);
-//    trc ("chk operand",operand);
         switch (operand) {
             case 'Z':
 //        trc ("Zero",this.cpu.flagBits.Z);
-                if (cc & this.cpu.flagBits.Z) {
+                if ((cc & this.cpu.flagBits.Z) !== 0) {
                     this.condition = 1;
                 }
                 break;
             case 'C':
 //        trc ("Carry",this.cpu.flagBits.C);
-                if (cc & this.cpu.flagBits.C) {
+                if ((cc & this.cpu.flagBits.C) !== 0) {
                     this.condition = 1;
                 }
                 break;
             case 'N':
 //        trc ("Negative",this.cpu.flagBits.N);
-                if (cc & this.cpu.flagBits.N) {
+                if ((cc & this.cpu.flagBits.N) !== 0) {
                     this.condition = 1;
                 }
                 break;
             case 'V':
 //        trc ("Overflow",this.cpu.flagBits.N);
-                if (cc & this.cpu.flagBits.V) {
+                if ((cc & this.cpu.flagBits.V) !== 0) {
                     this.condition = 1;
                 }
                 break;
@@ -487,14 +485,14 @@ function ALU816(cpu) {
                 break;
             case 'LT':
 //        trc ("LT",this.cpu.flagBits.C);
-                if ((cc & this.cpu.flagBits.V) != (cc & this.cpu.flagBits.N)) {
+                if ((cc & this.cpu.flagBits.V) !== (cc & this.cpu.flagBits.N)) {
                     this.condition = 1;
                 }
                 break;
             case 'LE':
 //        trc ("LE",this.cpu.flagBits.C);
                 if ((cc & this.cpu.flagBits.Z) ||
-                    ((cc & this.cpu.flagBits.V) != (cc & this.cpu.flagBits.N))) {
+                    ((cc & this.cpu.flagBits.V) !== (cc & this.cpu.flagBits.N))) {
                     this.condition = 1;
                 }
                 break;
@@ -505,7 +503,7 @@ function ALU816(cpu) {
         this.syncing = 1;
     };
     this.exx = function () {
-        var r = this.r1;
+        const r = this.r1;
         this.r1 = this.r2;
         this.r2 = r;
     };
@@ -513,17 +511,17 @@ function ALU816(cpu) {
         this.r1 = this.cpu.ram.wrap(this.r1 - 1);
     };
     this.qt = function () {
-        if (this.condition != 0) {
+        if (this.condition !== 0) {
             this.quit = 1;
         }
     };
     this.qf = function () {
-        if (this.condition == 0) {
+        if (this.condition === 0) {
             this.quit = 1;
         }
     };
     this.ld = function (operand) {
-        if (operand == 'regD') {
+        if (operand === 'regD') {
             return (this.regs['regA'].regValue << 8) | this.regs['regB'].regValue;
         } else {
             return this.regs[operand].regValue;
@@ -538,7 +536,7 @@ function ALU816(cpu) {
     this.st = function (operand, value) {
 //    trc ("ST operand",operand);
 //    trc ("ST value",value);
-        if (operand == 'regD') {
+        if (operand === 'regD') {
             this.regs['regA'].change(value >>> 8, 0);
             this.regs['regB'].change(value & 0xff, 0);
         } else {
@@ -552,23 +550,20 @@ function ALU816(cpu) {
         this.st(operand, this.r2);
     };
     this.regPairRead = function (nybble) {
-        var w = this.ld(pairRegsToText[nybble]);
-        if (nybble & 0x08) {
+        let w = this.ld(pairRegsToText[nybble]);
+        if ((nybble & 0x08) !== 0) {
             w = w | (w << 8);
         }
         return w;
     };
     this.regPairWrite = function (nybble, value) {
-        var w = value;
-        if (nybble & 0x08) {
-            w = w & 0xff;
-        }
+        const w = ((nybble & 0x08) !== 0) ? value & 0xff : value;
         this.st(pairRegsToText[nybble], w);
     };
     this.rgop = function (operand) {
         this.pcb();
-        var hn = this.r1 >>> 4;
-        var ln = this.r1 & 0x0f;
+        let hn = this.r1 >>> 4;
+        let ln = this.r1 & 0x0f;
         this.r1 = this.regPairRead(hn);
         this.r2 = this.regPairRead(ln);
         switch (operand) {
@@ -582,8 +577,8 @@ function ALU816(cpu) {
         }
     };
     this.stck16 = function (operand) {
-        var w = this.regs[operand].regValue;
-        var s = this.regs['regS'].regValue;
+        let w = this.regs[operand].regValue;
+        let s = this.regs['regS'].regValue;
 //    trc ("STCK16 (s='"+inHex(s,4)+"'",w);
         s = this.cpu.ram.wrap(s - 1);
         this.cpu.ram.poke(s, w);
@@ -602,11 +597,13 @@ function ALU816(cpu) {
         this.pushPostByte(operand, this.r1);
     };
     this.pushPostByte = function (operand, postByte) {
-        var regValue;
-        var stack = this.regs[operand].regValue;
-        var regList = (operand == 'regS') ? fullRegsToTextS : fullRegsToTextU;
-        var postByteMask = 0x80;
-        var i = 8;
+        let regValue;
+        let stack = this.regs[operand].regValue;
+        const regList = (operand === 'regS')
+            ? fullRegsToTextS
+            : fullRegsToTextU;
+        let postByteMask = 0x80;
+        let i = 8;
 //    trc ("Push postbyte", postByte);
         while (postByteMask > 0) {
             i--;
@@ -639,11 +636,13 @@ function ALU816(cpu) {
         this.pullPostByte(operand, this.r1);
     };
     this.pullPostByte = function (operand, postByte) {
-        var regValue;
-        var stack = this.regs[operand].regValue;
-        var regList = (operand == 'regS') ? fullRegsToTextS : fullRegsToTextU;
-        var postByteMask = 0x01;
-        var i = 0;
+        let regValue;
+        let stack = this.regs[operand].regValue;
+        const regList = (operand === 'regS')
+            ? fullRegsToTextS
+            : fullRegsToTextU;
+        let postByteMask = 0x01;
+        let i = 0;
 //    trc ("Pull postbyte", postByte);
         this.eaLast = stack;
         while (postByteMask > 0) {
@@ -672,55 +671,55 @@ function ALU816(cpu) {
     this.err = function () {
     };
     this.or8 = function () {
-        var f = 'v';
+        const f = 'v';
         this.r1 = this.r1 | this.r2;
-        this.cpu.flags(f + (this.r1 ? 'z' : 'Z') + ((this.r1 & 0x80) ? 'N' : 'n'));
+        this.cpu.flags(f + (this.r1 ? 'z' : 'Z') + ((this.r1 & 0x80) !== 0 ? 'N' : 'n'));
     };
     this.clr8 = function () {
         this.r1 = 0;
         this.cpu.flags('nZvc');
     };
     this.tst8 = function () {
-        var f = 'v';
-        this.cpu.flags(f + (this.r1 ? 'z' : 'Z') + ((this.r1 & 0x80) ? 'N' : 'n'));
+        const f = 'v';
+        this.cpu.flags(f + (this.r1 ? 'z' : 'Z') + ((this.r1 & 0x80) !== 0 ? 'N' : 'n'));
     };
     this.and8 = function () {
-        var f = 'v';
+        const f = 'v';
         this.r1 = (this.r2 & this.r1) & 0xff;
-        this.cpu.flags(f + (this.r1 ? 'z' : 'Z') + ((this.r1 & 0x80) ? 'N' : 'n'));
+        this.cpu.flags(f + (this.r1 ? 'z' : 'Z') + ((this.r1 & 0x80) !== 0 ? 'N' : 'n'));
     };
     this.eor8 = function () {
-        var f = 'v';
+        const f = 'v';
         this.r1 = (this.r2 ^ this.r1) & 0xff;
-        this.cpu.flags(f + (this.r1 ? 'z' : 'Z') + ((this.r1 & 0x80) ? 'N' : 'n'));
+        this.cpu.flags(f + (this.r1 ? 'z' : 'Z') + ((this.r1 & 0x80) !== 0 ? 'N' : 'n'));
     };
     this.or8 = function () {
-        var f = 'v';
+        const f = 'v';
         this.r1 = (this.r2 | this.r1) & 0xff;
-        this.cpu.flags(f + (this.r1 ? 'z' : 'Z') + ((this.r1 & 0x80) ? 'N' : 'n'));
+        this.cpu.flags(f + (this.r1 ? 'z' : 'Z') + ((this.r1 & 0x80) !== 0 ? 'N' : 'n'));
     };
     this.sub8 = function () {
         // set high bit IFF signs of operand differ;
-        var mask = (this.r2 ^ this.r1);
-        var result = this.r2 - this.r1;
-        var f = (mask & (this.r2 ^ result)) & 0x80 ? 'V' : 'v';
+        const mask = (this.r2 ^ this.r1);
+        const result = this.r2 - this.r1;
+        const f = (mask & (this.r2 ^ result)) & 0x80 ? 'V' : 'v';
         this.r1 = result & 0xff;
-        this.cpu.flags(f + (this.r1 ? 'z' : 'Z') + ((this.r1 & 0x80) ? 'N' : 'n') + ((result & 0x100) ? 'C' : 'c'));
+        this.cpu.flags(f + (this.r1 ? 'z' : 'Z') + ((this.r1 & 0x80) !== 0 ? 'N' : 'n') + ((result & 0x100) ? 'C' : 'c'));
     };
     this.sub16 = function () {
         // set high bit IFF signs of operand differ;
-        var mask = (this.r2 ^ this.r1);
-        var result = this.r2 - this.r1;
-        var f = (mask & (this.r2 ^ result)) & 0x8000 ? 'V' : 'v';
+        const mask = (this.r2 ^ this.r1);
+        const result = this.r2 - this.r1;
+        const f = (mask & (this.r2 ^ result)) & 0x8000 ? 'V' : 'v';
         this.r1 = result & 0xffff;
-        this.cpu.flags(f + (this.r1 ? 'z' : 'Z') + ((this.r1 & 0x8000) ? 'N' : 'n') + ((result & 0x10000) ? 'C' : 'c'));
+        this.cpu.flags(f + (this.r1 ? 'z' : 'Z') + ((this.r1 & 0x8000) !== 0 ? 'N' : 'n') + ((result & 0x10000) ? 'C' : 'c'));
     };
     this.sbc8 = function () {
-        var mask = (this.r2 ^ this.r1) ^ 0x80;
-        var result = this.r2 - this.r1 - (this.cpu.flagCheck('C') ? 1 : 0);
-        var f = (mask & (this.r2 ^ result)) & 0x80 ? 'V' : 'v';
+        const mask = (this.r2 ^ this.r1) ^ 0x80;
+        const result = this.r2 - this.r1 - (this.cpu.flagCheck('C') ? 1 : 0);
+        const f = (mask & (this.r2 ^ result)) & 0x80 ? 'V' : 'v';
         this.r1 = result & 0xff;
-        this.cpu.flags(f + (this.r1 ? 'z' : 'Z') + ((this.r1 & 0x80) ? 'N' : 'n') + ((result & 0x100) ? 'C' : 'c'));
+        this.cpu.flags(f + (this.r1 ? 'z' : 'Z') + ((this.r1 & 0x80) !== 0 ? 'N' : 'n') + ((result & 0x100) ? 'C' : 'c'));
     };
     this.add8 = function () {
         // set high bit IFF signs of operand the same;
@@ -730,23 +729,23 @@ function ALU816(cpu) {
         // set overflow IFF signs of original and result differ, and mask bit set;
         f += (mask & (this.r2 ^ result)) & 0x80 ? 'V' : 'v';
         this.r1 = result & 0xff;
-        this.cpu.flags(f + (this.r1 ? 'z' : 'Z') + ((this.r1 & 0x80) ? 'N' : 'n') + ((result & 0x100) ? 'C' : 'c'));
+        this.cpu.flags(f + (this.r1 ? 'z' : 'Z') + ((this.r1 & 0x80) !== 0? 'N' : 'n') + ((result & 0x100) !== 0 ? 'C' : 'c'));
     };
     this.add16 = function () {
         // set high bit IFF signs of operand the same;
-        var mask = (this.r2 ^ this.r1) ^ 0x8000;
-        var result = this.r2 + this.r1;
+        const mask = (this.r2 ^ this.r1) ^ 0x8000;
+        const result = this.r2 + this.r1;
         // set overflow IFF signs of original and result differ, and mask bit set;
-        var f = (mask & (this.r2 ^ result)) & 0x8000 ? 'V' : 'v';
+        const f = (mask & (this.r2 ^ result)) & 0x8000 ? 'V' : 'v';
         this.r1 = result & 0xffff;
-        this.cpu.flags(f + (this.r1 ? 'z' : 'Z') + ((this.r1 & 0x8000) ? 'N' : 'n') + ((result & 0x10000) ? 'C' : 'c'));
+        this.cpu.flags(f + (this.r1 ? 'z' : 'Z') + ((this.r1 & 0x8000) !== 0? 'N' : 'n') + ((result & 0x10000) !== 0 ? 'C' : 'c'));
     };
     this.adc8 = function () {
-        var mask = (this.r2 ^ this.r1) ^ 0x80;
-        var result = this.r2 + this.r1 + (this.cpu.flagCheck('C') ? 1 : 0);
-        var f = (mask & (this.r2 ^ result)) & 0x80 ? 'V' : 'v';
+        const mask = (this.r2 ^ this.r1) ^ 0x80;
+        const result = this.r2 + this.r1 + (this.cpu.flagCheck('C') ? 1 : 0);
+        const f = (mask & (this.r2 ^ result)) & 0x80 ? 'V' : 'v';
         this.r1 = result & 0xff;
-        this.cpu.flags(f + (this.r1 ? 'z' : 'Z') + ((this.r1 & 0x80) ? 'N' : 'n') + ((result & 0x100) ? 'C' : 'c'));
+        this.cpu.flags(f + (this.r1 ? 'z' : 'Z') + ((this.r1 & 0x80) !== 0 ? 'N' : 'n') + ((result & 0x100) !== 0 ? 'C' : 'c'));
     };
     this.mul = function () {
         var product = (this.regs['regA'].regValue & 0xff) * (this.regs['regB'].regValue & 0xff);
@@ -766,17 +765,17 @@ function ALU816(cpu) {
         this.cpu.flags(f + (this.r1 ? 'z' : 'Z') + ((this.r1 & 0x8000) ? 'N' : 'n'));
     };
     this.inc8 = function () {
-        var f = (this.r1 == 127) ? 'V' : 'v';
+        var f = (this.r1 === 127) ? 'V' : 'v';
         this.r1 = (this.r1 + 1) & 0xff;
         this.cpu.flags(f + (this.r1 ? 'z' : 'Z') + ((this.r1 & 0x80) ? 'N' : 'n'));
     };
     this.dec8 = function () {
-        var f = (this.r1 == 0x80) ? 'V' : 'v';
+        var f = (this.r1 === 0x80) ? 'V' : 'v';
         this.r1 = (this.r1 - 1) & 0xff;
         this.cpu.flags(f + (this.r1 ? 'z' : 'Z') + ((this.r1 & 0x80) ? 'N' : 'n'));
     };
     this.neg8 = function () {
-        var f = (this.r1 ? 'C' : 'c') + ((this.r1 == 0x80) ? 'V' : 'v');
+        var f = (this.r1 ? 'C' : 'c') + ((this.r1 === 0x80) ? 'V' : 'v');
         this.r1 = (0x100 - this.r1) & 0xff;
         this.cpu.flags(f + (this.r1 ? 'z' : 'Z') + ((this.r1 & 0x80) ? 'N' : 'n'));
     };
@@ -807,7 +806,7 @@ function ALU816(cpu) {
         var f = sign ? 'C' : 'c';
         this.r1 = (this.r1 << 1) & 0xff;
         this.cpu.flags(
-            f + (((this.r1 & 0x80) != sign) ? 'V' : 'v') + (this.r1 ? 'z' : 'Z') + ((this.r1 & 0x80) ? 'N' : 'n'));
+            f + (((this.r1 & 0x80) !== sign) ? 'V' : 'v') + (this.r1 ? 'z' : 'Z') + ((this.r1 & 0x80) ? 'N' : 'n'));
     };
     this.rol8 = function () {
         var sign = this.r1 & 0x80;
@@ -815,7 +814,7 @@ function ALU816(cpu) {
         var f = sign ? 'C' : 'c';
         this.r1 = ((this.r1 << 1) | carry) & 0xff;
         this.cpu.flags(
-            f + (((this.r1 & 0x80) != sign) ? 'V' : 'v') + (this.r1 ? 'z' : 'Z') + ((this.r1 & 0x80) ? 'N' : 'n'));
+            f + (((this.r1 & 0x80) !== sign) ? 'V' : 'v') + (this.r1 ? 'z' : 'Z') + ((this.r1 & 0x80) ? 'N' : 'n'));
     };
     this.sx = function () {
         // sign extend r1
@@ -1059,7 +1058,7 @@ function watchWindow(id, cpuOwner, firstAddress) {
 //    trc ('watch update address', inHex (address, 4),1);
         while (rowNo < this.table.rows.length) {
             row = this.table.rows[rowNo];
-            if (row.cells[1].innerText == baseText) {
+            if (row.cells[1].innerText === baseText) {
                 this.setHex(row, base);
             }
             rowNo++;
@@ -1254,7 +1253,7 @@ function CPU() {
             cu = c.toUpperCase(c);
             b = this.flagBits[cu];
             flagsV &= ~b;
-            if (c == cu) {
+            if (c === cu) {
                 flagsV |= b;
             }
         }
@@ -1582,7 +1581,7 @@ function CPU() {
             }, true);
             document.addEventListener('keydown', function (event) {
                 trc('keydown event', event.key, 1);
-                if ((event.key == 'Backspace') || (event.key == 'Escape')) {
+                if ((event.key === 'Backspace') || (event.key === 'Escape')) {
                     trc('Escape or backspace', event.key, 1);
                     if (mc6809.intervalID != null) {
                         trc('Escape or backspace', 'running', 1);
