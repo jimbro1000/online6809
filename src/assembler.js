@@ -41,6 +41,8 @@ export class Assembler {
   ram;
 
   constructor(ram, cpu, dsmWindow) {
+    this.mapLabels = [];
+    this.mapAddrs = [];
     this.labelMap = new labelList('labelMap', this);
     this.asmText = '';
     this.labels = [];
@@ -1027,24 +1029,24 @@ export class Assembler {
     let pc = startAddress;
     const lines = [];
 
-    function nextByte(machine) {
+    function nextByte(assembler) {
       let byte;
-      [pc, byte] = machine.ram.read(pc);
+      [pc, byte] = assembler.ram.read(pc);
       disassembly.bytes.push(byte);
       return byte;
     }
 
-    function readWord(machine, bits16, prefix) {
-      let word = nextByte(machine);
+    function readWord(assembler, bits16, prefix) {
+      let word = nextByte(assembler);
       if (bits16) {
-        word = (word << 8) | nextByte(machine);
-        return machine.labelled(machine.mapAddrs, inHex(word, 4), prefix);
+        word = (word << 8) | nextByte(assembler);
+        return labelled(assembler.mapAddrs, inHex(word, 4), prefix);
       } else {
-        return machine.labelled(machine.mapAddrs, inHex(word, 2), prefix);
+        return labelled(assembler.mapAddrs, inHex(word, 2), prefix);
       }
     }
 
-    function disIndexed(machine, postByte) {
+    function disIndexed(assembler, postByte) {
       let operand = '';
       // find index register name
       const indexReg = ['X', 'Y', 'U', 'S'][(postByte & 0x60) >>> 5];
@@ -1079,10 +1081,10 @@ export class Assembler {
             operand = 'ERR';
             break;
           case 0x08:
-            operand = signedHex(parseInt(readWord(machine, modes.bits8, ''), 16), 8, '$') + ', ' + indexReg;
+            operand = signedHex(parseInt(readWord(assembler, modes.bits8, ''), 16), 8, '$') + ', ' + indexReg;
             break;
           case 0x09:
-            operand = signedHex(parseInt(readWord(machine, modes.bits16, ''), 16), 16, '$') + ', ' + indexReg;
+            operand = signedHex(parseInt(readWord(assembler, modes.bits16, ''), 16), 16, '$') + ', ' + indexReg;
             break;
           case 0x0A:
             operand = 'ERR';
@@ -1091,16 +1093,16 @@ export class Assembler {
             operand = 'D,' + indexReg;
             break;
           case 0x0C:
-            operand = findPCR(machine, parseInt(readWord(machine, modes.bits8, ''), 16), modes.bits8, pc) + ',PCR';
+            operand = findPCR(assembler, parseInt(readWord(assembler, modes.bits8, ''), 16), modes.bits8, pc) + ',PCR';
             break;
           case 0x0D:
-            operand = findPCR(machine, parseInt(readWord(machine, modes.bits16, ''), 16), modes.bits16, pc) + ',PCR';
+            operand = findPCR(assembler, parseInt(readWord(assembler, modes.bits16, ''), 16), modes.bits16, pc) + ',PCR';
             break;
           case 0x0E:
             operand = 'ERR';
             break;
           case 0X0F:
-            operand = readWord(machine, modes.bits16, '$');
+            operand = readWord(assembler, modes.bits16, '$');
             break;
         }
         if ((postByte & 0x10) !== 0) {
@@ -1110,12 +1112,20 @@ export class Assembler {
       return operand;
     }
 
-    function findPCR(machine, offset, bits16, pc) {
+    function findPCR(assembler, offset, bits16, pc) {
       let d = offset;
       if (!bits16) {
         d |= (offset & 0x80) !== 0 ? 0xff00 : 0;
       }
-      return machine.labelled(machine.mapAddrs, inHex((pc + d) & 0xffff, 4), '$');
+      return labelled(assembler.mapAddrs, inHex((pc + d) & 0xffff, 4), '$');
+    }
+
+    function labelled(mapAddresses, word, prefix) {
+      if (word in mapAddresses) {
+        return mapAddresses[word];
+      } else {
+        return prefix + word;
+      }
     }
 
     trc('Disassembling from', inHex(startAddress, 4));
@@ -1140,15 +1150,15 @@ export class Assembler {
         disassembly.operation = instruction.mnem;
         if ((instruction.mode & modes.simple) !== 0) {
         } else if ((instruction.mode & modes.immediate) !== 0) {
-          disassembly.operand = '#' + readWord(this.cpu, instruction.mode & modes.bits16, '$');
+          disassembly.operand = '#' + readWord(this, instruction.mode & modes.bits16, '$');
         } else if ((instruction.mode & modes.direct) !== 0) {
-          disassembly.operand = '<' + readWord(this.cpu, modes.bits8, '$');
+          disassembly.operand = '<' + readWord(this, modes.bits8, '$');
         } else if ((instruction.mode & modes.extended) !== 0) {
-          disassembly.operand = readWord(this.cpu, modes.bits16, '$');
+          disassembly.operand = readWord(this, modes.bits16, '$');
         } else if ((instruction.mode & modes.indexed) !== 0) {
-          disassembly.operand = disIndexed(this.cpu, nextByte(this.cpu));
+          disassembly.operand = disIndexed(this, nextByte(this));
         } else if ((instruction.mode & modes.register) !== 0) {
-          postByte = nextByte(this.cpu);
+          postByte = nextByte(this);
           if ((instruction.mode & modes.pair) !== 0) {
             disassembly.operand = this.#regPairList(postByte, pairRegsToText);
           } else {
@@ -1157,7 +1167,7 @@ export class Assembler {
                 (disassembly.operation[disassembly.operation.length - 1] === 'S') ? fullRegsToTextS : fullRegsToTextU);
           }
         } else if ((instruction.mode & modes.pcr) !== 0) {
-          disassembly.operand = findPCR(this.cpu, parseInt(readWord(this.cpu, instruction.mode & modes.bits16, ''), 16),
+          disassembly.operand = findPCR(this, parseInt(readWord(this, instruction.mode & modes.bits16, ''), 16),
               instruction.mode & modes.bits16, pc);
         }
       } else {

@@ -1158,8 +1158,6 @@ function CPU() {
   this.watchList = null;
   this.asmText = '';
   this.labels = [];
-  this.mapLabels = [];
-  this.mapAddrs = [];
   this.lastLabel = '';
   this.codeBlocks = [];
   this.opPage = 0;
@@ -1442,14 +1440,14 @@ function CPU() {
     this.ram.fill(0xFFF0, []);
     this.ram.fill(0xFFF2, [240, 18, 240, 15, 240, 12, 240, 9, 240, 6, 240, 3, 240, 0]);
   };
-  this.labelled = function(mapAddresses, word, prefix) {
-    if (word in mapAddresses) {
-      //      return "="+mapAddresses[word]+":"+word
-      return mapAddresses[word];
-    } else {
-      return prefix + word;
-    }
-  };
+  // this.labelled = function(mapAddresses, word, prefix) {
+  //   if (word in mapAddresses) {
+  //     //      return "="+mapAddresses[word]+":"+word
+  //     return mapAddresses[word];
+  //   } else {
+  //     return prefix + word;
+  //   }
+  // };
   this.jumpTo = function(CPU, address) {
     if (CPU.intervalID == null) {
       machineOrg(address, 1);
