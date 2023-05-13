@@ -1,6 +1,13 @@
 import winston from 'winston';
 import 'setimmediate';
 
+/**
+ * Convert decimal to hexadecimal.
+ *
+ * @param {number} n number to convert
+ * @param {number} l bit length of result
+ * @return {string}
+ */
 function inHex(n, l) {
   let s = n.toString(16).toUpperCase();
   while (s.length < l) {
@@ -9,6 +16,14 @@ function inHex(n, l) {
   return s;
 }
 
+/**
+ * Convert decimal to signed hexadecimal.
+ *
+ * @param {number} n number to convert
+ * @param {number} bits bit length of result
+ * @param {string} symbol symbol prefix
+ * @return {string}
+ */
 function signedHex(n, bits, symbol) {
   const digits = (bits > 8) ? 4 : 2;
   if ((n & (1 << (bits - 1))) !== 0) {
@@ -29,13 +44,27 @@ const logger = winston.createLogger({
   ],
 });
 
+/**
+ * Create an info level log entry.
+ *
+ * @param {string} caption log message
+ * @param {Object} data object data to log
+ * @param {boolean} force override logging flag
+ */
 function trc(caption, data, force) {
   if ((tracing !== 0) || (force)) {
     logger.info(caption + ' : ' + data);
   }
-  // console.log(caption + ": " + data);
 }
 
+/**
+ * Pluralise a word if needed.
+ *
+ * @param {string} word
+ * @param {number} n
+ * @param {string} wordPlural
+ * @return {string}
+ */
 function plural(word, n, wordPlural) {
   if (n === 1) {
     return word;
