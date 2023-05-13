@@ -71,11 +71,13 @@ function statusEventHandler(event) {
  *
  * @param {String} id target elementId name
  */
-function codeDump(id) {
+function codeDump(id) { // eslint-disable-line no-unused-vars
   let block;
   let text = '';
   for (block in mc6809.codeBlocks) {
-    text += mc6809.codeBlocks[block].writeCode() + '\n';
+    if (Object.prototype.hasOwnProperty.call(mc6809.codeBlocks, block)) {
+      text += mc6809.codeBlocks[block].writeCode() + '\n';
+    }
   }
   const element = document.getElementById(id);
   if (element !== null) {
@@ -88,7 +90,7 @@ function codeDump(id) {
  *
  * @param {String} id elementId name of source container
  */
-function compileRun(id) {
+function compileRun(id) { // eslint-disable-line no-unused-vars
   const element = document.getElementById(id);
   if (element) {
     mc6809.assemble(element.value.split('\n'));
@@ -114,7 +116,7 @@ function machineRefresh() {
  *
  * @param {String} where address reference (EA/X/APPEND)
  */
-function addWatchpoint(where) {
+function addWatchpoint(where) { // eslint-disable-line no-unused-vars
   switch (where.toUpperCase()) {
     case 'EA':
       mc6809.watchList.addWatch(mc6809.alu.eaLast);
@@ -131,7 +133,7 @@ function addWatchpoint(where) {
 /**
  * Force CPU reset.
  */
-function machineReset() {
+function machineReset() { // eslint-disable-line no-unused-vars
   machineInterrupt('reset');
 }
 
@@ -151,7 +153,7 @@ function machineInterrupt(irqName) {
 /**
  * Stop CPU auto-cycle.
  */
-function machineHalt() {
+function machineHalt() { // eslint-disable-line no-unused-vars
   console.dir(document.getElementById('registers-container'));
   mc6809.stop();
   mc6809.refresh(1);
@@ -160,7 +162,7 @@ function machineHalt() {
 /**
  * Start CPU auto-cycle.
  */
-function machineRun() {
+function machineRun() { // eslint-disable-line no-unused-vars
   machineRefresh();
   mc6809.execute();
 }
@@ -168,18 +170,14 @@ function machineRun() {
 /**
  * CPU cycle callback.
  */
-function machineCycle() {
+function machineCycle() { // eslint-disable-line no-unused-vars
   mc6809.cycle();
 }
-
-// function assemblyCycle() {
-//   mc6809.asmCycle();
-// }
 
 /**
  * Step CPU by 1 instruction.
  */
-function machineStep() {
+function machineStep() { // eslint-disable-line no-unused-vars
   mc6809.stop();
   mc6809.cycle();
   if (!mc6809.refreshOn) {
@@ -190,7 +188,7 @@ function machineStep() {
 /**
  * Trigger Interrupt (IRQ).
  */
-function doIRQ() {
+function doIRQ() { // eslint-disable-line no-unused-vars
   mc6809.alu.interrupt('irq');
   mc6809.alu.checkInterrupts();
 }
@@ -198,7 +196,7 @@ function doIRQ() {
 /**
  * Trigger Fast Interrupt (FIRQ).
  */
-function doFIRQ() {
+function doFIRQ() { // eslint-disable-line no-unused-vars
   mc6809.alu.interrupt('firq');
   mc6809.alu.checkInterrupts();
 }
@@ -209,7 +207,7 @@ function doFIRQ() {
  * @param {number} PC program counter
  * @param {boolean} force force update
  */
-function machineOrg(PC, force) {
+function machineOrg(PC, force) { // eslint-disable-line no-unused-vars
   mc6809.registers['regPC'].change(PC, 0);
   mc6809.dsmTable.lineOn(mc6809.registers['regPC'].regValue, force);
 }
