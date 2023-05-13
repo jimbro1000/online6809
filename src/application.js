@@ -1,3 +1,6 @@
+/**
+ * Custom slider for controlling CPU step interval.
+ */
 class SlideControl {
   #cpu;
   #value;
@@ -5,6 +8,12 @@ class SlideControl {
   #readout;
   #slider;
 
+  /**
+   * Inject CPU and set default interval.
+   *
+   * @param {CPU} cpu bound CPU
+   * @param {number} speed default step interval
+   */
   constructor(cpu, speed) {
     this.#cpu = cpu;
     this.#speed = Math.trunc(speed);
@@ -13,6 +22,12 @@ class SlideControl {
     this.#value = 0;
   }
 
+  /**
+   * Bind control to given UI elements.
+   *
+   * @param {String} slideElement slide control element name
+   * @param {String} textElement text readout element name
+   */
   bindId(slideElement, textElement) {
     this.#readout = document.getElementById(textElement);
     this.#slider = document.getElementById(slideElement);
@@ -26,6 +41,11 @@ class SlideControl {
     this.#readout.innerHTML = this.#value;
   }
 
+  /**
+   * Update CPU with new interval step.
+   *
+   * @param {Object} event slide control change event
+   */
   update(event) {
     this.#value = parseInt(event.srcElement.value);
     this.#readout.innerHTML = this.#value;
@@ -33,6 +53,11 @@ class SlideControl {
   }
 }
 
+/**
+ * Event consumer for assembly status updates.
+ *
+ * @param {Object} event assembly status event
+ */
 function statusEventHandler(event) {
   const statusBox = document.getElementById('assemblyStatus');
   if (statusBox != null) {
@@ -41,28 +66,41 @@ function statusEventHandler(event) {
   event.preventDefault();
 }
 
-function codeDump(id) {
-  let block; let element;
+/**
+ * Disassemble visible code.
+ *
+ * @param {String} id target elementId name
+ */
+function codeDump(id) { // eslint-disable-line no-unused-vars
+  let block;
   let text = '';
   for (block in mc6809.codeBlocks) {
-    text += mc6809.codeBlocks[block].writeCode() + '\n';
+    if (Object.prototype.hasOwnProperty.call(mc6809.codeBlocks, block)) {
+      text += mc6809.codeBlocks[block].writeCode() + '\n';
+    }
   }
-  //  console.log (text);
-  element = document.getElementById(id);
-  if (element) {
+  const element = document.getElementById(id);
+  if (element !== null) {
     element.value = text;
   }
 }
 
-function compileRun(id) {
-  let asmLines; let element;
-  element = document.getElementById(id);
+/**
+ * Start assembly process.
+ *
+ * @param {String} id elementId name of source container
+ */
+function compileRun(id) { // eslint-disable-line no-unused-vars
+  const element = document.getElementById(id);
   if (element) {
     mc6809.assemble(element.value.split('\n'));
     mc6809.refresh(1);
   }
 }
 
+/**
+ * Refresh UI with machine state.
+ */
 function machineRefresh() {
   const refresh= document.getElementById('refreshCheck');
   if (refresh) {
@@ -73,7 +111,12 @@ function machineRefresh() {
   }
 }
 
-function addWatchpoint(where) {
+/**
+ * Add watchpoint frame.
+ *
+ * @param {String} where address reference (EA/X/APPEND)
+ */
+function addWatchpoint(where) { // eslint-disable-line no-unused-vars
   switch (where.toUpperCase()) {
     case 'EA':
       mc6809.watchList.addWatch(mc6809.alu.eaLast);
@@ -87,10 +130,18 @@ function addWatchpoint(where) {
   }
 }
 
-function machineReset() {
+/**
+ * Force CPU reset.
+ */
+function machineReset() { // eslint-disable-line no-unused-vars
   machineInterrupt('reset');
 }
 
+/**
+ * Trigger named interrupt.
+ *
+ * @param {String} irqName interrupt name (NMI/IRQ/FIRQ)
+ */
 function machineInterrupt(irqName) {
   bundle.trc('machineInterrupt', irqName);
   mc6809.alu.interrupt(irqName);
@@ -99,26 +150,34 @@ function machineInterrupt(irqName) {
   mc6809.execute();
 }
 
-function machineHalt() {
+/**
+ * Stop CPU auto-cycle.
+ */
+function machineHalt() { // eslint-disable-line no-unused-vars
   console.dir(document.getElementById('registers-container'));
   mc6809.stop();
   mc6809.refresh(1);
 }
 
-function machineRun() {
+/**
+ * Start CPU auto-cycle.
+ */
+function machineRun() { // eslint-disable-line no-unused-vars
   machineRefresh();
   mc6809.execute();
 }
 
-function machineCycle() {
+/**
+ * CPU cycle callback.
+ */
+function machineCycle() { // eslint-disable-line no-unused-vars
   mc6809.cycle();
 }
 
-function assemblyCycle() {
-  mc6809.asmCycle();
-}
-
-function machineStep() {
+/**
+ * Step CPU by 1 instruction.
+ */
+function machineStep() { // eslint-disable-line no-unused-vars
   mc6809.stop();
   mc6809.cycle();
   if (!mc6809.refreshOn) {
@@ -126,17 +185,29 @@ function machineStep() {
   }
 }
 
-function doIRQ() {
+/**
+ * Trigger Interrupt (IRQ).
+ */
+function doIRQ() { // eslint-disable-line no-unused-vars
   mc6809.alu.interrupt('irq');
   mc6809.alu.checkInterrupts();
 }
 
-function doFIRQ() {
+/**
+ * Trigger Fast Interrupt (FIRQ).
+ */
+function doFIRQ() { // eslint-disable-line no-unused-vars
   mc6809.alu.interrupt('firq');
   mc6809.alu.checkInterrupts();
 }
 
-function machineOrg(PC, force) {
+/**
+ * Refresh UI with updated program counter.
+ *
+ * @param {number} PC program counter
+ * @param {boolean} force force update
+ */
+function machineOrg(PC, force) { // eslint-disable-line no-unused-vars
   mc6809.registers['regPC'].change(PC, 0);
   mc6809.dsmTable.lineOn(mc6809.registers['regPC'].regValue, force);
 }
@@ -146,7 +217,8 @@ const mc6809 = new bundle.CPU();
 mc6809.ready();
 const speed = new SlideControl(mc6809, 5);
 speed.bindId('speed', 'speedVal');
-document.getElementById('assembly-code').value = document.getElementById('demo-helloworld').value;
+document.getElementById('assembly-code').value =
+    document.getElementById('demo-helloworld').value;
 machineInterrupt('reset');
 mc6809.refresh(1);
 mc6809.execute();

@@ -1,5 +1,11 @@
 import {inHex, trc} from './helper';
 
+/**
+ * Eight bit memory simulation.
+ *
+ * @param {number} size memory capacity in bytes
+ * @constructor
+ */
 export function Memory8(size) {
   let i;
   this.mask = size - 1;
@@ -23,7 +29,8 @@ export function Memory8(size) {
     return this.ram[address & this.mask];
   };
   this.deek = function(address) {
-    return (this.ram[address & this.mask] << 8) + this.ram[(address + 1) & this.mask];
+    return (this.ram[address & this.mask] << 8) +
+        this.ram[(address + 1) & this.mask];
   };
   this.poke = function(address, byte) {
     byte = byte & 0xff;
@@ -55,9 +62,13 @@ export function Memory8(size) {
     let i;
     if (handle == null) {
       for (i = this.windows.length - 1; i >= 0; i--) {
-        if ((this.windows[i].base === base) && (this.windows[i].ending === base + length)) {
+        if ((this.windows[i].base === base) &&
+            (this.windows[i].ending === base + length)) {
           this.windows.splice(i, 1);
-          trc('Removed array splice at ', i + ' with base=' + base + ' length=' + length);
+          trc(
+              'Removed array splice at ',
+              i + ' with base=' + base + ' length=' + length,
+          );
         }
       }
     } else {

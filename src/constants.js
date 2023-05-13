@@ -4,10 +4,15 @@ const SIrefreshOn = 1;
 const SIgraphicsMode = 2;
 const SIkeyInterface = 3;
 /* System Interface
-    SIrefreshOff             Write <any> to force OFF register refresh and display animation
-    SIrefreshOn              Write <any> to re-enable register refresh and display animation
-    SIgraphicsMode           Write <number of colours> to select graphics mode (2, 4, 16 allowed values)
-    SIkeyInterface           Write 0 then read an ASCII code (if<128), write 255 to clear the keyboard buffer
+  SIrefreshOff
+    Write <any> to force OFF register refresh and display animation
+  SIrefreshOn
+    Write <any> to re-enable register refresh and display animation
+  SIgraphicsMode
+    Write <number of colours> to select graphics mode (2, 4, 16 allowed values)
+  SIkeyInterface
+    Write 0 then read an ASCII code (if<128),
+    write 255 to clear the keyboard buffer
 */
 
 const Defaults = {org: 0x4000, lineBytes: 0x20};
@@ -99,11 +104,18 @@ const pairRegsToText = {
   11: 'regDP',
 };
 
-const pairRegsToValue = {'D': 0, 'X': 1, 'Y': 2, 'U': 3, 'S': 4, 'PC': 5, 'A': 8, 'B': 9, 'CC': 10, 'DP': 11};
+const pairRegsToValue = {
+  'D': 0, 'X': 1, 'Y': 2, 'U': 3, 'S': 4,
+  'PC': 5, 'A': 8, 'B': 9, 'CC': 10, 'DP': 11,
+};
 
-const fullRegsToTextS = ['regCC', 'regA', 'regB', 'regDP', 'regX', 'regY', 'regU', 'regPC'];
+const fullRegsToTextS = [
+  'regCC', 'regA', 'regB', 'regDP', 'regX', 'regY', 'regU', 'regPC',
+];
 
-const fullRegsToTextU = ['regCC', 'regA', 'regB', 'regDP', 'regX', 'regY', 'regS', 'regPC'];
+const fullRegsToTextU = [
+  'regCC', 'regA', 'regB', 'regDP', 'regX', 'regY', 'regS', 'regPC',
+];
 
 const fullRegsToValue = {
   'CC': 0x01,
