@@ -103,7 +103,7 @@ function SystemInterface(cpuOwner, address) {
         if (value === 0) {
           key = holder.cpu.keyBuffer.shift();
           if (key) {
-            trc('Keypress', key, 1);
+            trc('Keypress', key, true);
             switch (key) {
               case 'Enter':
                 key = 13;
@@ -115,10 +115,10 @@ function SystemInterface(cpuOwner, address) {
                 key = 27;
                 break;
               default:
-                key = key.charCodeAt();
+                key = key.charCodeAt(0);
                 break;
             }
-            trc('Keycode', key, 1);
+            trc('Keycode', key, true);
             holder.cpu.ram.poke(address, key);
           } else {
             holder.cpu.ram.poke(address, 255);
@@ -146,7 +146,7 @@ function CellEdit(cellTD, cpu, cellAddress) {
     cpu.assembler.passNo = 2;
     const encoded = cpu.asmLine(this.input.value);
     if (cpu.assembler.foundError) {
-      this.input.style = 'color: #f02020';
+      this.input.style.color = '#f02020';
       return null;
     } else {
       if (encoded.length > 0) {
@@ -213,8 +213,8 @@ function Register(called, size, n, cpuOwner, useBinary) {
   this.digGroups = function(s, count) {
     const groups = [];
     while (s.length >= count) {
-      groups.push(s.substr(0, count));
-      s = s.substr(count);
+      groups.push(s.substring(0, count));
+      s = s.substring(count);
     }
     return groups;
   };
@@ -257,7 +257,7 @@ function Register(called, size, n, cpuOwner, useBinary) {
         if (notify) {
           trc('Notifiable binary cell', i);
           (function(register, cellno) {
-            cell.onclick = function(cell) {
+            cell.onclick = function() {
               register.toggleBit(cellno);
             };
           }(this, l - i - 1));
@@ -266,7 +266,7 @@ function Register(called, size, n, cpuOwner, useBinary) {
         cell.innerHTML = '-';
         if (notify) {
           (function(register, cell, cellno) {
-            cell.onclick = function(e) {
+            cell.onclick = function() {
               register.selectInput(cell, cellno);
             };
           }(this, cell, l - i - 1));
@@ -429,7 +429,7 @@ function ALU816(cpu) {
         }
         this[operation](operand);
       } else {
-        trc('Operation unknown', ops[i] + ' in ' + microcode, 1);
+        trc('Operation unknown', ops[i] + ' in ' + microcode, true);
       }
       i++;
     }
@@ -668,7 +668,7 @@ function ALU816(cpu) {
     //    trc ("Push postbyte", postByte);
     while (postByteMask > 0) {
       i--;
-      if (postByte & postByteMask) {
+      if ((postByte & postByteMask) !== 0) {
         regValue = this.regs[regList[i]].regValue;
         //        trc ("Push register '"+regList[i]+"'",inHex (regValue,4));
         stack = this.cpu.ram.wrap(stack - 1);
@@ -704,11 +704,9 @@ function ALU816(cpu) {
         fullRegsToTextU;
     let postByteMask = 0x01;
     let i = 0;
-    //    trc ("Pull postbyte", postByte);
     this.eaLast = stack;
     while (postByteMask > 0) {
-      if (postByte & postByteMask) {
-        //        trc ("Pull register",regList[i]);
+      if ((postByte & postByteMask) !== 0) {
         if (i >= 4) {
           regValue = this.cpu.ram.peek(stack) << 8;
           stack = this.cpu.ram.wrap(stack + 1);
@@ -768,7 +766,7 @@ function ALU816(cpu) {
     // set high bit IFF signs of operand differ;
     const mask = (this.r2 ^ this.r1);
     const result = this.r2 - this.r1;
-    const f = (mask & (this.r2 ^ result)) & 0x80 ? 'V' : 'v';
+    const f = ((mask & (this.r2 ^ result)) & 0x80) !== 0 ? 'V' : 'v';
     this.r1 = result & 0xff;
     this.cpu.flags(
         f + (this.r1 ? 'z' : 'Z') + ((this.r1 & 0x80) !== 0 ? 'N' : 'n') +
@@ -843,44 +841,44 @@ function ALU816(cpu) {
   this.tst16 = function() {
     const f = 'v';
     this.cpu.flags(
-        f + (this.r1 ? 'z' : 'Z') + ((this.r1 & 0x8000) ? 'N' : 'n'));
+        f + (this.r1 ? 'z' : 'Z') + ((this.r1 & 0x8000) !== 0 ? 'N' : 'n'));
   };
   this.inc8 = function() {
     const f = (this.r1 === 127) ? 'V' : 'v';
     this.r1 = (this.r1 + 1) & 0xff;
-    this.cpu.flags(f + (this.r1 ? 'z' : 'Z') + ((this.r1 & 0x80) ? 'N' : 'n'));
+    this.cpu.flags(f + (this.r1 ? 'z' : 'Z') + ((this.r1 & 0x80) !== 0 ? 'N' : 'n'));
   };
   this.dec8 = function() {
     const f = (this.r1 === 0x80) ? 'V' : 'v';
     this.r1 = (this.r1 - 1) & 0xff;
-    this.cpu.flags(f + (this.r1 ? 'z' : 'Z') + ((this.r1 & 0x80) ? 'N' : 'n'));
+    this.cpu.flags(f + (this.r1 ? 'z' : 'Z') + ((this.r1 & 0x80) !== 0 ? 'N' : 'n'));
   };
   this.neg8 = function() {
     const f = (this.r1 ? 'C' : 'c') + ((this.r1 === 0x80) ? 'V' : 'v');
     this.r1 = (0x100 - this.r1) & 0xff;
-    this.cpu.flags(f + (this.r1 ? 'z' : 'Z') + ((this.r1 & 0x80) ? 'N' : 'n'));
+    this.cpu.flags(f + (this.r1 ? 'z' : 'Z') + ((this.r1 & 0x80) !== 0 ? 'N' : 'n'));
   };
   this.com8 = function() {
     const f = 'vC';
     this.r1 = (this.r1 ^ 0xff) & 0xff;
-    this.cpu.flags(f + (this.r1 ? 'z' : 'Z') + ((this.r1 & 0x80) ? 'N' : 'n'));
+    this.cpu.flags(f + (this.r1 ? 'z' : 'Z') + ((this.r1 & 0x80) !== 0 ? 'N' : 'n'));
   };
   this.lsr8 = function() {
-    const f = 'n' + ((this.r1 & 0x01) ? 'C' : 'c');
+    const f = 'n' + ((this.r1 & 0x01) !== 0 ? 'C' : 'c');
     this.r1 = (this.r1 >>> 1) & 0xff;
     this.cpu.flags(f + (this.r1 ? 'z' : 'Z'));
   };
   this.ror8 = function() {
-    const f = 'n' + ((this.r1 & 0x01) ? 'C' : 'c');
+    const f = 'n' + ((this.r1 & 0x01) !== 0 ? 'C' : 'c');
     const carry = this.cpu.flagCheck('C') ? 0x80 : 0;
     this.r1 = ((this.r1 >>> 1) | carry) & 0xff;
     this.cpu.flags(f + (this.r1 ? 'z' : 'Z'));
   };
   this.asr8 = function() {
-    const f = (this.r1 & 0x01) ? 'C' : 'c';
+    const f = (this.r1 & 0x01) !== 0 ? 'C' : 'c';
     const sign = this.r1 & 0x80;
     this.r1 = ((this.r1 >>> 1) | sign) & 0xff;
-    this.cpu.flags(f + (this.r1 ? 'z' : 'Z') + ((this.r1 & 0x80) ? 'N' : 'n'));
+    this.cpu.flags(f + (this.r1 ? 'z' : 'Z') + ((this.r1 & 0x80) !== 0 ? 'N' : 'n'));
   };
   this.lsl8 = function() {
     const sign = this.r1 & 0x80;
@@ -888,7 +886,7 @@ function ALU816(cpu) {
     this.r1 = (this.r1 << 1) & 0xff;
     this.cpu.flags(
         f + (((this.r1 & 0x80) !== sign) ? 'V' : 'v') + (this.r1 ? 'z' : 'Z') +
-        ((this.r1 & 0x80) ? 'N' : 'n'));
+        ((this.r1 & 0x80) !== 0 ? 'N' : 'n'));
   };
   this.rol8 = function() {
     const sign = this.r1 & 0x80;
@@ -897,18 +895,18 @@ function ALU816(cpu) {
     this.r1 = ((this.r1 << 1) | carry) & 0xff;
     this.cpu.flags(
         f + (((this.r1 & 0x80) !== sign) ? 'V' : 'v') + (this.r1 ? 'z' : 'Z') +
-        ((this.r1 & 0x80) ? 'N' : 'n'));
+        ((this.r1 & 0x80) !== 0 ? 'N' : 'n'));
   };
   this.sx = function() {
     // sign extend r1
     this.r1 &= 0xff;
-    this.r1 |= (this.r1 & 0x80) ? 0xff00 : 0;
+    this.r1 |= (this.r1 & 0x80) !== 0 ? 0xff00 : 0;
   };
   this.shft = function() {
     // shift high byte to low byte of r1
     this.r1 = this.r1 >>> 8;
     const f = this.r1 ? 'z' : 'Z';
-    this.cpu.flags(f + ((this.r1 & 0x80) ? 'N' : 'n'));
+    this.cpu.flags(f + ((this.r1 & 0x80) !== 0 ? 'N' : 'n'));
   };
   this.daa = function() {
     let b = this.regs['regA'].regValue;
@@ -953,8 +951,8 @@ function ALU816(cpu) {
         break;
     }
     // extract 5 bit offset
-    if (!(this.r1 & 0x80)) {
-      offset = (this.r1 & 0x10) ? (this.r1 & 0x0f) - 0x10 : (this.r1 & 0x0f);
+    if ((this.r1 & 0x80) === 0) {
+      offset = (this.r1 & 0x10) !== 0 ? (this.r1 & 0x0f) - 0x10 : (this.r1 & 0x0f);
     } else {
       indirect = this.r1 & 0x10;
       switch (this.r1 & 0x0f) {
@@ -1057,7 +1055,7 @@ function ALU816(cpu) {
   this.rel8 = function() {
     // find address via 8 bit PCR and leave in r1
     this.pcb();
-    this.r1 |= this.r1 & 0x80 ? 0xff00 : 0;
+    this.r1 |= (this.r1 & 0x80) !== 0 ? 0xff00 : 0;
     this.r1 = this.cpu.ram.wrap(this.ea + this.r1);
   };
   this.rel16 = function() {
@@ -1159,7 +1157,7 @@ function WatchWindow(id, cpuOwner, firstAddress) {
   };
   this.createTable = function(tableId) {
     let container;
-    if (container = document.getElementById(tableId + '-container')) {
+    if ((container = document.getElementById(tableId + '-container')) !== null) {
       trc('Found container', tableId);
       this.table = document.createElement('table');
       this.table.setAttribute('id', tableId);
@@ -1340,7 +1338,7 @@ function CPU() {
 
     for (i = 0; i < flagList.length; i++) {
       c = flagList[i];
-      cu = c.toUpperCase(c);
+      cu = c.toUpperCase();
       b = this.flagBits[cu];
       flagsV &= ~b;
       if (c === cu) {
@@ -1353,7 +1351,7 @@ function CPU() {
     const flagsV = this.registers['regCC'].regValue;
     trc('flagCheck', flagsV);
     trc('flagCheck', this.flagBits[flag]);
-    return (this.registers['regCC'].regValue & this.flagBits[flag]) ? 1 : 0;
+    return (this.registers['regCC'].regValue & this.flagBits[flag]) !== 0 ? 1 : 0;
   };
   this.addReg = function(called, size, n, usebinary) {
     trc('CPU addReg', 'reg' + called);
@@ -1379,14 +1377,14 @@ function CPU() {
         break;
     }
   };
-  this.parseVal = function(s) {
-    const n = Number(s);
-    if (isNAN(n)) {
-      this.error('Number expected \'' + s + '\'');
-    } else {
-      return n;
-    }
-  };
+  // this.parseVal = function(s) {
+  //   const n = Number(s);
+  //   if (isNaN(n)) {
+  //     this.error('Number expected \'' + s + '\'');
+  //   } else {
+  //     return n;
+  //   }
+  // };
   this.loadOS = function() {
     this.ram.fill(0x4000, [57]);
     this.ram.fill(0xF000, [
@@ -1614,25 +1612,25 @@ function CPU() {
   this.addEvents = function() {
     let container;
     const cpu = this;
-    if (container = document.getElementById('registers-container')) {
+    if ((container = document.getElementById('registers-container')) !== null) {
       container.addEventListener('keypress', function(event) {
         let keyPress;
         if (!event.defaultPrevented) {
           keyPress = event.key.toString().toUpperCase();
           trc('Event keypress triggered', keyPress);
           if ((keyPress in keyCodesList) && (cpu.hexInputCell)) {
-            trc('Key Event triggered', keyPress, 1);
+            trc('Key Event triggered', keyPress, true);
             cpu.hexInputRegister.inputHex(cpu, keyCodesList[keyPress]);
             event.preventDefault();
           }
         }
       }, true);
       document.addEventListener('keydown', function(event) {
-        trc('keydown event', event.key, 1);
+        trc('keydown event', event.key, true);
         if ((event.key === 'Backspace') || (event.key === 'Escape')) {
-          trc('Escape or backspace', event.key, 1);
+          trc('Escape or backspace', event.key, true);
           if (mc6809.intervalID != null) {
-            trc('Escape or backspace', 'running', 1);
+            trc('Escape or backspace', 'running', true);
             keyPressHandler(event);
           }
         }

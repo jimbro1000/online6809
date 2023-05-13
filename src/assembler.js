@@ -124,7 +124,6 @@ export class Assembler {
    */
   #asmInit(pass) {
     this.passNo = pass;
-    this.assembling = true;
     this.ended = false;
     this.dpVal = 0;
     this.dpUse = false;
@@ -156,7 +155,6 @@ export class Assembler {
         const disassembly = this.disassemble(start, 0x10000, this.dsmTableSize);
         this.dsmTable.setTable(disassembly);
       }
-      this.assembling = false;
       this.labelMap.fill(this.mapLabels);
     }
   };
@@ -188,7 +186,7 @@ export class Assembler {
       }
     } else {
       clearInterval(this.asmIntervalID);
-      this.asmIintervalID = null;
+      this.asmIntervalID = null;
       if (this.passNo < this.passes) {
         this.#asmInit(this.passNo + 1);
       } else {
@@ -602,7 +600,7 @@ export class Assembler {
         this.#error('Value for data byte out of range');
       }
     } else {
-      this.#error('Directive requires <data byte> and <count> operands');
+      this.#error('Directive requires [data byte] and [count] operands');
     }
   };
 
@@ -1292,7 +1290,6 @@ export class Assembler {
    */
   #error(message, value) {
     this.foundError = 1;
-    console.log('Error ' + message);
     this.#setStatus(
         'red',
         'Error @ line ' + (this.asmLineNo + 1) + ':',

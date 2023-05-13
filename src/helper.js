@@ -8,7 +8,7 @@ import 'setimmediate';
  * @param {number} l bit length of result
  * @return {string}
  */
-function inHex(n, l) {
+function inHex(n, l = 8) {
   let s = n.toString(16).toUpperCase();
   while (s.length < l) {
     s = '0' + s;
@@ -51,7 +51,7 @@ const logger = winston.createLogger({
  * @param {Object} data object data to log
  * @param {boolean} force override logging flag
  */
-function trc(caption, data, force) {
+function trc(caption, data, force= false) {
   if ((tracing !== 0) || (force)) {
     logger.info(caption + ' : ' + data);
   }
