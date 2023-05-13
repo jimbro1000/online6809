@@ -1,4 +1,5 @@
-import {SIbaseAddress,
+import {
+  SIbaseAddress,
   SIrefreshOff,
   SIrefreshOn,
   SIgraphicsMode,
@@ -8,13 +9,27 @@ import {SIbaseAddress,
   pairRegsToText,
   fullRegsToTextS,
   fullRegsToTextU,
-  fullRegsToValue} from './constants';
+  fullRegsToValue,
+} from './constants';
 import {ops6809} from './opcodes';
-import {DSMWindow, GraphicsScreen, TextScreen, keyPressHandler, LabelList} from './interface';
-import {inHex, trc, plural, signedHex} from './helper';
+import {
+  DSMWindow,
+  GraphicsScreen,
+  TextScreen,
+  keyPressHandler,
+  LabelList,
+} from './interface';
+import {inHex, trc} from './helper';
 import {Memory8} from './memory8';
 import {Assembler} from './assembler';
 
+/**
+ * Convert number to 0 padded string.
+ *
+ * @param {number} n
+ * @param {number} l length
+ * @return {string}
+ */
 function inBinary(n, l) {
   let s = n.toString();
   while (s.length < l) {
@@ -23,27 +38,49 @@ function inBinary(n, l) {
   return s;
 }
 
+/**
+ * Convert number to signed 8-bit value.
+ *
+ * @param {number} w
+ * @return {number}
+ */
 function signed8(w) {
   const b = w & 0xff;
   return (b & 0x80) ? ((b & 0x7f) - 0x80) : b;
 }
 
+/**
+ * Convert number to signed 16-bit value.
+ *
+ * @param {number} l
+ * @return {number}
+ */
 function signed16(l) {
   const w = l & 0xffff;
   return (w & 0x8000) ? ((w & 0x7fff) - 0x8000) : w;
 }
 
-function deSelect() {
+/**
+ * De-select content in UI.
+ */
+function deSelect() { // eslint-disable-line no-unused-vars
   const selection = ('getSelection' in window) ?
-        window.getSelection() :
-        ('selection' in document) ?
-            document.selection :
-            null;
+      window.getSelection() :
+      ('selection' in document) ?
+          document.selection :
+          null;
   if ('removeAllRanges' in selection) selection.removeAllRanges();
   else if ('empty' in selection) selection.empty();
 }
 
-function systemInterface(cpuOwner, address) {
+/**
+ * Bind interface to CPU.
+ *
+ * @param {CPU} cpuOwner
+ * @param {number} address
+ * @constructor
+ */
+function SystemInterface(cpuOwner, address) {
   this.cpu = cpuOwner;
   this.base = address;
   cpuOwner.ram.addWindow(this, address, 0x20);
@@ -52,16 +89,12 @@ function systemInterface(cpuOwner, address) {
     switch (address - this.base) {
       case SIrefreshOn:
         if (!this.cpu.refreshOn) {
-          //                          this.cpu.refreshOn=true;
-          //                          mc6809.refresh (1)
-          //                          console.log ("Refresh on");
           machineRefresh();
         }
         break;
       case SIrefreshOff:
         this.cpu.refresh(1);
         this.cpu.refreshOn = false;
-        //                         console.log ("Refresh off");
         break;
       case SIgraphicsMode:
         holder.cpu.graphicsRAM.setMode(value);
@@ -98,15 +131,22 @@ function systemInterface(cpuOwner, address) {
   };
 }
 
-function cellEdit(cellTD, cpu, cellAddress) {
+/**
+ * Generate cell edit control for ui.
+ *
+ * @param {HTMLTableCellElement} cellTD parent cell element
+ * @param {CPU} cpu Cpu reference
+ * @param {number} cellAddress address associated with cell
+ * @constructor
+ */
+function CellEdit(cellTD, cpu, cellAddress) {
   this.verify = function() {
     cpu.pcVal = this.address;
-    cpu.foundError = 0;
-    cpu.passNo = 2;
+    cpu.assembler.foundError = 0;
+    cpu.assembler.passNo = 2;
     const encoded = cpu.asmLine(this.input.value);
-    if (cpu.foundError) {
+    if (cpu.assembler.foundError) {
       this.input.style = 'color: #f02020';
-      //      alert ('Machine language contains errors');
       return null;
     } else {
       if (encoded.length > 0) {
@@ -147,10 +187,21 @@ function cellEdit(cellTD, cpu, cellAddress) {
   this.parent.appendChild(this.input);
   this.input.focus();
   this.input.select();
-  this.input.setSelectionRange(this.oldContents.length, this.oldContents.length);
+  this.input.setSelectionRange(this.oldContents.length,
+      this.oldContents.length);
 }
 
-function Register(called, size, n, cpuOwner, usebinary) {
+/**
+ * CPU register.
+ *
+ * @param {string} called register name
+ * @param {number} size register size in bits
+ * @param {number} n initial value
+ * @param {CPU} cpuOwner
+ * @param {string} useBinary
+ * @constructor
+ */
+function Register(called, size, n, cpuOwner, useBinary) {
   this.bits = 8;
   this.binary = '';
   this.regValue = n;
@@ -189,8 +240,9 @@ function Register(called, size, n, cpuOwner, usebinary) {
     }
   };
   this.digitRow = function(t, c, l, notify, labelTop) {
-    let i; let row; let cell;
-    row = t.insertRow();
+    let i;
+    let cell;
+    const row = t.insertRow();
     if (!labelTop) {
       cell = row.insertCell();
       cell.innerHTML = this.regLabel + '&nbsp;';
@@ -223,10 +275,12 @@ function Register(called, size, n, cpuOwner, usebinary) {
     }
   };
   this.createHTML = function(called) {
-    let table; let aRow; let aCell; let cells;
+    let aRow;
+    let aCell;
+    let cells;
     this.regLabel = called;
     this.regName = 'reg' + called;
-    table = document.getElementById(this.regName);
+    const table = document.getElementById(this.regName);
     cells = this.bits;
     if (this.binary.length <= 1) {
       cells = cells / 4;
@@ -255,15 +309,13 @@ function Register(called, size, n, cpuOwner, usebinary) {
     }
   };
   this.refresh = function(force) {
-    let w; let sBinary; let sHex; let sFlags;
     if (!(this.cpu.refreshOn || force)) {
       return;
     }
-    w = this.regValue & 0xffff;
-    sBinary = this.digGroups(inBinary(w, this.bits), 4);
-    sFlags = this.digGroups(inBinary(w, this.bits), 1);
-    sHex = this.digGroups(inHex(w, this.bits / 4), 1);
-    //    trc ("Register refresh", this.regName);
+    const w = this.regValue & 0xffff;
+    const sBinary = this.digGroups(inBinary(w, this.bits), 4);
+    const sFlags = this.digGroups(inBinary(w, this.bits), 1);
+    const sHex = this.digGroups(inHex(w, this.bits / 4), 1);
     document.getElementsByName(this.regName).forEach((element) => {
       switch (element.className) {
         case 'anydig hex':
@@ -319,9 +371,11 @@ function Register(called, size, n, cpuOwner, usebinary) {
     if (cpuCaller.hexInputCell) {
       mask = (0x000f << (cpuCaller.hexInputCellNo * 4)) ^ 0xffff;
       cpuCaller.hexInputRegister.change(
-          (cpuCaller.hexInputRegister.regValue & mask) | (hexValue << (cpuCaller.hexInputCellNo * 4)), 1);
+          (cpuCaller.hexInputRegister.regValue & mask) |
+          (hexValue << (cpuCaller.hexInputCellNo * 4)), 1);
       if (cpuCaller.hexInputCellNo > 0) {
-        cpuCaller.hexInputRegister.selectInput(cpuCaller.hexInputCell.nextSibling, cpuCaller.hexInputCellNo - 1);
+        cpuCaller.hexInputRegister.selectInput(
+            cpuCaller.hexInputCell.nextSibling, cpuCaller.hexInputCellNo - 1);
       } else {
         cpuCaller.hexInputRegister.selectInput(null, 0);
       }
@@ -329,10 +383,16 @@ function Register(called, size, n, cpuOwner, usebinary) {
   };
   this.setbits(size);
   this.setValue(n);
-  this.setbinary(usebinary);
+  this.setbinary(useBinary);
   this.createHTML(called);
 }
 
+/**
+ * Arithmetic logic unit.
+ *
+ * @param {CPU} cpu
+ * @constructor
+ */
 function ALU816(cpu) {
   this.r1 = 0;
   this.r2 = 0;
@@ -351,14 +411,16 @@ function ALU816(cpu) {
   this.cpu = cpu;
   this.iLines = {'irq': 0, 'firq': 0, 'nmi': 0, 'reset': 0};
   this.execute = function(microcode) {
-    let i; let ops; let matches; let operation; let operand;
+    let i;
+    let matches;
+    let operation;
+    let operand;
     this.notick = 0;
     this.quit = 0;
     i = 0;
     this.nextPage = 0;
-    ops = microcode.split(';');
+    const ops = microcode.split(';');
     while ((i < ops.length) && (this.quit === 0)) {
-      //      trc ("ops[i] ("+i+")", ops[i], 1);
       matches = /(\w+)(\s*)(\w*)/.exec(ops[i]);
       if (matches) {
         operation = matches[1];
@@ -433,7 +495,8 @@ function ALU816(cpu) {
     if (!this.waiting) {
       if (entire) {
         this.cpu.flags('E');
-        trc('Interrupt push CC value', inHex(this.cpu.registers['regCC'].regValue));
+        trc('Interrupt push CC value',
+            inHex(this.cpu.registers['regCC'].regValue));
         this.pushPostByte('regS', 0xFF);
       } else {
         this.cpu.flags('e');
@@ -490,7 +553,7 @@ function ALU816(cpu) {
       case 'LE':
         //        trc ("LE",this.cpu.flagBits.C);
         if ((cc & this.cpu.flagBits.Z) ||
-                    ((cc & this.cpu.flagBits.V) !== (cc & this.cpu.flagBits.N))) {
+            ((cc & this.cpu.flagBits.V) !== (cc & this.cpu.flagBits.N))) {
           this.condition = 1;
         }
         break;
@@ -598,8 +661,8 @@ function ALU816(cpu) {
     let regValue;
     let stack = this.regs[operand].regValue;
     const regList = (operand === 'regS') ?
-            fullRegsToTextS :
-            fullRegsToTextU;
+        fullRegsToTextS :
+        fullRegsToTextU;
     let postByteMask = 0x80;
     let i = 8;
     //    trc ("Push postbyte", postByte);
@@ -637,8 +700,8 @@ function ALU816(cpu) {
     let regValue;
     let stack = this.regs[operand].regValue;
     const regList = (operand === 'regS') ?
-            fullRegsToTextS :
-            fullRegsToTextU;
+        fullRegsToTextS :
+        fullRegsToTextU;
     let postByteMask = 0x01;
     let i = 0;
     //    trc ("Pull postbyte", postByte);
@@ -671,7 +734,8 @@ function ALU816(cpu) {
   this.or8 = function() {
     const f = 'v';
     this.r1 = this.r1 | this.r2;
-    this.cpu.flags(f + (this.r1 ? 'z' : 'Z') + ((this.r1 & 0x80) !== 0 ? 'N' : 'n'));
+    this.cpu.flags(
+        f + (this.r1 ? 'z' : 'Z') + ((this.r1 & 0x80) !== 0 ? 'N' : 'n'));
   };
   this.clr8 = function() {
     this.r1 = 0;
@@ -679,22 +743,26 @@ function ALU816(cpu) {
   };
   this.tst8 = function() {
     const f = 'v';
-    this.cpu.flags(f + (this.r1 ? 'z' : 'Z') + ((this.r1 & 0x80) !== 0 ? 'N' : 'n'));
+    this.cpu.flags(
+        f + (this.r1 ? 'z' : 'Z') + ((this.r1 & 0x80) !== 0 ? 'N' : 'n'));
   };
   this.and8 = function() {
     const f = 'v';
     this.r1 = (this.r2 & this.r1) & 0xff;
-    this.cpu.flags(f + (this.r1 ? 'z' : 'Z') + ((this.r1 & 0x80) !== 0 ? 'N' : 'n'));
+    this.cpu.flags(
+        f + (this.r1 ? 'z' : 'Z') + ((this.r1 & 0x80) !== 0 ? 'N' : 'n'));
   };
   this.eor8 = function() {
     const f = 'v';
     this.r1 = (this.r2 ^ this.r1) & 0xff;
-    this.cpu.flags(f + (this.r1 ? 'z' : 'Z') + ((this.r1 & 0x80) !== 0 ? 'N' : 'n'));
+    this.cpu.flags(
+        f + (this.r1 ? 'z' : 'Z') + ((this.r1 & 0x80) !== 0 ? 'N' : 'n'));
   };
   this.or8 = function() {
     const f = 'v';
     this.r1 = (this.r2 | this.r1) & 0xff;
-    this.cpu.flags(f + (this.r1 ? 'z' : 'Z') + ((this.r1 & 0x80) !== 0 ? 'N' : 'n'));
+    this.cpu.flags(
+        f + (this.r1 ? 'z' : 'Z') + ((this.r1 & 0x80) !== 0 ? 'N' : 'n'));
   };
   this.sub8 = function() {
     // set high bit IFF signs of operand differ;
@@ -702,7 +770,9 @@ function ALU816(cpu) {
     const result = this.r2 - this.r1;
     const f = (mask & (this.r2 ^ result)) & 0x80 ? 'V' : 'v';
     this.r1 = result & 0xff;
-    this.cpu.flags(f + (this.r1 ? 'z' : 'Z') + ((this.r1 & 0x80) !== 0 ? 'N' : 'n') + ((result & 0x100) ? 'C' : 'c'));
+    this.cpu.flags(
+        f + (this.r1 ? 'z' : 'Z') + ((this.r1 & 0x80) !== 0 ? 'N' : 'n') +
+        ((result & 0x100) ? 'C' : 'c'));
   };
   this.sub16 = function() {
     // set high bit IFF signs of operand differ;
@@ -710,14 +780,18 @@ function ALU816(cpu) {
     const result = this.r2 - this.r1;
     const f = (mask & (this.r2 ^ result)) & 0x8000 ? 'V' : 'v';
     this.r1 = result & 0xffff;
-    this.cpu.flags(f + (this.r1 ? 'z' : 'Z') + ((this.r1 & 0x8000) !== 0 ? 'N' : 'n') + ((result & 0x10000) ? 'C' : 'c'));
+    this.cpu.flags(
+        f + (this.r1 ? 'z' : 'Z') + ((this.r1 & 0x8000) !== 0 ? 'N' : 'n') +
+        ((result & 0x10000) ? 'C' : 'c'));
   };
   this.sbc8 = function() {
     const mask = (this.r2 ^ this.r1) ^ 0x80;
     const result = this.r2 - this.r1 - (this.cpu.flagCheck('C') ? 1 : 0);
     const f = (mask & (this.r2 ^ result)) & 0x80 ? 'V' : 'v';
     this.r1 = result & 0xff;
-    this.cpu.flags(f + (this.r1 ? 'z' : 'Z') + ((this.r1 & 0x80) !== 0 ? 'N' : 'n') + ((result & 0x100) ? 'C' : 'c'));
+    this.cpu.flags(
+        f + (this.r1 ? 'z' : 'Z') + ((this.r1 & 0x80) !== 0 ? 'N' : 'n') +
+        ((result & 0x100) ? 'C' : 'c'));
   };
   this.add8 = function() {
     // set high bit IFF signs of operand the same;
@@ -727,7 +801,9 @@ function ALU816(cpu) {
     // set overflow IFF signs of original and result differ, and mask bit set;
     f += (mask & (this.r2 ^ result)) & 0x80 ? 'V' : 'v';
     this.r1 = result & 0xff;
-    this.cpu.flags(f + (this.r1 ? 'z' : 'Z') + ((this.r1 & 0x80) !== 0? 'N' : 'n') + ((result & 0x100) !== 0 ? 'C' : 'c'));
+    this.cpu.flags(
+        f + (this.r1 ? 'z' : 'Z') + ((this.r1 & 0x80) !== 0 ? 'N' : 'n') +
+        ((result & 0x100) !== 0 ? 'C' : 'c'));
   };
   this.add16 = function() {
     // set high bit IFF signs of operand the same;
@@ -736,31 +812,38 @@ function ALU816(cpu) {
     // set overflow IFF signs of original and result differ, and mask bit set;
     const f = (mask & (this.r2 ^ result)) & 0x8000 ? 'V' : 'v';
     this.r1 = result & 0xffff;
-    this.cpu.flags(f + (this.r1 ? 'z' : 'Z') + ((this.r1 & 0x8000) !== 0? 'N' : 'n') + ((result & 0x10000) !== 0 ? 'C' : 'c'));
+    this.cpu.flags(
+        f + (this.r1 ? 'z' : 'Z') + ((this.r1 & 0x8000) !== 0 ? 'N' : 'n') +
+        ((result & 0x10000) !== 0 ? 'C' : 'c'));
   };
   this.adc8 = function() {
     const mask = (this.r2 ^ this.r1) ^ 0x80;
     const result = this.r2 + this.r1 + (this.cpu.flagCheck('C') ? 1 : 0);
     const f = (mask & (this.r2 ^ result)) & 0x80 ? 'V' : 'v';
     this.r1 = result & 0xff;
-    this.cpu.flags(f + (this.r1 ? 'z' : 'Z') + ((this.r1 & 0x80) !== 0 ? 'N' : 'n') + ((result & 0x100) !== 0 ? 'C' : 'c'));
+    this.cpu.flags(
+        f + (this.r1 ? 'z' : 'Z') + ((this.r1 & 0x80) !== 0 ? 'N' : 'n') +
+        ((result & 0x100) !== 0 ? 'C' : 'c'));
   };
   this.mul = function() {
-    const product = (this.regs['regA'].regValue & 0xff) * (this.regs['regB'].regValue & 0xff);
+    const product = (this.regs['regA'].regValue & 0xff) *
+        (this.regs['regB'].regValue & 0xff);
     const f = (product & 0x80) ? 'C' : 'c';
     this.regs['regA'].change(product >>> 8, 0);
     this.regs['regB'].change(product & 0xff, 0);
     this.cpu.flags(f + (product ? 'z' : 'Z'));
   };
   this.abx = function() {
-    this.regs['regX'].change((this.regs['regX'].regValue + this.regs['regB'].regValue) & 0xffff, 0);
+    this.regs['regX'].change(
+        (this.regs['regX'].regValue + this.regs['regB'].regValue) & 0xffff, 0);
   };
   this.zero = function() {
     this.cpu.flags(this.r1 ? 'z' : 'Z');
   };
   this.tst16 = function() {
     const f = 'v';
-    this.cpu.flags(f + (this.r1 ? 'z' : 'Z') + ((this.r1 & 0x8000) ? 'N' : 'n'));
+    this.cpu.flags(
+        f + (this.r1 ? 'z' : 'Z') + ((this.r1 & 0x8000) ? 'N' : 'n'));
   };
   this.inc8 = function() {
     const f = (this.r1 === 127) ? 'V' : 'v';
@@ -804,7 +887,8 @@ function ALU816(cpu) {
     const f = sign ? 'C' : 'c';
     this.r1 = (this.r1 << 1) & 0xff;
     this.cpu.flags(
-        f + (((this.r1 & 0x80) !== sign) ? 'V' : 'v') + (this.r1 ? 'z' : 'Z') + ((this.r1 & 0x80) ? 'N' : 'n'));
+        f + (((this.r1 & 0x80) !== sign) ? 'V' : 'v') + (this.r1 ? 'z' : 'Z') +
+        ((this.r1 & 0x80) ? 'N' : 'n'));
   };
   this.rol8 = function() {
     const sign = this.r1 & 0x80;
@@ -812,7 +896,8 @@ function ALU816(cpu) {
     const f = sign ? 'C' : 'c';
     this.r1 = ((this.r1 << 1) | carry) & 0xff;
     this.cpu.flags(
-        f + (((this.r1 & 0x80) !== sign) ? 'V' : 'v') + (this.r1 ? 'z' : 'Z') + ((this.r1 & 0x80) ? 'N' : 'n'));
+        f + (((this.r1 & 0x80) !== sign) ? 'V' : 'v') + (this.r1 ? 'z' : 'Z') +
+        ((this.r1 & 0x80) ? 'N' : 'n'));
   };
   this.sx = function() {
     // sign extend r1
@@ -826,7 +911,6 @@ function ALU816(cpu) {
     this.cpu.flags(f + ((this.r1 & 0x80) ? 'N' : 'n'));
   };
   this.daa = function() {
-    let f;
     let b = this.regs['regA'].regValue;
     trc('DAA b', b);
     let hn = b >>> 4;
@@ -839,20 +923,20 @@ function ALU816(cpu) {
       ln += 6;
       hn += 1;
     }
-    f = (hn & 0x10) ? 'C' : 'c';
+    const f = (hn & 0x10) !== 0 ? 'C' : 'c';
     b = ((hn & 0x0f) << 4) | (ln & 0x0f);
     this.regs['regA'].change(b, 0);
-    this.cpu.flags(f + (b ? 'z' : 'Z') + ((b & 0x80) ? 'N' : 'n'));
+    this.cpu.flags(f + (b ? 'z' : 'Z') + ((b & 0x80) !== 0 ? 'N' : 'n'));
   };
   this.indx = function() {
-    // process indexing post byte, leaving effective address in EA, index register in indexReg, auto-increment in indexInc
+    // process indexing post byte, leaving effective address in EA,
+    // index register in indexReg, auto-increment in indexInc
     let offset = 0;
     let indirect = 0;
     this.indexReg = '';
     this.indexInc = 0;
     this.indexBase = 0;
     this.pcb();
-    //    trc ("Index postbyte",inHex(this.r1,2));
     // find index register name
     switch ((this.r1 & 0x60) >>> 5) {
       case 0:
@@ -929,10 +1013,7 @@ function ALU816(cpu) {
       }
     }
     if (this.indexReg) {
-      //      trc ("Index postbyte regname",this.indexReg);
       this.indexBase = this.regs[this.indexReg].regValue;
-      //        trc ("Index postbyte reg",this.indexBase);
-      // perform pre-decrement, leave post-increment for later
       if (this.indexInc < 0) {
         this.indexBase += this.indexInc;
         this.regs[this.indexReg].change(this.indexBase & 0xffff, 0);
@@ -948,10 +1029,9 @@ function ALU816(cpu) {
     //    trc ("indexInc",this.indexInc);
   };
   this.idxu = function() {
-    //    trc ("Index update",this.indexInc);
-    //    trc ("Index update",this.indexBase);
     if (this.indexInc > 0) {
-      this.regs[this.indexReg].change((this.indexBase + this.indexInc) & 0xffff, 0);
+      this.regs[this.indexReg].change((this.indexBase + this.indexInc) & 0xffff,
+          0);
     }
   };
   this.pcb = function() {
@@ -1008,7 +1088,8 @@ function ALU816(cpu) {
   };
   this.pull16 = function(operand) {
     this.ea = this.regs[operand].regValue;
-    this.r1 = (this.cpu.ram.peek(this.ea) << 8) | (this.cpu.ram.peek(this.cpu.ram.wrap(this.ea + 1)));
+    this.r1 = (this.cpu.ram.peek(this.ea) << 8) |
+        (this.cpu.ram.peek(this.cpu.ram.wrap(this.ea + 1)));
     this.regs[operand].change(this.cpu.ram.wrap(this.ea + 2), 0);
   };
   this.ftch8 = function() {
@@ -1017,7 +1098,8 @@ function ALU816(cpu) {
   };
   this.ftch16 = function() {
     this.eaLast = this.ea;
-    this.r1 = (this.cpu.ram.peek(this.ea) << 8) + this.cpu.ram.peek(this.cpu.ram.wrap(this.ea + 1));
+    this.r1 = (this.cpu.ram.peek(this.ea) << 8) +
+        this.cpu.ram.peek(this.cpu.ram.wrap(this.ea + 1));
   };
   this.stor8 = function() {
     this.eaLast = this.ea;
@@ -1031,16 +1113,20 @@ function ALU816(cpu) {
   this.r1ea = function() {
     this.ea = this.r1;
   };
-  //  this.adda=function () {
-  //    this.r1=this.cpu.ram.wrap (this.r1+this.ea);
-  //    trc ("ADDA", inHex (this.r1,4));
-  //  }
   this.ntck = function() {
     this.notick = 1;
   };
-};
+}
 
-function watchWindow(id, cpuOwner, firstAddress) {
+/**
+ * Generate watch window element for ui.
+ *
+ * @param {string} id target html element id
+ * @param {CPU} cpuOwner cpu reference
+ * @param {number} firstAddress
+ * @constructor
+ */
+function WatchWindow(id, cpuOwner, firstAddress) {
   this.table = null;
   this.cpu = cpuOwner;
   this.lastWatch = null;
@@ -1053,7 +1139,6 @@ function watchWindow(id, cpuOwner, firstAddress) {
     const base = this.cpu.ram.wrap(address & 0xfff0);
     const baseText = inHex(base, 4);
     let rowNo = 0;
-    //    trc ('watch update address', inHex (address, 4),1);
     while (rowNo < this.table.rows.length) {
       row = this.table.rows[rowNo];
       if (row.cells[1].innerText === baseText) {
@@ -1061,19 +1146,15 @@ function watchWindow(id, cpuOwner, firstAddress) {
       }
       rowNo++;
     }
-    //    this.table.rows.length
   };
   this.refresh = function(force) {
     let i;
     if (!(this.cpu.refreshOn || force)) {
       return;
     }
-    //    trc ("watchwindow refresh this", this, 1);
-    //    console.dir (this);
     for (i = 0; i < this.table.rows.length; i++) {
-      //      trc ('watchWindow refresh row', i,1);
-      //      trc ('address',this.table.rows[i].cells[1].innerText,1);
-      this.setHex(this.table.rows[i], parseInt('0x' + this.table.rows[i].cells[1].innerText));
+      this.setHex(this.table.rows[i],
+          parseInt('0x' + this.table.rows[i].cells[1].innerText));
     }
   };
   this.createTable = function(tableId) {
@@ -1088,19 +1169,18 @@ function watchWindow(id, cpuOwner, firstAddress) {
   };
   this.setHex = function(row, base) {
     let i;
-    const bytes = '';
     for (i = 0; i < 0x10; i++) {
       row.cells[i + 2].innerText = inHex(this.cpu.ram.peek(base + i), 2);
     }
   };
   this.addWatch = function(address) {
-    let base; let i;
+    let base;
+    let i;
     const hexCells = [];
     if (this.table !== null) {
       const newRow = this.table.insertRow();
       const offCell = newRow.insertCell();
       const addrCell = newRow.insertCell();
-      const cpuOwner = this.cpu;
       trc('addWatch', 0);
       for (i = 0; i < 0x10; i++) {
         hexCells[i] = newRow.insertCell();
@@ -1138,6 +1218,11 @@ function watchWindow(id, cpuOwner, firstAddress) {
   this.createTable(id);
   this.addWatch(firstAddress);
 
+  /**
+   * Remove watch from window.
+   *
+   * @param {HTMLTableRowElement} row
+   */
   function removeWatch(row) {
     trc('removeWatch ', row.cells[1].innerText);
     cpuOwner.ram.removeWindow(parseInt(row.cells[1].innerText, 16), 0x10);
@@ -1145,6 +1230,10 @@ function watchWindow(id, cpuOwner, firstAddress) {
   }
 }
 
+/**
+ * CPU emulator.
+ * @constructor
+ */
 function CPU() {
   this.flagBits = {C: 1, V: 2, Z: 4, N: 8, I: 16, H: 32, F: 64, E: 128};
   this.registers = [];
@@ -1156,33 +1245,36 @@ function CPU() {
   this.dsmTable = new DSMWindow('DSMTable', this, this.dsmTableSize);
   this.labelMap = new LabelList('labelMap', this);
   this.watchList = null;
-  this.asmText = '';
   this.labels = [];
-  this.lastLabel = '';
   this.codeBlocks = [];
   this.opPage = 0;
   this.ended = false;
   this.dpVal = 0;
   this.dpUse = false;
   this.pcVal = null;
-  this.passNo = 0;
   this.assembling = false;
   this.intervalID = null;
   this.irqID = null;
   this.firqID = null;
   this.irqMils = 500;
   this.firqMils = 50;
-  this.asmIntervalID = null;
-  this.asmIntervalMils = 2;
-  this.asmProgram = [];
-  this.asmLineNo = 0;
-  this.passes = 3;
   this.hexInputCell = null;
   this.hexInputCellNo = 0;
   this.hexInputRegister = null;
   this.intervalMils = 1000;
   this.intervalTimes = 1;
-  this.speedMils = {'1': 1000, '2': 500, '3': 250, '4': 100, '5': 50, '6': 25, '7': 10, '8': 5, '9': 2, '10': 1};
+  this.speedMils = {
+    '1': 1000,
+    '2': 500,
+    '3': 250,
+    '4': 100,
+    '5': 50,
+    '6': 25,
+    '7': 10,
+    '8': 5,
+    '9': 2,
+    '10': 1,
+  };
   this.speedMils = {
     '1': 1000,
     '2': 500,
@@ -1208,7 +1300,7 @@ function CPU() {
     this.assembler.assemble(program);
   };
   this.asmLine = function(s) {
-    this.assembler.asmLine(s, false);
+    return this.assembler.asmLine(s, false);
   };
   this.asmCycle = function() {
     this.assembler.asmCycle();
@@ -1239,10 +1331,12 @@ function CPU() {
     }
   };
   this.flags = function(flagList) {
-    let i; let flagsV; let c; let cu; let b;
+    let i;
+    let flagsV;
+    let c;
+    let cu;
+    let b;
     flagsV = this.registers['regCC'].regValue;
-    //    trc ("Flags in", inHex (this.registers['regCC'].regValue, 2));
-    //    trc ("Flags list", flagList);
 
     for (i = 0; i < flagList.length; i++) {
       c = flagList[i];
@@ -1254,7 +1348,6 @@ function CPU() {
       }
     }
     this.registers['regCC'].change(flagsV, 0);
-    //    trc ("Flags out", inHex (this.registers['regCC'].regValue, 2));
   };
   this.flagCheck = function(flag) {
     const flagsV = this.registers['regCC'].regValue;
@@ -1264,12 +1357,15 @@ function CPU() {
   };
   this.addReg = function(called, size, n, usebinary) {
     trc('CPU addReg', 'reg' + called);
-    this.registers['reg' + called] = new Register(called, size, n, this, usebinary);
+    this.registers['reg' + called] = new Register(called, size, n, this,
+        usebinary);
   };
   this.refresh = function(force) {
-    let key; let refresh;
+    let key;
     for (key in this.registers) {
-      this.registers[key].refresh(force);
+      if (Object.prototype.hasOwnProperty.call(this.registers, key)) {
+        this.registers[key].refresh(force);
+      }
     }
     this.registers['regPC'].notify = 1;
     this.dsmTable.lineOn(this.registers['regPC'].regValue, force);
@@ -1291,47 +1387,7 @@ function CPU() {
       return n;
     }
   };
-  // this.setStatus = function (colour, alert, message, source) {
-  //     var statusBox, HTML;
-  //     var sourceText = source;
-  //     if (sourceText) {
-  //         sourceText = sourceText.replace(/\</, '&lt;');
-  //         sourceText = sourceText.replace(/\>/, '&gt;');
-  //     }
-  //     HTML = '<span style=\'color: ' + colour + '\' font-size:large;\'>' + alert + '</span> <i>' + message + '</i>';
-  //     if (source != null) {
-  //         HTML += '<br />Input: <span style=\'color: blue\'>' + sourceText + '</span>';
-  //     }
-  //     if (statusBox = document.getElementById('assemblyStatus')) {
-  //         statusBox.innerHTML = HTML;
-  //     }
-  // };
-  // this.error = function (message) {
-  //     this.foundError = 1;
-  //     console.log('Error ' + message);
-  //     this.setStatus('red', 'Error @ line ' + (this.asmLineNo + 1) + ':', message, this.asmText);
-  //     clearInterval(this.asmIntervalID);
-  //     this.asmIntervalID = null;
-  // };
   this.loadOS = function() {
-    /*
-    this.ram.fill (0, [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,23,0,24,150,13,142,0,100,16,142,0,50,23,0,140,48,136,1,49,168,1,140,0,200,37,242,57,52,22,204,0,0,23,0,37,142,6,0,159,4,142,1,0,159,6,142,0,192,159,8,48,141,0,167,159,10,134,0,141,21,134,1,23,0,42,134,0,23,0,65,53,150,15,0,151,1,15,2,215,3,57,151,12,57,52,2,220,2,134,32,61,211,4,31,1,220,0,84,84,84,58,220,0,196,7,53,130,52,18,48,140,15,132,3,125,0,12,39,2,139,4,166,134,151,13,53,146,0,255,0,255,0,85,170,255,52,18,48,140,243,132,3,125,0,12,39,2,139,4,166,134,151,14,53,146,52,54,159,0,16,159,2,141,176,49,140,22,13,12,39,2,203,16,164,165,167,226,166,132,203,8,164,165,170,224,167,132,53,182,128,64,32,16,8,4,2,1,127,191,223,239,247,251,253,254,192,192,48,48,12,12,3,3,63,63,207,207,243,243,252,252,0,0,0,0,0,0,0,0,32,112,112,32,32,0,32,0,216,216,144,0,0,0,0,0,0,80,248,80,80,248,80,0,64,112,128,96,16,224,32,0,200,200,16,32,64,152,152,0,64,160,160,64,168,144,104,0,96,96,64,0,0,0,0,0,32,64,64,64,64,64,32,0,64,32,32,32,32,32,64,0,0,80,112,248,112,80,0,0,0,32,32,248,32,32,0,0,0,0,0,0,0,96,96,64,0,0,0,248,0,0,0,0,0,0,0,0,0,96,96,0,0,8,16,32,64,128,0,0,112,136,152,168,200,136,112,0,32,96,32,32,32,32,112,0,112,136,8,48,64,128,248,0,112,136,8,112,8,136,112,0,16,48,80,144,248,16,16,0,248,128,128,240,8,136,112,0,48,64,128,240,136,136,112,0,248,8,16,32,64,64,64,0,112,136,136,112,136,136,112,0,112,136,136,120,8,16,96,0,0,0,96,96,0,96,96,0,0,0,96,96,0,96,96,64,16,32,64,128,64,32,16,0,0,0,248,0,0,248,0,0,64,32,16,8,16,32,64,0,112,136,8,48,32,0,32,0,112,136,184,168,184,128,112,0,112,136,136,136,248,136,136,0,240,136,136,240,136,136,240,0,112,136,128,128,128,136,112,0,240,136,136,136,136,136,240,0,248,128,128,240,128,128,248,0,248,128,128,240,128,128,128,0,112,136,128,184,136,136,120,0,136,136,136,248,136,136,136,0,112,32,32,32,32,32,112,0,8,8,8,8,136,136,112,0,136,144,160,192,160,144,136,0,128,128,128,128,128,128,248,0,136,216,168,136,136,136,136,0,136,200,168,152,136,136,136,0,112,136,136,136,136,136,112,0,240,136,136,240,128,128,128,0,112,136,136,136,168,144,104,0,240,136,136,240,144,136,136,0,112,136,128,112,8,136,112,0,248,32,32,32,32,32,32,0,136,136,136,136,136,136,112,0,136,136,136,136,136,80,32,0,136,136,168,168,168,168,80,0,136,136,80,32,80,136,136,0,136,136,136,80,32,32,32,0,240,16,32,64,128,128,240,0,112,64,64,64,64,64,112,0,0,128,64,32,16,8,0,0,112,16,16,16,16,16,112,0,32,80,136,0,0,0,0,0,0,0,0,0,0,0,0,248,96,96,32,0,0,0,0,0,0,0,112,8,120,136,120,0,128,128,240,136,136,136,240,0,0,0,112,136,128,136,112,0,8,8,120,136,136,136,120,0,0,0,112,136,240,128,112,0,48,64,64,240,64,64,64,0,0,0,120,136,136,120,8,112,128,128,224,144,144,144,144,0,32,0,32,32,32,32,48,0,16,0,48,16,16,16,144,96,128,128,144,160,192,160,144,0,32,32,32,32,32,32,48,0,0,0,208,168,168,136,136,0,0,0,224,144,144,144,144,0,0,0,112,136,136,136,112,0,0,0,240,136,136,136,240,128,0,0,120,136,136,136,120,8,0,0,176,72,64,64,224,0,0,0,112,128,112,8,112,0,0,64,240,64,64,80,32,0,0,0,144,144,144,176,80,0,0,0,136,136,136,80,32,0,0,0,136,136,168,248,80,0,0,0,144,144,96,144,144,0,0,0,144,144,144,112,32,192,0,0,240,16,96,128,240,0,48,64,64,192,64,64,48,0,32,32,32,0,32,32,32,0,96,16,16,24,16,16,96,0,80,160,0,0,0,0,0,0,32,112,216,136,136,248,0,0]);
-    this.ram.fill (61440, [22,0,24,22,0,20,22,0,17,22,0,14,22,0,11,22,0,8,22,0,5,23,15,247,32,251,59,16,206,128,0,141,5,28,0,22,255,239,204,0,0,31,128,31,1,31,2,31,3,57]);
-    this.ram.fill (65520, []);
-    this.ram.fill (65522, [240,18,240,15,240,12,240,9,240,6,240,3,240,0]);
-*/
-    /*
-    this.ram.fill (0x4000, [57]);
-    this.ram.fill (0xF000, [22,0,86,22,0,20,22,0,17,22,0,14,22,0,11,22,0,8,22,0,6,23,79,232,32,251,59,238,106,79,230,192,88,73,49,141,0,51,52,32,49,141,0,37,49,171,16,172,225,36,2,173,180,239,106,59,57,166,192,38,4,127,255,128,57,127,255,129,57,166,192,183,255,130,57,166,192,183,255,131,57,240,56,240,57,240,69,240,75,16,206,128,0,141,5,28,0,22,255,177,204,0,0,31,139,31,1,31,2,31,3,57]);
-    this.ram.fill (0xFFF0, []);
-    this.ram.fill (0xFFF2, [240,18,240,15,240,12,240,9,240,6,240,3,240,0]);
-*/
-    /*
-  this.ram.fill (0x4000, [57]);
-  this.ram.fill (0xF000, [22,0,75,22,0,20,22,0,17,22,0,14,22,0,11,22,0,8,22,0,6,189,64,0,32,251,59,52,4,31,137,79,88,73,49,141,0,40,52,32,49,141,0,28,49,171,16,172,225,53,4,36,2,173,180,59,57,93,38,4,127,255,128,57,127,255,129,57,247,255,130,57,240,56,240,57,240,68,16,206,128,0,141,5,28,0,22,255,188,204,0,0,31,139,31,1,31,2,31,3,57]);
-  this.ram.fill (0xFFF0, []);
-  this.ram.fill (0xFFF2, [240,18,240,15,240,12,240,9,240,6,240,3,240,0]);
-*/
     this.ram.fill(0x4000, [57]);
     this.ram.fill(0xF000, [
       22,
@@ -1438,16 +1494,9 @@ function CPU() {
       3,
       57]);
     this.ram.fill(0xFFF0, []);
-    this.ram.fill(0xFFF2, [240, 18, 240, 15, 240, 12, 240, 9, 240, 6, 240, 3, 240, 0]);
+    this.ram.fill(0xFFF2,
+        [240, 18, 240, 15, 240, 12, 240, 9, 240, 6, 240, 3, 240, 0]);
   };
-  // this.labelled = function(mapAddresses, word, prefix) {
-  //   if (word in mapAddresses) {
-  //     //      return "="+mapAddresses[word]+":"+word
-  //     return mapAddresses[word];
-  //   } else {
-  //     return prefix + word;
-  //   }
-  // };
   this.jumpTo = function(CPU, address) {
     if (CPU.intervalID == null) {
       machineOrg(address, 1);
@@ -1456,7 +1505,7 @@ function CPU() {
   this.editCode = function(cpu, event, address) {
     const cell = event.target.parentNode.lastChild;
     trc('editCode', 0);
-    new cellEdit(cell, cpu, address);
+    new CellEdit(cell, cpu, address);
     return false;
   };
   this.setBreakpoint = function(cpu, event, address) {
@@ -1471,21 +1520,24 @@ function CPU() {
     return false;
   };
   this.cycle = function() {
-    let opcode; let instruction; let i; let numTimes; let pcAddress;
+    let opcode;
+    let instruction;
+    let i;
+    let numTimes;
+    let pcAddress;
     if (this.intervalID == null) {
       numTimes = 1;
     } else {
       numTimes = this.intervalTimes;
     }
     for (i = 1; i <= numTimes; i++) {
-      //      trc ("Cycle no.",this.cycles,1);
       this.cycles++;
       if (!(this.alu.syncing || this.alu.waiting)) {
-        //        trc ("Begin instruction execute PC", inHex (this.registers['regPC'].regValue,4));
         do {
-          //      trc ("opPage",this.opPage);
           opcode = this.ram.peek(this.registers['regPC'].regValue);
-          this.registers['regPC'].setValue(this.ram.plus(this.registers['regPC'].regValue));
+          this.registers['regPC'].setValue(
+              this.ram.plus(this.registers['regPC'].regValue),
+          );
           try {
             instruction = this.assembler.opFind(opcode,
                 this.opPage);
@@ -1498,15 +1550,11 @@ function CPU() {
             }
           }
           if (instruction != null) {
-            //            trc ("Found mnemonic", instruction.mnem+' = '+instruction.code);
             this.alu.execute(instruction.code);
           } else {
-            //            trc ("PC: ", inHex (this.registers['regPC'].regValue,4)+" unknown opcode "+opcode);
           }
         } while (this.opPage);
       } else {
-        //        trc ("Syncing or waiting, syncing=", this.alu.syncing,1);
-        //        trc ("Syncing or waiting, waiting=", this.alu.waiting,1);
       }
       this.alu.checkInterrupts();
       pcAddress = this.registers['regPC'].regValue;
@@ -1519,6 +1567,12 @@ function CPU() {
     this.dsmTable.lineOn(pcAddress, 0);
   };
   this.stop = function() {
+    /**
+     * Disable timer interval for cpu cycle.
+     *
+     * @param {string} id timer id
+     * @return {null}
+     */
     function cancelInterval(id) {
       if (id != null) {
         clearInterval(id);
@@ -1536,13 +1590,11 @@ function CPU() {
     this.alu = new ALU816(this);
     this.cycles = 0;
     this.loadOS();
-    this.SI = new systemInterface(this, SIbaseAddress);
+    this.SI = new SystemInterface(this, SIbaseAddress);
   };
   this.execute = function() {
-    //    trc ("Execute from "+inHex (this.registers['regPC'].regValue,4)+" with "+this.intervalMils+" delay. (speed factor "+this.intervalTimes+")",0,1);
     this.stop();
     this.intervalID = setInterval(machineCycle, this.intervalMils);
-    //    trc ("Execute irqMils", this.irqMils,1);
     this.irqID = setInterval(doIRQ, this.irqMils);
     this.firqID = setInterval(doFIRQ, this.firqMils);
   };
@@ -1599,7 +1651,7 @@ function CPU() {
     this.addReg('DP', 8, 0, '', 0);
   };
   this.addRegisters();
-  this.watchList = new watchWindow('watchWindow', this, 0x7ff0);
+  this.watchList = new WatchWindow('watchWindow', this, 0x7ff0);
   this.watchList.addWatch(0xff80);
   this.addEvents();
 }
