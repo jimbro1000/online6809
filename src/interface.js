@@ -1,7 +1,7 @@
 import {blockChars, blockClasses, Defaults} from './constants';
 import {inHex, trc} from './helper';
 
-function labelList(id, cpuOwner) {
+function LabelList(id, cpuOwner) {
   this.cpu = cpuOwner;
   this.list = null;
   this.createList = function(listId) {
@@ -354,4 +354,4 @@ function keyPressHandler(event) {
   event.preventDefault();
 }
 
-export {labelList, DSMWindow, GraphicsScreen, TextScreen, keyPressHandler};
+export {LabelList, DSMWindow, GraphicsScreen, TextScreen, keyPressHandler};

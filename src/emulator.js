@@ -10,7 +10,7 @@ import {SIbaseAddress,
   fullRegsToTextU,
   fullRegsToValue} from './constants';
 import {ops6809} from './opcodes';
-import {DSMWindow, GraphicsScreen, TextScreen, keyPressHandler, labelList} from './interface';
+import {DSMWindow, GraphicsScreen, TextScreen, keyPressHandler, LabelList} from './interface';
 import {inHex, trc, plural, signedHex} from './helper';
 import {Memory8} from './memory8';
 import {Assembler} from './assembler';
@@ -1154,7 +1154,7 @@ function CPU() {
   this.graphicsRAM = new GraphicsScreen(this.ram, 0x600, 256, 192, 2, 2);
   this.dsmTableSize = 30;
   this.dsmTable = new DSMWindow('DSMTable', this, this.dsmTableSize);
-  this.labelMap = new labelList('labelMap', this);
+  this.labelMap = new LabelList('labelMap', this);
   this.watchList = null;
   this.asmText = '';
   this.labels = [];
