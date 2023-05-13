@@ -1,6 +1,13 @@
 import {blockChars, blockClasses, Defaults} from './constants';
 import {inHex, trc} from './helper';
 
+/**
+ * Generate label list element for ui.
+ *
+ * @param {string} id target html element id
+ * @param {CPU} cpuOwner cpu reference
+ * @constructor
+ */
 function LabelList(id, cpuOwner) {
   this.cpu = cpuOwner;
   this.list = null;
@@ -21,27 +28,27 @@ function LabelList(id, cpuOwner) {
     }
   };
   this.fill = function(labels) {
-    let label; let option;
+    let label;
+    let option;
     trc('Labels fill', 0);
-    //    console.log (labels);
     for (label in labels) {
-      option = document.createElement('option');
-      //      option=new Option (label, 1);
-      option.text = label;
-      option.value = 1;
-      //      option.innerText=label;
-      //      option.appendChild(document.createTextNode(label));
-      trc('Label: ', label);
-      option.className = 'labelList';
-      (function(cpuOwner, optLabel) {
-        option.onclick = function(event) {
-          //          cpuOwner.dsmTable.lineOff ();
-          trc('reloadtable call label \'' + optLabel + '\' value', labels[optLabel]);
-          cpuOwner.dsmTable.reloadTable(labels[optLabel]);
-          cpuOwner.dsmTable.lineOn(cpuOwner.registers['regPC'].regValue, true, true);
-        };
-      }(this.cpu, label));
-      this.list.add(option);
+      if (Object.prototype.hasOwnProperty.call(labels, label)) {
+        option = document.createElement('option');
+        option.text = label;
+        option.value = 1;
+        trc('Label: ', label);
+        option.className = 'labelList';
+        (function(cpuOwner, optLabel) {
+          option.onclick = function(event) {
+            trc('reloadtable call label \'' + optLabel + '\' value',
+                labels[optLabel]);
+            cpuOwner.dsmTable.reloadTable(labels[optLabel]);
+            cpuOwner.dsmTable.lineOn(cpuOwner.registers['regPC'].regValue, true,
+                true);
+          };
+        }(this.cpu, label));
+        this.list.add(option);
+      }
     }
   };
   this.empty = function() {
@@ -52,6 +59,14 @@ function LabelList(id, cpuOwner) {
   this.createList(id);
 }
 
+/**
+ * Generate DSM window element for UI.
+ *
+ * @param {string} id target html element id
+ * @param {CPU} cpu cpu reference
+ * @param {number} rows number of rows to create
+ * @constructor
+ */
 function DSMWindow(id, cpu, rows) {
   this.lineMap = [];
   this.lineHi = null;
@@ -62,18 +77,26 @@ function DSMWindow(id, cpu, rows) {
   this.baseAddress = 0;
   this.codeLength = 0;
   this.watch = null;
-  this.createTable = function(tableId) {
-    let newRow; let container; let rowNo;
 
+  this.createTable = function(tableId) {
+    let newRow;
+    let rowNo;
+
+    /**
+     * Extend current watch with new cell.
+     *
+     * @param {HTMLTableRowElement} thisRow
+     * @param {string} cellClass
+     * @param {string} content
+     */
     function newCell(thisRow, cellClass, content) {
       const cell = thisRow.insertCell();
       cell.className = cellClass;
       cell.innerHTML = content;
-      //      console.dir (cell);
     }
 
     trc('createTable tableId', tableId);
-    container = document.getElementById(tableId + '-container');
+    const container = document.getElementById(tableId + '-container');
     if (container !== null) {
       trc('Found container, rows', this.rowCount);
       this.table = document.createElement('table');
@@ -91,8 +114,17 @@ function DSMWindow(id, cpu, rows) {
     }
   };
   this.setRow = function(rowNo, code, cpu) {
-    let row; let address; let bytes; let mnemonic;
+    let row;
+    let address;
+    let bytes;
+    let mnemonic;
 
+    /**
+     * Safe jump CPU to current address in code.
+     *
+     * @param {Event} event
+     * @return {boolean}
+     */
     function jump(event) {
       event.preventDefault();
       if (!cpu.cellEditing) {
@@ -102,15 +134,12 @@ function DSMWindow(id, cpu, rows) {
       return false;
     }
 
-    //    trc ("setRow", rowNo);
     if (this.table && (rowNo < this.table.rows.length)) {
       row = this.table.rows[rowNo];
       bytes = '';
       if (code) {
         this.lineMap[code.address] = row;
-        //        row.onclick=function (event) { cpu.closeEdit (false); cpu.jumpTo (cpu, code.address) }
         address = inHex(code.address, 4) + ':';
-        //        trc ("Setting dsm table address",inHex (address,4));
         for (let i = 0; i < code.maxInstructionLength; i++) {
           if (i < code.bytes.length) {
             bytes += inHex(code.bytes[i], 2) + ' ';
@@ -130,7 +159,9 @@ function DSMWindow(id, cpu, rows) {
         return false;
       };
       row.cells[0].onclick = jump;
-      row.cells[0].style.backgroundColor = (code.address in cpu.breakpoints) ? 'red' : '';
+      row.cells[0].style.backgroundColor = (code.address in cpu.breakpoints) ?
+          'red' :
+          '';
       row.cells[1].innerHTML = bytes;
       row.cells[1].onclick = jump;
       row.cells[2].innerHTML = mnemonic;
@@ -151,7 +182,8 @@ function DSMWindow(id, cpu, rows) {
       this.cpuOwner.ram.removeWindow(0, 0, this.watch);
       this.watch = null;
     }
-    this.setTable(this.cpuOwner.disassemble(address, 0x10000, this.cpuOwner.dsmTableSize));
+    this.setTable(this.cpuOwner.disassemble(address, 0x10000,
+        this.cpuOwner.dsmTableSize));
   };
   this.lineOff = function() {
     if (this.lineHi) {
@@ -187,7 +219,8 @@ function DSMWindow(id, cpu, rows) {
         //        trc ("this.table row", i);
         this.setRow(i, (i < lines.length) ? lines[i] : null, this.cpuOwner);
       }
-      this.watch = this.cpuOwner.ram.addWindow(this, this.baseAddress, this.codeLength);
+      this.watch = this.cpuOwner.ram.addWindow(this, this.baseAddress,
+          this.codeLength);
       trc('Add DASM watch length', this.codeLength);
     }
   };
@@ -198,13 +231,25 @@ function DSMWindow(id, cpu, rows) {
     trc('DASM window update address', inHex(address, 4));
     holder.doTrace();
     trc('Assembling', holder.cpuOwner.assembling);
-    if ((holder.cpuOwner.cellEditing == null) && (holder.cpuOwner.assembling == false)) {
+    if ((holder.cpuOwner.cellEditing == null) &&
+        (holder.cpuOwner.assembling == false)) {
       holder.reloadTable(holder.baseAddress);
     }
   };
   this.createTable(id);
 }
 
+/**
+ * Define graphics screen element for UI.
+ *
+ * @param {Memory8} videoRAM ram reference
+ * @param {number} videoBase base address
+ * @param {number} width pixel width
+ * @param {number} height pixel height
+ * @param {number} colours palette size
+ * @param {number} zoom scale
+ * @constructor
+ */
 function GraphicsScreen(videoRAM, videoBase, width, height, colours, zoom) {
   this.ram = videoRAM;
   this.base = videoBase;
@@ -215,9 +260,29 @@ function GraphicsScreen(videoRAM, videoBase, width, height, colours, zoom) {
   this.sourceBitmap = null;
   this.canvas = null;
   this.colourMap = [
-    '#000000', '#a00000', '#00a000', '#a0a000', '#0000a0', '#a000a0', '#00a0a0', '#808080',
-    '#404040', '#ff0000', '#00ff00', '#ffff00', '#0000ff', '#ff00ff', '#00ffff', '#ffffff'];
-  this.palettes = [[], [0, 2], [0, 9, 2, 12], [], [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]];
+    '#000000',
+    '#a00000',
+    '#00a000',
+    '#a0a000',
+    '#0000a0',
+    '#a000a0',
+    '#00a0a0',
+    '#808080',
+    '#404040',
+    '#ff0000',
+    '#00ff00',
+    '#ffff00',
+    '#0000ff',
+    '#ff00ff',
+    '#00ffff',
+    '#ffffff'];
+  this.palettes = [
+    [],
+    [0, 2],
+    [0, 9, 2, 12],
+    [],
+    [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15],
+  ];
   this.setMode = function(colours) {
     switch (colours) {
       case 2:
@@ -246,7 +311,9 @@ function GraphicsScreen(videoRAM, videoBase, width, height, colours, zoom) {
     }
   };
   this.update = function(holder, address, value) {
-    let pixel; let dx; let dy;
+    let pixel;
+    let dx;
+    let dy;
     let byte = value;
     switch (this.bitsPerPixel) {
       case 1:
@@ -262,18 +329,22 @@ function GraphicsScreen(videoRAM, videoBase, width, height, colours, zoom) {
         dy = 2;
         break;
     }
-    let xPos = ((address - this.base) & ((Defaults.lineBytes * dy) - 1)) * (8 / dy);
-    const yPos = Math.trunc((address - this.base) / (Defaults.lineBytes * dy)) * dy;
+    let xPos = ((address - this.base) & ((Defaults.lineBytes * dy) - 1)) *
+        (8 / dy);
+    const yPos = Math.trunc((address - this.base) /
+        (Defaults.lineBytes * dy)) * dy;
     const ctx = this.canvas.getContext('2d');
     for (let i = 0; i < 8; i += this.bitsPerPixel) {
-      //      trc ("byte",inHex(byte,2),true);
       byte <<= this.bitsPerPixel;
       pixel = byte >>> 8;
-      //      trc ("Pixel",inHex(pixel,2),true);
       byte &= 0xff;
       ctx.fillStyle = this.colourMap[this.palettes[this.bitsPerPixel][pixel]];
-      //      trc ("Colour",this.colourMap[this.palettes[this.bitsPerPixel][pixel]],true);
-      ctx.fillRect(xPos * this.scale, yPos * this.scale, this.scale * dx, this.scale * dy);
+      ctx.fillRect(
+          xPos * this.scale,
+          yPos * this.scale,
+          this.scale * dx,
+          this.scale * dy,
+      );
       xPos += dx;
     }
   };
@@ -285,12 +356,24 @@ function GraphicsScreen(videoRAM, videoBase, width, height, colours, zoom) {
   }
 }
 
+/**
+ * Define text screen element for UI.
+ *
+ * @param {Memory8} videoRAM memory reference
+ * @param {number} videoBase base address in memory
+ * @param {number} width character width
+ * @param {number} height character height
+ * @constructor
+ */
 function TextScreen(videoRAM, videoBase, width, height) {
   this.ram = videoRAM;
   this.base = videoBase;
   this.wide = width;
   this.high = height;
-  this.charSet = '@ABCDEFGHIJKLMNO' + 'PQRSTUVWXYZ[\\]\u2191\u2190' + ' !"#$%&\'()*+,-./' + '0123456789:;<=>?';
+  this.charSet = '@ABCDEFGHIJKLMNO' +
+      'PQRSTUVWXYZ[\\]\u2191\u2190' +
+      ' !"#$%&\'()*+,-./' +
+      '0123456789:;<=>?';
   this.update = function(holder, address, value) {
     let cell;
     const element = document.getElementById('txtScreenTable');
@@ -322,10 +405,16 @@ function TextScreen(videoRAM, videoBase, width, height) {
     }
   };
   this.createScreenTable = function(tableId, width, height) {
-    let rows; let cells; let newRow; let newCell; let container; let table;
+    let rows;
+    let cells;
+    let newRow;
+    let newCell;
+    let container;
+    let table;
     table = null;
-    if (container = document.getElementById(tableId + '-container')) {
-      //      trc ("Found table container", tableId,1);
+    if (
+      (container = document.getElementById(tableId + '-container')) !== null
+    ) {
       table = document.createElement('table');
       table.setAttribute('id', tableId);
       table.setAttribute('tabindex', 0);
@@ -349,6 +438,11 @@ function TextScreen(videoRAM, videoBase, width, height) {
   this.table = this.createScreenTable('txtScreenTable', 32, 16);
 }
 
+/**
+ * Capture keypress events and push to key buffer.
+ *
+ * @param {KeyboardEvent} event
+ */
 function keyPressHandler(event) {
   mc6809.keyBuffer.push(event.key);
   event.preventDefault();
