@@ -297,14 +297,14 @@ function TextScreen(videoRAM, videoBase, width, height) {
     if (element) {
       trc('Update element found', '');
       //      console.dir (holder);
-      cell = element.rows[Math.trunc((address - holder.base) / width)].cells[Math.trunc(
-          (address - holder.base) % width)];
+      cell = element.rows[Math.floor((address - holder.base) / width)].cells[
+          (address - holder.base) % width];
       if (cell) {
         if (value >= 0x80) {
           cell.innerHTML = blockChars[value & 0x0f];
           cell.className = blockClasses[(value & 0x70) >> 4];
         } else {
-          if ((value & 0x3f) == 0x20) {
+          if ((value & 0x3f) === 0x20) {
             cell.innerHTML = '&nbsp;';
           } else {
             cell.innerHTML = holder.charSet[value & 0x3f];
