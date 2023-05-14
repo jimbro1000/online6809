@@ -5,11 +5,11 @@ import {inHex, trc} from './helper';
  * Generate label list element for ui.
  *
  * @param {string} id target html element id
- * @param {CPU} cpuOwner cpu reference
+ * @param {Object} owner owner reference
  * @constructor
  */
-function LabelList(id, cpuOwner) {
-  this.cpu = cpuOwner;
+function LabelList(id, owner) {
+  this.cpu = owner;
   this.list = null;
   this.createList = function(listId) {
     const container = document.getElementById(listId + '-container');

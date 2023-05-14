@@ -148,7 +148,7 @@ export class Assembler {
           'green',
           'Ready',
           'assembly of ' + this.asmProgram.length + ' ' +
-          plural('line', this.asmProgram.length) + ' complete',
+          plural('line', this.asmProgram.length, 'lines') + ' complete',
           undefined,
       );
       if (this.dsmTable != null) {
@@ -312,18 +312,18 @@ export class Assembler {
     let valid = false;
     const matchValue = /^\s*(('(.))|(-|\+|)(\$|%|0x|)([\w_]+))/i;
     let expression = String(expressionIn);
-    trc('nextVal input', expression, 0);
+    trc('nextVal input', expression);
     while (matches = matchValue.exec(expression)) {
       minus = 0;
       radix = 10;
       if (matches[3]) {
-        trc('matches[3]', matches[3], 0);
+        trc('matches[3]', matches[3]);
         valueNum = matches[3].charCodeAt(0);
       } else {
         value = matches[6].toUpperCase();
-        trc('nextVal item', value, 0);
-        trc('nextVal radix', matches[5], 0);
-        trc('matches[5] "' + matches[5] + '"  ', matches[5].charCodeAt(0), 0);
+        trc('nextVal item', value);
+        trc('nextVal radix', matches[5]);
+        trc('matches[5] "' + matches[5] + '"  ', matches[5].charCodeAt(0));
         if (matches[4] === '-') {
           minus = 1;
         }
@@ -346,7 +346,7 @@ export class Assembler {
             }
           }
         } else {
-          trc('Radix', radix, 0);
+          trc('Radix', radix);
           valueNum = parseInt(value, radix);
         }
       }
@@ -435,14 +435,14 @@ export class Assembler {
    */
   #encodeValue(encoding, value, bits) {
     let n;
-    trc('Encode value initial', value, 0);
+    trc('Encode value initial', value);
     if (value) {
-      n = this.#nextVal(value, false);
+      n = this.#nextVal(String(value), false);
     } else {
       n = 0;
     }
-    trc('Encode value', n, 0);
-    trc('Encode bits', bits, 0);
+    trc('Encode value', n);
+    trc('Encode bits', bits);
     if (bits > 8) {
       if (n < 0) {
         n += 0x10000;
@@ -492,7 +492,7 @@ export class Assembler {
     let matches = 0;
     for (let i = 0; i < items.length; i++) {
       const item = items[i];
-      trc('Encode data', item, 0);
+      trc('Encode data', item);
       matches = /\s*"(.*)"/.exec(item);
       if (matches === null) {
         trc('Try to match single quotes', item);
@@ -501,7 +501,7 @@ export class Assembler {
       if (matches !== null) {
         this.#encodeString(encoding, matches[1]);
       } else {
-        this.#encodeValue(encoding, item, bits);
+        this.#encodeValue(encoding, parseInt(item), bits);
       }
     }
   };
@@ -527,7 +527,7 @@ export class Assembler {
     let item;
     const items = [];
     let textList = text;
-    trc('splitByComma', text, 0);
+    trc('splitByComma', text);
     while (textList.length > 0) {
       item = '';
       let matches = /^("(?:[^"\\]|\\.)*")|^('(?:[^'\\]|\\.)*)'/.exec(textList);
@@ -543,7 +543,7 @@ export class Assembler {
         textList = '';
       } else {
         items.push(item);
-        trc('item', item, 0);
+        trc('item', item);
         textList = textList.substring(item.length).replace(/^\s*,/, '');
       }
     }
@@ -556,7 +556,7 @@ export class Assembler {
    * @param {number} operand new dp value
    */
   #setDp(operand) {
-    const value = this.#nextVal(operand, true);
+    const value = this.#nextVal(String(operand), true);
     if ((value >= 0) && (value < 0x100)) {
       this.dpVal = value;
       this.dpUse = true;
@@ -589,7 +589,7 @@ export class Assembler {
       }
       if ((filler >= 0) && (filler < 0x100)) {
         if ((count > 0) && (count < 0x10000)) {
-          trc('filling ' + count + ' bytes with value', filler, 0);
+          trc('filling ' + count + ' bytes with value', filler);
           for (let i = 0; i < count; i++) {
             encoding.push(filler);
           }
@@ -655,13 +655,13 @@ export class Assembler {
    * Encode pseudo-op directive.
    *
    * @param {number[]} encoding
-   * @param {string} instruction
+   * @param {Object} instruction
    * @param {string} operand
    * @param {string} label
    */
   #encodeDirective(encoding, instruction, operand, label) {
     trc('Encode directive name', instruction.mnem);
-    trc('Encode directive operand', operand, 0);
+    trc('Encode directive operand', operand);
     switch (instruction.mnem) {
       case 'DB':
       case '.BYTE':
@@ -686,7 +686,7 @@ export class Assembler {
         break;
       case 'SETDP':
       case 'DIRECT':
-        this.#setDp(operand);
+        this.#setDp(parseInt(operand));
         break;
       case '=':
       case 'EQU':
@@ -718,11 +718,11 @@ export class Assembler {
   #pcr(target, bits, pcIn) {
     trc('this.pcr pcIn', inHex(pcIn, 4));
     const pc = this.ram.wrap(pcIn + ((bits === 8) ? 1 : 2));
-    trc('PCR pc value', inHex(pc, 4), 0);
-    trc('PCR target', inHex(target, 4), 0);
-    trc('PCR bits', bits, 0);
-    let n = this.#nextVal(target, false);
-    trc('this.pcr nextVal', n, 0);
+    trc('PCR pc value', inHex(pc, 4));
+    trc('PCR target', inHex(target, 4));
+    trc('PCR bits', bits);
+    let n = this.#nextVal(String(target), false);
+    trc('this.pcr nextVal', n);
     if (n == null) {
       if (bits > 8) {
         return [null, 0, 0];
@@ -734,7 +734,7 @@ export class Assembler {
     if (n < -0x8000) {
       n += 0x10000;
     }
-    trc('PCR offset value', inHex(n), 0);
+    trc('PCR offset value', inHex(n));
     switch (bits) {
       case 7:
       case 8:
@@ -936,7 +936,7 @@ export class Assembler {
   /**
    * Parse Sized Value.
    *
-   * @param {number} s source
+   * @param {string} s source
    * @param {boolean} noError
    * @param {number} dp direct page
    * @param {boolean} useDp
@@ -1007,15 +1007,15 @@ export class Assembler {
     } else {
       matches = /\s*[(\[]\s*(.+?)[)\]]\s*/.exec(s);
       if (matches != null) {
-        trc('Indirect addressing', matches[1], 0);
+        trc('Indirect addressing', matches[1]);
         s = matches[1];
         indirect = 1;
       }
       matches = /\s*(\S*?)\s*,\s*(\S+)/.exec(s);
       if (matches != null) {
         offset = matches[1].toUpperCase();
-        trc('Indexed addressing', matches[2], 0);
-        trc('Offset', offset, 0);
+        trc('Indexed addressing', matches[2]);
+        trc('Offset', offset);
         mode = modes.indexed;
         [indexMode, increment] = this.#getIndexMode(matches[2]);
         if (offset) {
@@ -1028,11 +1028,11 @@ export class Assembler {
             [value, forceBits] =
                 this.parseSizedVal(offset, true, 0, false);
             hasValue = true;
-            trc('forceBits=' + forceBits, value, 0);
+            trc('forceBits=' + forceBits, value);
           }
         }
-        trc('indexMode', indexMode, 0);
-        trc('increment', increment, 0);
+        trc('indexMode', indexMode);
+        trc('increment', increment);
         postByte = indexMode | increment;
         if (increment) {
           if ((hasValue) && (value !== 0)) {
@@ -1101,7 +1101,7 @@ export class Assembler {
         }
       } else {
         [value, forceBits] =
-            this.parseSizedVal(s, 0, this.dpVal, this.dpUse);
+            this.parseSizedVal(s, false, this.dpVal, this.dpUse);
         trc('Extended or indirect mode', value);
         bits = this.#opSize(value);
         if ((forceBits === 8) && (indirect === 0)) {
@@ -1119,10 +1119,10 @@ export class Assembler {
             mode = modes.indexed;
           } else {
             withDPValue = (value - (this.dpVal << 8) & 0xffff);
-            trc('withDP', inHex(withDPValue, 4), 0);
+            trc('withDP', inHex(withDPValue, 4));
             if ((this.dpUse) && (value != null) &&
                 (withDPValue < 0x100) && (forceBits !== 16)) {
-              trc('Using DP', value, 0);
+              trc('Using DP', value);
               value = withDPValue;
               bits = 8;
               mode = modes.direct;
@@ -1188,7 +1188,7 @@ export class Assembler {
           if ((mode & modes.pcr) !== 0) {
             this.#encodeOp(encoded, instruction);
             //            console.dir (instruction);
-            trc('ASM mode pcr instruction length', encoded.length, 0);
+            trc('ASM mode pcr instruction length', encoded.length);
             offsetValues = this.#pcr(
                 operand,
                 (mode & modes.bits16) !== 0 ? 16 : 8,
@@ -1269,7 +1269,7 @@ export class Assembler {
       sourceText = sourceText.replace(/</, '&lt;');
       sourceText = sourceText.replace(/>/, '&gt;');
     }
-    HTML = '<span style=\'color: ' + statusColour + '\' font-size:large;\'>' +
+    HTML = '<span style=\'color: ' + statusColour + '\' \'font-size: large\'>' +
         alert + '</span> <i>' + message + '</i>';
     if (source != null) {
       HTML += '<br />Input: <span style=\'color: blue\'>' +
@@ -1288,12 +1288,13 @@ export class Assembler {
    * @param {string} message status message
    * @param {Object=} value
    */
-  #error(message, value) {
+  #error(message, value = null) {
+    const stateMessage = message + (value == null ? '':' ' + value);
     this.foundError = 1;
     this.#setStatus(
         'red',
         'Error @ line ' + (this.asmLineNo + 1) + ':',
-        message,
+        stateMessage,
         this.asmText,
     );
     clearInterval(this.asmIntervalID);
@@ -1321,7 +1322,7 @@ export class Assembler {
    * Convert post byte nybble pairs to register names.
    *
    * @param {number} postByte
-   * @param {string[]} regList
+   * @param {Object} regList
    * @return {string}
    */
   #regPairList(postByte, regList) {
@@ -1380,9 +1381,9 @@ export class Assembler {
       let word = nextByte(assembler);
       if (bits16) {
         word = (word << 8) | nextByte(assembler);
-        return labelled(assembler.mapAddrs, inHex(word, 4), prefix);
+        return labelled(assembler.mapAddrs, parseInt(inHex(word, 4)), prefix);
       } else {
-        return labelled(assembler.mapAddrs, inHex(word, 2), prefix);
+        return labelled(assembler.mapAddrs, parseInt(inHex(word, 2)), prefix);
       }
     }
 
@@ -1476,7 +1477,7 @@ export class Assembler {
      * @param {number} offset offset from PC
      * @param {boolean} bits16
      * @param {number} pc PC
-     * @return {string[]} List of disassembled instructions
+     * @return {string} List of disassembled instructions
      */
     function findPCR(assembler, offset, bits16, pc) {
       let d = offset;
@@ -1484,7 +1485,7 @@ export class Assembler {
         d |= (offset & 0x80) !== 0 ? 0xff00 : 0;
       }
       return labelled(
-          assembler.mapAddrs, inHex((pc + d) & 0xffff, 4), '$');
+          assembler.mapAddrs, parseInt(inHex((pc + d) & 0xffff, 4)), '$');
     }
 
     /**
@@ -1528,7 +1529,7 @@ export class Assembler {
         if ((instruction.mode & modes.simple) !== 0) {
         } else if ((instruction.mode & modes.immediate) !== 0) {
           disassembly.operand = '#' + readWord(
-              this, instruction.mode & modes.bits16, '$');
+              this, (instruction.mode & modes.bits16) !== 0, '$');
         } else if ((instruction.mode & modes.direct) !== 0) {
           disassembly.operand = '<' + readWord(
               this, modes.bits8, '$');
