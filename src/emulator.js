@@ -1503,8 +1503,12 @@ function CPU() {
   this.editCode = function(cpu, event, address) {
     const cell = event.target.parentNode.lastChild;
     trc('editCode', 0);
-    new CellEdit(cell, cpu, address);
-    return false;
+    if (cell instanceof HTMLTableCellElement) {
+      new CellEdit(cell, cpu, address);
+      return false;
+    } else {
+      trc('editCode: error - invalid cell element', cell, true);
+    }
   };
   this.setBreakpoint = function(cpu, event, address) {
     const cell = event.target.parentNode.firstChild;

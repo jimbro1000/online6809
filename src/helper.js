@@ -77,4 +77,35 @@ function plural(word, n, wordPlural) {
   }
 }
 
-export {inHex, signedHex, trc, plural};
+/**
+ * Convert hex and binary to integer.
+ *
+ * @param {string} source
+ */
+function toInt(source) {
+  if (source.trim() === '') {
+    return 0;
+  }
+  let polarity = 1;
+  if (source[0] === '-') {
+    polarity = -1;
+    source = source.substring(1)
+  }
+  const prefix = source[0];
+  switch (prefix) {
+    case '%':
+      return parseInt(source.substring(1), 2) * polarity;
+    case '&':
+    case '$':
+      return parseInt(source.substring(1), 16) * polarity;
+    case '0':
+      if (source.length > 1 && source[1].toUpperCase() === 'X') {
+        return parseInt(source.substring(2), 16) * polarity;
+      }
+      return parseInt(source) * polarity;
+    default:
+      return parseInt(source) * polarity;
+  }
+}
+
+export {inHex, signedHex, trc, plural, toInt};

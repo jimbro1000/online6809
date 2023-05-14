@@ -35,12 +35,12 @@ function LabelList(id, owner) {
       if (Object.prototype.hasOwnProperty.call(labels, label)) {
         option = document.createElement('option');
         option.text = label;
-        option.value = 1;
+        option.value = '1';
         trc('Label: ', label);
         option.className = 'labelList';
         (function(cpuOwner, optLabel) {
           option.onclick = function(event) {
-            trc('reloadtable call label \'' + optLabel + '\' value',
+            trc('reload table call label \'' + optLabel + '\' value',
                 labels[optLabel]);
             cpuOwner.dsmTable.reloadTable(labels[optLabel]);
             cpuOwner.dsmTable.lineOn(cpuOwner.registers['regPC'].regValue, true,
@@ -73,7 +73,6 @@ function DSMWindow(id, cpu, rows) {
   this.table = null;
   this.cpuOwner = cpu;
   this.rowCount = rows;
-  this.editContents = null;
   this.baseAddress = 0;
   this.codeLength = 0;
   this.watch = null;
@@ -229,10 +228,11 @@ function DSMWindow(id, cpu, rows) {
   };
   this.update = function(holder, address, value) {
     trc('DASM window update address', inHex(address, 4));
+    trc('DASM window update value', value);
     holder.doTrace();
     trc('Assembling', holder.cpuOwner.assembling);
     if ((holder.cpuOwner.cellEditing == null) &&
-        (holder.cpuOwner.assembling == false)) {
+        (holder.cpuOwner.assembling === false)) {
       holder.reloadTable(holder.baseAddress);
     }
   };
@@ -417,7 +417,7 @@ function TextScreen(videoRAM, videoBase, width, height) {
     ) {
       table = document.createElement('table');
       table.setAttribute('id', tableId);
-      table.setAttribute('tabindex', 0);
+      table.setAttribute('tabindex', '0');
       table.className = 'txtScreen';
       for (rows = 0; rows < height; rows++) {
         newRow = document.createElement('tr');

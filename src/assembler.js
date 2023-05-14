@@ -7,7 +7,7 @@ import {
   modesText, pairRegsToText,
   pairRegsToValue,
 } from './constants';
-import {inHex, plural, signedHex, trc} from './helper';
+import {inHex, plural, signedHex, toInt, trc} from './helper';
 import {Memory8} from './memory8';
 
 /**
@@ -314,6 +314,7 @@ export class Assembler {
     let expression = String(expressionIn);
     trc('nextVal input', expression);
     while (matches = matchValue.exec(expression)) {
+      console.log(matches);
       minus = 0;
       radix = 10;
       if (matches[3]) {
@@ -501,7 +502,7 @@ export class Assembler {
       if (matches !== null) {
         this.#encodeString(encoding, matches[1]);
       } else {
-        this.#encodeValue(encoding, parseInt(item), bits);
+        this.#encodeValue(encoding, toInt(item), bits);
       }
     }
   };
