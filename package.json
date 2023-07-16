@@ -11,18 +11,18 @@
     "build": "webpack --stats-error-details && inline-script-tags src/index.html index.html"
   },
   "devDependencies": {
-    "@babel/plugin-transform-modules-commonjs": "^7.21.5",
-    "eslint": "^8.40.0",
+    "@babel/plugin-transform-modules-commonjs": "^7.22.5",
+    "eslint": "^8.45.0",
     "eslint-config-google": "^0.14.0",
     "inline-scripts": "^1.7.4",
-    "jest": "^29.5.0",
-    "jest-environment-jsdom": "^29.5.0",
-    "webpack": "^5.81.0",
-    "webpack-cli": "^5.0.2"
+    "jest": "^29.6.1",
+    "jest-environment-jsdom": "^29.6.1",
+    "webpack": "^5.88.1",
+    "webpack-cli": "^5.1.4"
   },
   "dependencies": {
     "node-polyfill-webpack-plugin": "^2.0.1",
     "setimmediate": "^1.0.5",
-    "winston": "^3.8.2"
+    "winston": "^3.10.0"
   }
 }
