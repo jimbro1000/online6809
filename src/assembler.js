@@ -872,7 +872,7 @@ export class Assembler {
     let index = -1;
     let increment = 0;
     trc('getIndexMode', s);
-    const matches = /\s*(-{0,2})([A-z]{1,3})(\+{0,2})/.exec(s.toUpperCase());
+    const matches = /\s*(-{0,2})([A-Za-z]{1,3})(\+{0,2})/.exec(s.toUpperCase());
     if (matches) {
       trc('Index mode match', matches[2]);
       switch (matches[2]) {
