@@ -1266,8 +1266,8 @@ export class Assembler {
     let HTML;
     let sourceText = source;
     if (sourceText) {
-      sourceText = sourceText.replace(/</, '&lt;');
-      sourceText = sourceText.replace(/>/, '&gt;');
+      sourceText = sourceText.replace('<', '&lt;');
+      sourceText = sourceText.replace('>', '&gt;');
     }
     HTML = '<span style=\'color: ' + statusColour + '\' \'font-size: large\'>' +
         alert + '</span> <i>' + message + '</i>';
