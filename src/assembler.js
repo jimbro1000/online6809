@@ -501,7 +501,12 @@ export class Assembler {
       if (matches !== null) {
         this.#encodeString(encoding, matches[1]);
       } else {
-        this.#encodeValue(encoding, parseInt(item), bits);
+        if (item.startsWith("$")) {
+          const hex = item.replace("$","0x");
+          this.#encodeValue(encoding, parseInt(hex), bits);
+        } else {
+          this.#encodeValue(encoding, parseInt(item), bits);
+        }
       }
     }
   };
