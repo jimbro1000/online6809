@@ -145,3 +145,6 @@ Network Trash Folder
 Temporary Items
 .apdisk
 
+# Node
+dist/
+node_modules/
