@@ -770,11 +770,14 @@ ptble:
 
 
 start:
+    jsr clear
     leay helloworld,pcr
     jsr print
     rts
 
 const textscreenbase=$400
+const textscreensize=$200
+const clearchar=$40
 
 print:
     pshs a,x,y
@@ -789,12 +792,21 @@ print6847:
     sta ,x+
     bra printloop
 printover:
-    puls a,x,y
-    rts
+    puls a,x,y,pc
 
+clear:
+    pshs a,x
+    lda #clearchar
+    ldx #0
+clearloop:
+    sta textscreenbase,x
+    leax 1,x
+    cmpx #textscreensize
+    bne clearloop
+    puls a,x,pc
 
 helloworld:
-    fcb "HELLO WORLD",0
+    fcb "HELLORLD",0
 
 </textarea>
 
