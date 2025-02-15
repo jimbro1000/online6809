@@ -21,6 +21,7 @@
     "webpack-cli": "^5.1.4"
   },
   "dependencies": {
+    "elliptic": "^6.6.1",
     "node-polyfill-webpack-plugin": "^2.0.1",
     "setimmediate": "^1.0.5",
     "winston": "^3.10.0"
